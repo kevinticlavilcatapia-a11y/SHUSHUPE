@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema SALIDAS - V10</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+
+        /* --- 1. HEADER SUPERIOR (Título + Controles Principales) --- */
+        .header-container {
+            background: var(--white); padding: 12px 20px; border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .title-section h1 { margin: 0; font-size: 1.5rem; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
+        
+        .main-controls { display: flex; gap: 12px; align-items: center; }
+
+        /* Selector de Mes (Más pequeño) */
+        .date-picker-compact {
+            padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+            color: var(--text); font-size: 0.9rem; width: auto; cursor: pointer;
+        }
+
+        .btn-new {
+            background: var(--primary); color: white; border: none; padding: 8px 16px;
+            border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 4px rgba(37,99,235,0.2); transition: background 0.2s; font-size: 0.9rem;
+        }
+        .btn-new:hover { background: var(--primary-dark); }
+
+        /* --- 2. BARRA DE HERRAMIENTAS (Tabs Izq - Buscador Der) --- */
+        .toolbar-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; padding: 0 5px;
+        }
+
+        .tabs { display: flex; gap: 5px; }
+        .tab-btn {
+            padding: 10px 20px; background: transparent; border: none; border-bottom: 3px solid transparent;
+            font-weight: 600; color: #64748b; cursor: pointer; font-size: 0.95rem; transition: 0.2s;
+        }
+        .tab-btn:hover { color: var(--primary); background: #e2e8f0; border-radius: 6px 6px 0 0; }
+        .tab-btn.active { border-bottom-color: var(--primary); color: var(--primary); }
+
+        /* Buscador (A la derecha) */
+        .search-wrapper { position: relative; }
+        .search-input {
+            padding: 8px 12px 8px 32px; border: 1px solid #cbd5e1; border-radius: 20px;
+            font-size: 0.9rem; width: 220px; transition: all 0.2s; outline: none; background: white;
+        }
+        .search-input:focus { width: 280px; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem; }
+
+        /* --- 3. VISTAS Y TABLAS --- */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--white); border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background: #f8fafc; color: #475569; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+
+        /* Estilos Lista */
+        .tag-tour { display: inline-block; background: #eff6ff; color: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid #dbeafe; margin: 2px; font-weight: 600; }
+        .btn-action { border: none; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; font-size: 1rem; margin-right: 5px; }
+        .btn-edit { background: #fff7ed; color: var(--warning); } .btn-edit:hover { background: var(--warning); color: white; }
+        .btn-delete { background: #fef2f2; color: var(--danger); } .btn-delete:hover { background: var(--danger); color: white; }
+
+        /* Estilos Calendario (Excel) */
+        .excel-wrapper { overflow-x: auto; max-width: 100%; height: 75vh; position: relative; background: white; }
+        .excel-table { border-collapse: separate; border-spacing: 0; min-width: 100%; }
+        .excel-table th, .excel-table td { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); vertical-align: top; padding: 6px; }
+        
+        .excel-table thead { position: sticky; top: 0; z-index: 50; background: #f8fafc; }
+        .col-sticky { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #cbd5e1 !important; width: 200px; min-width: 200px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+        .excel-table thead th.col-sticky { z-index: 60; background: #f1f5f9; }
+        .day-header { text-align: center; font-size: 0.85rem; min-width: 60px; }
+
+        /* Tarjeta Cliente en Calendario */
+        .pax-card { font-size: 0.8rem; display: flex; flex-direction: column; gap: 3px; }
+        .pax-header { display: flex; justify-content: space-between; align-items: center; }
+        .pax-name { font-weight: 700; color: var(--primary-dark); }
+        .pax-count { background: var(--primary); color: white; padding: 1px 5px; border-radius: 8px; font-size: 0.65rem; font-weight: bold; }
+        .pax-detail { color: #64748b; font-size: 0.75rem; }
+
+        /* Drag & Drop */
+        .drop-zone.drag-over { background: #dcfce7 !important; box-shadow: inset 0 0 0 2px #16a34a; }
+        .cell-stay { background: #f8fafc; }
+        .tour-stack { display: flex; flex-direction: column; gap: 3px; min-height: 100%; }
+        .tour-item { background: var(--white); border-left: 3px solid var(--primary); padding: 3px 5px; border-radius: 0 4px 4px 0; font-size: 0.7rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: grab; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+
+        /* --- MODAL --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; }
+        .tour-row { display: grid; grid-template-columns: 2fr 1fr 40px; gap: 10px; margin-bottom: 8px; align-items: center; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="title-section">
+            <h1>🚀 SALIDAS</h1>
+        </div>
+        
+        <div class="main-controls">
+            <label style="font-size:0.85rem; font-weight:600; color:#64748b;">Mes:</label>
+            <input type="month" id="filtroMes" class="date-picker-compact" onchange="actualizarTodo()">
+            
+            <button class="btn-new" onclick="abrirModal()">
+                <span>+</span> Nuevo Registro
+            </button>
+        </div>
+    </div>
+
+    <div class="toolbar-row">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="cambiarVista('lista')">📋 Lista General</button>
+            <button class="tab-btn" onclick="cambiarVista('excel')">📅 Calendario</button>
+        </div>
+
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="buscadorGlobal" class="search-input" placeholder="Buscar pax, hotel..." onkeyup="actualizarTodo()">
+        </div>
+    </div>
+
+    <div id="vistaLista" class="view-section active">
+        <div class="card">
+            <table id="tablaLista">
+                <thead>
+                    <tr>
+                        <th width="25%">Pax / Contacto</th>
+                        <th width="20%">Logística</th>
+                        <th width="15%">Estadía</th>
+                        <th width="30%">Itinerario</th>
+                        <th width="10%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyLista"></tbody>
+            </table>
+        </div>
+        <div id="msgSinResultados" style="text-align:center; padding:30px; color:#94a3b8; display:none;">No se encontraron registros.</div>
+    </div>
+
+    <div id="vistaExcel" class="view-section">
+        <div class="excel-wrapper">
+            <table class="excel-table" id="tablaExcel">
+                </table>
+        </div>
+        <div style="margin-top:10px; font-size:0.8rem; color:#64748b; text-align:right;">
+            Arrastra los tours para cambiar de día
+        </div>
+    </div>
+
+    <div class="modal" id="modalRegistro">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                <h2 id="modalTitulo" style="margin:0; color:var(--text); font-size:1.3rem;">Nuevo Registro</h2>
+                <button onclick="cerrarModal()" style="border:none; background:white; font-size:1.5rem; cursor:pointer; color:#94a3b8;">&times;</button>
+            </div>
+            
+            <form id="formTour">
+                <div class="form-grid">
+                    <div><label>Nombre Pax</label><input type="text" id="nombre" required></div>
+                    <div><label>Celular</label><input type="tel" id="celular" required></div>
+                    <div><label>Agencia</label><input type="text" id="agencia" required></div>
+                    <div><label>Hotel</label><input type="text" id="hotel" required></div>
+                    <div><label>Cant. Pax</label><input type="number" id="cantidad" min="1" value="2" required style="font-weight:bold; color:var(--primary);"></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div><label>Llegada</label><input type="date" id="llegada" required onchange="actualizarSelectores()"></div>
+                    <div><label>Retorno</label><input type="date" id="retorno" required onchange="actualizarSelectores()"></div>
+                </div>
+
+                <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <label style="font-weight:700; color:#334155; font-size:0.9rem;">Tours</label>
+                        <button type="button" onclick="agregarLineaTour()" style="background:#10b981; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.8rem;">+ Tour</button>
+                    </div>
+                    <div id="listaToursInputs"></div>
+                </div>
+
+                <button type="submit" class="btn-new" style="width:100%; margin-top:20px; justify-content:center; padding:12px;">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+    // --- LÓGICA (Idéntica a V9, solo renderizado visual actualizado) ---
+    let db = []; 
+    let editId = null;
+    let dragData = null;
+
+    window.onload = () => {
+        const saved = localStorage.getItem('sistema_salidas_v10');
+        if (saved) db = JSON.parse(saved);
+        document.getElementById('filtroMes').value = new Date().toISOString().slice(0, 7);
+        actualizarTodo();
+    };
+
+    function guardarDB() {
+        localStorage.setItem('sistema_salidas_v10', JSON.stringify(db));
+        actualizarTodo();
+    }
+
+    // Funciones de Fecha
+    function sumarDiasFecha(fechaStr, dias) {
+        if(!fechaStr) return '';
+        const parts = fechaStr.split('-'); 
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0);
+        d.setDate(d.getDate() + dias);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function diffDias(inicio, fin) {
+        const d1 = new Date(inicio);
+        const d2 = new Date(fin);
+        return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+    }
+
+    // Vistas
+    function cambiarVista(vista) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        if (vista === 'lista') {
+            document.getElementById('vistaLista').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        } else {
+            document.getElementById('vistaExcel').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        }
+    }
+
+    function actualizarTodo() {
+        const mes = document.getElementById('filtroMes').value;
+        const busqueda = document.getElementById('buscadorGlobal').value.toLowerCase();
+
+        const dataFiltrada = db.filter(r => {
+            const cruzaMes = r.llegada.startsWith(mes) || r.retorno.startsWith(mes);
+            const coincideTexto = 
+                r.nombre.toLowerCase().includes(busqueda) ||
+                r.celular.includes(busqueda) ||
+                r.agencia.toLowerCase().includes(busqueda) ||
+                r.hotel.toLowerCase().includes(busqueda);
+            
+            return cruzaMes && coincideTexto;
+        });
+        
+        renderLista(dataFiltrada);
+        renderExcel(dataFiltrada, mes);
+    }
+
+    // Render Lista
+    function renderLista(data) {
+        const tbody = document.getElementById('tbodyLista');
+        const msg = document.getElementById('msgSinResultados');
+        tbody.innerHTML = '';
+        
+        if(data.length === 0) { msg.style.display = 'block'; return; }
+        msg.style.display = 'none';
+
+        data.forEach(reg => {
+            const toursBadges = reg.tours.map(t => `<span class="tag-tour">📅 ${t.fecha.split('-')[2]}: ${t.nombre}</span>`).join('');
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <div style="font-weight:700; color:var(--primary-dark); font-size:0.95rem;">${reg.nombre}</div>
+                        <div style="color:#64748b; font-size:0.85rem;">📱 ${reg.celular}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;">🏨 ${reg.hotel}</div>
+                        <div style="color:#64748b; font-size:0.8rem;">🏢 ${reg.agencia}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.8rem;">In: ${reg.llegada}</div>
+                        <div style="font-size:0.8rem;">Out: ${reg.retorno}</div>
+                        <div style="margin-top:2px; font-weight:bold; color:var(--text); font-size:0.8rem;">👥 ${reg.cantidad}</div>
+                    </td>
+                    <td>${toursBadges}</td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="cargarEdicion(${reg.id})">✎</button>
+                        <button class="btn-action btn-delete" onclick="eliminar(${reg.id})">🗑</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    // Render Excel
+    function renderExcel(data, mesStr) {
+        const table = document.getElementById('tablaExcel');
+        const [year, month] = mesStr.split('-');
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        let html = '<thead><tr>';
+        html += '<th class="col-sticky">CLIENTE & AGENCIA</th>';
+        for (let i = 1; i <= daysInMonth; i++) html += `<th class="day-header">${i}</th>`;
+        html += '</tr></thead><tbody>';
+
+        if (data.length === 0) {
+            html += `<tr><td colspan="${daysInMonth + 1}" style="padding:40px; text-align:center; color:#94a3b8;">No se encontraron registros.</td></tr>`;
+        } else {
+            data.forEach(reg => {
+                html += `<tr data-pax="${reg.id}">`;
+                html += `<td class="col-sticky">
+                            <div class="pax-card">
+                                <div class="pax-header"><span class="pax-name">${reg.nombre}</span><span class="pax-count">${reg.cantidad}</span></div>
+                                <div class="pax-detail">📱 ${reg.celular}</div>
+                                <div style="margin-top:2px; padding-top:2px; border-top:1px solid #f1f5f9;" class="pax-detail">
+                                    🏨 ${reg.hotel}<br>🏢 ${reg.agencia}
+                                </div>
+                            </div>
+                         </td>`;
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const diaFmt = String(d).padStart(2, '0');
+                    const fechaActual = `${year}-${month}-${diaFmt}`;
+                    const enEstancia = (fechaActual >= reg.llegada && fechaActual <= reg.retorno);
+                    const bgClass = enEstancia ? 'cell-stay' : '';
+                    const toursHoy = reg.tours.filter(t => t.fecha === fechaActual);
+
+                    html += `<td class="drop-zone ${bgClass}" data-dia="${d}" ondragover="allowDrop(event)" ondrop="dropTour(event)">
+                                <div class="tour-stack">`;
+                    toursHoy.forEach((tour) => {
+                         const idx = reg.tours.indexOf(tour);
+                         html += `<div class="tour-item" draggable="true" ondragstart="dragStart(event, ${reg.id}, ${idx})" title="${tour.nombre}">${tour.nombre}</div>`;
+                    });
+                    html += `</div></td>`;
+                }
+                html += '</tr>';
+            });
+        }
+        html += '</tbody>';
+        table.innerHTML = html;
+    }
+
+    // Drag & Drop
+    function dragStart(ev, paxId, tourIdx) { dragData = { paxId, tourIdx }; ev.dataTransfer.effectAllowed = "move"; }
+    function allowDrop(ev) { ev.preventDefault(); const cell = ev.target.closest('td'); if (cell) cell.classList.add('drag-over'); }
+    document.addEventListener('dragleave', (e) => { if(e.target.closest('td')) e.target.closest('td').classList.remove('drag-over'); });
+
+    function dropTour(ev) {
+        ev.preventDefault();
+        const cell = ev.target.closest('td');
+        document.querySelectorAll('.drop-zone').forEach(c => c.classList.remove('drag-over'));
+        
+        if (!cell || !dragData) return;
+        const targetPaxId = parseInt(cell.parentElement.getAttribute('data-pax'));
+        const targetDay = parseInt(cell.getAttribute('data-dia'));
+
+        if (targetPaxId !== dragData.paxId) { alert("⚠️ No puedes mover un tour a otro pasajero."); return; }
+
+        const pax = db.find(p => p.id === targetPaxId);
+        const mesStr = document.getElementById('filtroMes').value;
+        const nuevaFecha = `${mesStr}-${String(targetDay).padStart(2, '0')}`;
+
+        if (nuevaFecha < pax.llegada || nuevaFecha > pax.retorno) { alert(`⛔ Fecha fuera del rango de estadía.`); return; }
+
+        const toursDia = pax.tours.filter(t => t.fecha === nuevaFecha).length;
+        const tourActual = pax.tours[dragData.tourIdx];
+        if (tourActual.fecha !== nuevaFecha && toursDia >= 3) { alert("⛔ Máximo 3 tours por día."); return; }
+
+        pax.tours[dragData.tourIdx].fecha = nuevaFecha;
+        dragData = null;
+        guardarDB();
+    }
+
+    // Modal
+    function abrirModal() {
+        editId = null;
+        document.getElementById('formTour').reset();
+        document.getElementById('listaToursInputs').innerHTML = '';
+        document.getElementById('modalTitulo').innerText = "Nuevo Registro";
+        agregarLineaTour();
+        document.getElementById('modalRegistro').classList.add('active');
+    }
+    function cerrarModal() { document.getElementById('modalRegistro').classList.remove('active'); }
+
+    function cargarEdicion(id) {
+        editId = id;
+        const reg = db.find(r => r.id === id);
+        if(!reg) return;
+        document.getElementById('modalTitulo').innerText = "Editar Registro";
+        document.getElementById('nombre').value = reg.nombre;
+        document.getElementById('celular').value = reg.celular;
+        document.getElementById('agencia').value = reg.agencia;
+        document.getElementById('hotel').value = reg.hotel;
+        document.getElementById('cantidad').value = reg.cantidad;
+        document.getElementById('llegada').value = reg.llegada;
+        document.getElementById('retorno').value = reg.retorno;
+
+        const container = document.getElementById('listaToursInputs');
+        container.innerHTML = '';
+        if(reg.tours.length > 0) {
+            reg.tours.forEach(t => {
+                const dias = diffDias(reg.llegada, t.fecha);
+                agregarLineaTour(t.nombre, dias);
+            });
+        } else { agregarLineaTour(); }
+        document.getElementById('modalRegistro').classList.add('active');
+    }
+
+    function eliminar(id) { if(confirm("¿Eliminar registro?")) { db = db.filter(r => r.id !== id); guardarDB(); } }
+
+    function actualizarSelectores() {
+        const selects = document.querySelectorAll('.select-dia');
+        selects.forEach(sel => {
+            const val = sel.value;
+            sel.innerHTML = generarOpcionesDias();
+            sel.value = (val < sel.options.length) ? val : 0;
+        });
+    }
+
+    function generarOpcionesDias() {
+        const inDate = document.getElementById('llegada').value;
+        const outDate = document.getElementById('retorno').value;
+        if(!inDate || !outDate) return '<option value="0">Definir fechas...</option>';
+        const total = diffDias(inDate, outDate) + 1;
+        let html = '';
+        for(let i=0; i<total; i++) {
+            const f = sumarDiasFecha(inDate, i);
+            const [y, m, d] = f.split('-');
+            html += `<option value="${i}">Día ${i+1} (${d}/${m})</option>`;
+        }
+        return html;
+    }
+
+    function agregarLineaTour(nombre = '', diaIdx = 0) {
+        const div = document.createElement('div');
+        div.className = 'tour-row';
+        div.innerHTML = `
+            <input type="text" class="input-tour" placeholder="Tour" value="${nombre}" required>
+            <select class="select-dia" required>${generarOpcionesDias()}</select>
+            <button type="button" onclick="this.parentElement.remove()" style="color:#ef4444; border:1px solid #ef4444; background:white; border-radius:4px; cursor:pointer;">✕</button>
+        `;
+        document.getElementById('listaToursInputs').appendChild(div);
+        const sel = div.querySelector('.select-dia');
+        if(sel && sel.options.length > diaIdx) sel.value = diaIdx;
+    }
+
+    document.getElementById('formTour').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const llegada = document.getElementById('llegada').value;
+        const tours = [];
+        document.querySelectorAll('.tour-row').forEach(row => {
+            const nom = row.querySelector('.input-tour').value;
+            const offset = parseInt(row.querySelector('.select-dia').value);
+            tours.push({ nombre: nom, fecha: sumarDiasFecha(llegada, offset) });
+        });
+
+        const data = {
+            id: editId || Date.now(),
+            nombre: document.getElementById('nombre').value,
+            celular: document.getElementById('celular').value,
+            agencia: document.getElementById('agencia').value,
+            hotel: document.getElementById('hotel').value,
+            cantidad: document.getElementById('cantidad').value,
+            llegada: llegada,
+            retorno: document.getElementById('retorno').value,
+            tours: tours
+        };
+
+        if(editId) {
+            const idx = db.findIndex(r => r.id === editId);
+            db[idx] = data;
+        } else { db.push(data); }
+        guardarDB();
+        cerrarModal();
+    });
+</script>
+</body>
+</html>
