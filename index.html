@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema SALIDAS</title>
+    <title>Sistema SALIDAS - V51 (Clean Dashboard)</title>
     <style>
+        /* ESTILOS GENERALES Y PRO */
         :root {
             --primary: #4f46e5; --primary-dark: #3730a3; --primary-light: #e0e7ff;
             --bg-app: #f3f4f6; --surface: #ffffff; 
@@ -15,14 +16,20 @@
             --report-color: #be185d; --expense-color: #b91c1c;
         }
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-app); color: var(--text-main); margin: 0; padding: 25px; }
-
-        /* HEADER */
-        .header-container { background: var(--surface); padding: 15px 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
-        .title-section h1 { margin: 0; font-size: 1.5rem; color: var(--primary); font-weight: 800; letter-spacing: -0.025em; }
+        
+        /* HEADER RE-DISEÑADO (COMPACTO) */
+        .header-container { background: var(--surface); padding: 10px 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .title-section h1 { margin: 0; font-size: 1.4rem; color: var(--primary); font-weight: 800; letter-spacing: -0.025em; }
+        
         .main-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
-        .btn-main:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        .btn-sec { background: var(--surface); border: 1px solid var(--border); color: var(--text-sec); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        
+        /* GRUPO COMPACTO MES + REGISTRO */
+        .control-group-right { display: flex; align-items: center; gap: 5px; background: #f8fafc; padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+        .input-month-compact { border: none; background: transparent; font-family: inherit; font-size: 0.9rem; color: var(--text-main); padding: 5px; outline: none; cursor: pointer; }
+        .btn-reg-compact { background: var(--primary); color: white; border: none; padding: 6px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-reg-compact:hover { background: var(--primary-dark); }
+
+        .btn-sec { background: var(--surface); border: 1px solid var(--border); color: var(--text-sec); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
         .btn-sec:hover { background: #f9fafb; color: var(--primary); border-color: var(--primary); }
 
         /* TABS */
@@ -34,16 +41,14 @@
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ESTILOS COMUNES */
+        /* CARDS & TABLES */
         .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th, td { padding: 14px 15px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
         th { background: #f9fafb; color: #4b5563; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
-        
         .row-debt { background-color: var(--pay-debt-bg) !important; border-left: 4px solid var(--danger); }
         .row-partial { background-color: var(--pay-part-bg) !important; border-left: 4px solid var(--warning); }
         .row-ok { background-color: var(--pay-ok-bg); border-left: 4px solid var(--success); }
-        
         .obs-box { display: block; margin-top: 5px; font-size: 0.75rem; background: #fffbeb; color: #92400e; padding: 4px 8px; border-radius: 6px; border: 1px solid #fcd34d; width: fit-content; }
         .tag-tour { display: inline-block; background: var(--primary-light); color: var(--primary-dark); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin: 2px; border: 1px solid #c7d2fe; }
 
@@ -52,76 +57,70 @@
         .excel-table th, .excel-table td { border-right: 1px solid var(--border); }
         .excel-table thead { position: sticky; top: 0; z-index: 50; background: #f9fafb; }
         .col-sticky { position: sticky; left: 0; background: var(--surface); z-index: 20; border-right: 2px solid var(--border) !important; width: 300px; min-width: 300px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
-        .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
-        .day-header { text-align: center; cursor: pointer; transition: background 0.2s; position: relative; color: var(--primary); }
+        .day-header { text-align: center; cursor: pointer; transition: background 0.2s; position: relative; color: var(--primary); padding: 10px; }
         .day-header:hover { background-color: var(--primary-light); }
-        .drop-zone.drag-over { background: #dcfce7 !important; } .cell-stay { background: #f0fdf4; }
-        .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .drop-zone.drag-over { background: #dcfce7 !important; border: 2px dashed var(--success); } 
+        .cell-stay { background: #f0fdf4; }
+        .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 5;}
+        .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
         .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); }
-        
-        /* ESTILOS OPERACIONES */
+
+        /* OPERACIONES */
         .ops-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         .ops-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 15px; height: 60vh; overflow-y: auto; display: flex; flex-direction: column; }
         .ops-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .ops-item:hover { background: #f9fafb; }
         .ops-header { font-weight: 800; color: var(--ops-color); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-add-ops { background: var(--success); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; }
         .btn-remove-ops { background: var(--danger); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; }
         .capacidad-indicator { font-size: 1.2rem; font-weight: bold; text-align: center; margin: 10px 0; padding: 10px; background: #e0f2fe; border-radius: 8px; color: #0369a1; }
         .capacidad-error { background: #fee2e2; color: #991b1b; }
 
+        /* UTILIDADES */
         .money-cell { font-family: 'Courier New', monospace; font-weight: 700; color: var(--text-main); }
         .badge-debt { color: var(--danger); font-weight: 800; font-size: 0.8rem; background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--danger); }
         .badge-paid { color: var(--success); font-weight: 800; font-size: 0.8rem; background: #dcfce7; padding: 2px 6px; border-radius: 4px; border: 1px solid #86efac; }
         .badge-liq { background:#ecfdf5; color:#065f46; padding:2px 6px; border-radius:4px; font-size:0.75rem; border:1px solid #6ee7b7; display: inline-block; margin-top:2px; }
 
-        /* MODALES */
+        /* DASHBOARD V51 (SIMPLIFICADO) */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .kpi-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+        .kpi-title { font-size: 0.85rem; color: var(--text-sec); font-weight: 600; text-transform: uppercase; }
+        .kpi-value { font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-top: 5px; }
+
+        /* MODALES & FORMS */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 0; border-radius: 16px; width: 95%; max-width: 850px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column;}
-        
+        .modal-content { background: white; padding: 0; border-radius: 16px; width: 95%; max-width: 850px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column;}
         .modal-header { padding: 20px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: white; position: sticky; top: 0; z-index: 10; }
         .modal-body { padding: 25px; background: #f8fafc; flex: 1; overflow-y: auto; }
-
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 0; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; transition: 0.2s; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         
-        /* BOTONES ICONOS */
         .btn-icon { width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; margin-left: 5px; }
         .btn-edit { background: #fff7ed; color: #d97706; } .btn-del { background: #fef2f2; color: #dc2626; }
-
-        /* CATALOGO */
+        
         .catalog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .catalog-col { background: var(--surface); border-radius: 12px; padding: 15px; border: 1px solid var(--border); max-height: 70vh; display: flex; flex-direction: column; }
         .item-list { overflow-y: auto; flex: 1; }
         .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .room-row { display: grid; grid-template-columns: 2fr 1fr 1fr 30px; gap: 8px; margin-bottom: 8px; }
-        .type-selector { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-        .type-btn { padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 20px; cursor: pointer; }
-        .type-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        
-        /* HABITACIONES VISUALES */
+        .room-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 30px; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .type-selector { display: flex; background: #e0e7ff; padding: 5px; border-radius: 10px; margin-bottom: 20px; }
+        .type-btn { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 8px; cursor: pointer; font-weight: 600; color: #4b5563; transition: 0.2s; display:flex; justify-content:center; align-items:center; gap:8px;}
+        .type-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .room-list-container { background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 250px; overflow-y: auto; }
         .room-checkbox-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px; max-height: 200px; overflow-y: auto;}
         .room-option { cursor: pointer; position: relative; }
         .room-option input[type="checkbox"] { display: none; }
-        .room-card { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-            background: white; border: 1px solid var(--border); border-radius: 8px; padding: 6px;
-            transition: all 0.2s; height: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
+        .room-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 6px; transition: all 0.2s; height: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .room-card:hover { border-color: var(--primary); transform: translateY(-2px); }
         .room-card .r-num { font-weight: 700; font-size: 1rem; color: var(--text-main); }
         .room-card .r-cap { font-size: 0.7rem; color: var(--text-sec); }
-        
         .room-option input:checked + .room-card { background: var(--primary); border-color: var(--primary); color: white; }
         .room-option input:checked + .room-card .r-num { color: white; }
         .room-option input:checked + .room-card .r-cap { color: rgba(255,255,255,0.8); }
-
+        
         .tour-row-input { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 30px; gap: 5px; margin-bottom: 5px; background: white; padding: 5px; border-radius: 6px; border: 1px solid #eee; }
-        .sel-obs { font-size: 0.85rem; border: 1px solid #ddd; border-radius: 4px; padding: 8px; }
-
-        /* ESTILOS PRO PARA EL FORMULARIO */
         .pro-section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .pro-section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         .input-group { margin-bottom: 0; }
@@ -129,21 +128,15 @@
         .input-wrapper { position: relative; }
         .input-icon-left { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
         .with-icon { padding-left: 35px; }
-
         .date-range-container { display: flex; gap: 10px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
         .date-separator { color: #9ca3af; font-size: 1.2rem; }
-
-        /* PAGO TOGGLE */
         .pay-toggle-container { display: flex; background: #e5e7eb; padding: 4px; border-radius: 8px; margin-bottom: 15px; }
         .pay-toggle-opt { flex: 1; text-align: center; padding: 8px; cursor: pointer; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #6b7280; transition: 0.2s; }
         .pay-toggle-opt.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        
         .pay-toggle-opt.active-green { background: var(--money); color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        
-        /* OVERLAY DE CARGA */
-        #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; display:flex; justify-content:center; align-items:center; color: var(--primary); font-weight:800; font-size:1.5rem; flex-direction:column; gap:10px; }
 
-        /* IMPRESIÓN */
+        #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; display:flex; justify-content:center; align-items:center; color: var(--primary); font-weight:800; font-size:1.5rem; flex-direction:column; gap:10px; }
+        
         @media print {
             @page { size: A4 landscape; margin: 1cm; }
             body * { visibility: hidden; } #printableArea, #printableArea * { visibility: visible; }
@@ -158,20 +151,21 @@
 </head>
 <body>
 
-    <div id="loadingOverlay">
-        <div>☁️ Conectando con Firebase...</div>
-        <div style="font-size:0.9rem; font-weight:400; color:#666;">Sincronizando datos en tiempo real</div>
-    </div>
-    
+    <div id="loadingOverlay" style="display:none;"></div>
     <div id="printableArea"></div>
 
     <div class="header-container">
-        <div class="title-section"><h1>🚀 SALIDAS <small style="font-size:0.8rem;color:gray;">V45 (ONLINE)</small></h1></div>
+        <div class="title-section"><h1>🚀 SALIDAS <small style="font-size:0.8rem;color:gray;">V51</small></h1></div>
         <div class="main-controls">
-            <div style="width:1px; height:20px; background:#ccc; margin:0 5px;"></div>
-            <label style="font-weight:600; color:var(--text-sec);">Mes:</label>
-            <input type="month" id="filtroMes" style="padding:8px; border-radius:8px; border:1px solid var(--border);" onchange="actualizarTodo()">
-            <button class="btn-main" onclick="abrirModalRegistro()"><span>+</span> Registro</button>
+            <button class="btn-sec" onclick="descargarBackup()" title="Backup">💾</button>
+            <label class="btn-sec" style="cursor:pointer;" title="Importar">
+                📂 <input type="file" onchange="cargarBackup(this)" style="display:none;" accept=".json">
+            </label>
+            
+            <div class="control-group-right">
+                <input type="month" id="filtroMes" class="input-month-compact" onchange="actualizarTodo()">
+                <button class="btn-reg-compact" onclick="abrirModalRegistro()">+ Nuevo</button>
+            </div>
         </div>
     </div>
 
@@ -280,7 +274,29 @@
         </div>
     </div>
 
-    <div id="vistaControl" class="view-section"><div class="card"><table style="width:100%"><thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Adelanto</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th></tr></thead><tbody id="tbodyControl"></tbody></table></div></div>
+    <div id="vistaControl" class="view-section">
+        <div class="dashboard-grid">
+            <div class="kpi-card">
+                <span class="kpi-title">Ventas Totales</span>
+                <span id="kpi_ventas" class="kpi-value" style="color:var(--primary);">S/ 0.00</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Ganancia Estimada</span>
+                <span id="kpi_ganancia" class="kpi-value" style="color:var(--money);">S/ 0.00</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Por Cobrar</span>
+                <span id="kpi_cobrar" class="kpi-value" style="color:var(--danger);">S/ 0.00</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <table style="width:100%">
+                <thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Adelanto</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody id="tbodyControl"></tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="modal" id="modalRegistro">
         <div class="modal-content">
@@ -313,14 +329,14 @@
         </div>
     </div>
 
+    <div class="modal" id="modalCatalogo"><div class="modal-content" style="max-width:600px;"><div class="modal-header"><h2 style="margin:0;color:var(--primary);">📚 Catálogo</h2><button onclick="cerrarModal('modalCatalogo')" style="border:none;background:none;font-size:1.5rem;">&times;</button></div><div class="modal-body"><div class="type-selector"><button id="typeBtnHotel" class="type-btn active" onclick="cambiarTipoCat('hotel')">🏨 Hotel</button><button id="typeBtnTour" class="type-btn" onclick="cambiarTipoCat('tour')">🗺️ Tour</button><button id="typeBtnAgencia" class="type-btn" onclick="cambiarTipoCat('agencia')">🏢 Agencia</button></div><form id="formCatalogo"><input type="hidden" id="cat_edit_id"><input type="hidden" id="cat_edit_old_name"><input type="hidden" id="cat_tipo_actual" value="hotel"><div class="pro-section"><div class="input-group"><label class="input-label">Nombre</label><input type="text" id="cat_nombre" required style="font-weight:bold; font-size:1rem;"></div></div><div id="fields_tour" style="display:none;" class="pro-section"><div class="input-group"><label class="input-label">Precio Costo</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="cat_precio_tour" class="with-icon"></div></div></div><div id="fields_hotel" class="pro-section"><div class="pro-section-title" style="justify-content:space-between;"><span>🛏️ Habitaciones</span><button type="button" onclick="agregarFilaHabitacion()" style="font-size:0.8rem;color:var(--primary);background:none;border:none;cursor:pointer;">+ Agregar</button></div><div class="room-list-container"><div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 30px;gap:8px;padding:5px;font-size:0.75rem;font-weight:bold;"><span>Nombre</span><span>Cap</span><span>Precio</span><span></span></div><div id="room_list"></div></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;"><button type="submit" class="btn-main">Guardar</button></div></form></div></div></div>
+
     <div class="modal" id="modalResumenDia"><div class="modal-content" style="max-width:550px;"><div style="padding:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h2>📅 Operaciones</h2><button onclick="cerrarModal('modalResumenDia')" style="border:none;background:none;font-size:1.5rem;">&times;</button></div><h3 id="resumenFechaTitulo"></h3><div style="margin-bottom:15px;"><label>Filtrar:</label><select id="selTourPrint" style="width:100%;"></select></div><div id="listaResumenDia" style="border-top:1px solid #eee;"></div><div style="margin-top:20px;text-align:right;"><button class="btn-main" id="btnImprimirRuta">🖨️ Imprimir</button></div></div></div></div>
-    <div class="modal" id="modalCatalogo"><div class="modal-content" style="max-width:600px;"><div style="padding:20px;"><div style="text-align:center;margin-bottom:20px;"><h2>Catálogo</h2></div><div class="type-selector"><button id="typeBtnHotel" class="type-btn active" onclick="cambiarTipoCat('hotel')">🏨 Hotel</button><button id="typeBtnTour" class="type-btn" onclick="cambiarTipoCat('tour')">🗺️ Tour</button><button id="typeBtnAgencia" class="type-btn" onclick="cambiarTipoCat('agencia')">🏢 Agencia</button></div><form id="formCatalogo"><input type="hidden" id="cat_edit_id"><input type="hidden" id="cat_edit_old_name"><input type="hidden" id="cat_tipo_actual" value="hotel"><div style="margin-bottom:20px;"><label>Nombre</label><input type="text" id="cat_nombre" required style="font-weight:bold;"></div><div id="fields_tour" style="display:none;margin-bottom:20px;"><label>Precio</label><input type="number" id="cat_precio_tour"></div><div id="fields_hotel"><label>Habitaciones</label><div style="background:#f3f4f6;padding:10px;"><div id="room_list"></div><button type="button" onclick="agregarFilaHabitacion()" style="color:var(--primary);border:none;background:none;margin-top:10px;">+ Agregar</button></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;"><button type="button" onclick="cerrarModal('modalCatalogo')">Cancelar</button><button type="submit" class="btn-main">Guardar</button></div></form></div></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 🔥 TUS CLAVES INTEGRADAS 🔥
         const firebaseConfig = {
           apiKey: "AIzaSyB7R-NO45QoBSdHWS4Q2BK7tqmjYCMyDEk",
           authDomain: "sistemasalidas-92d4b.firebaseapp.com",
@@ -335,405 +351,337 @@
         try {
             app = initializeApp(firebaseConfig);
             dbFirestore = getFirestore(app);
-            
-            // Habilitar persistencia offline (si es posible)
-            enableIndexedDbPersistence(dbFirestore).catch((err) => {
-                if (err.code == 'failed-precondition') {
-                    console.log('Multiples pestañas abiertas, persistencia deshabilitada');
-                } else if (err.code == 'unimplemented') {
-                    console.log('Navegador no soporta persistencia');
-                }
-            });
-
-            console.log("Firebase inicializado correctamente.");
+            enableIndexedDbPersistence(dbFirestore).catch((err) => { console.log('Persistencia no disp.'); });
         } catch (error) {
-            console.error("Error al conectar Firebase:", error);
-            alert("Error crítico de conexión: " + error.message);
+            console.error("Error crítico de conexión: " + error.message);
         }
 
-        // Variables Globales
         window.db = []; window.dbPases = []; window.dbOps = []; window.dbGastos = []; 
         window.catalogo = { hoteles: [], tours: [], agencias: [] };
         window.editId = null; window.dragData = null; window.opsTempAsignados = []; window.liquidacionData = [];
 
-        // --- SINCRONIZACIÓN REAL-TIME ---
         function initRealTime() {
-            const overlay = document.getElementById('loadingOverlay');
-            let loads = 0;
-            const checkLoad = () => { loads++; if(loads >= 5) { overlay.style.display = 'none'; } };
-
             try {
-                // 1. REGISTROS
                 onSnapshot(collection(dbFirestore, "registros"), (snapshot) => {
                     window.db = snapshot.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
                     window.actualizarTodo();
-                    checkLoad();
-                }, (error) => { console.error("Error Regs:", error); });
-
-                // 2. PASES
+                });
                 onSnapshot(collection(dbFirestore, "pases"), (snapshot) => {
                     window.dbPases = snapshot.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
                     window.actualizarTodo();
-                    checkLoad();
                 });
-
-                // 3. OPERACIONES
                 onSnapshot(collection(dbFirestore, "operaciones"), (snapshot) => {
                     window.dbOps = snapshot.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
                     window.actualizarTodo();
-                    checkLoad();
                 });
-
-                // 4. GASTOS
                 onSnapshot(collection(dbFirestore, "gastos"), (snapshot) => {
                     window.dbGastos = snapshot.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
                     window.actualizarTodo();
-                    checkLoad();
                 });
-
-                // 5. CATÁLOGO
                 onSnapshot(doc(dbFirestore, "config", "catalogo"), (docSnap) => {
-                    if (docSnap.exists()) {
-                        window.catalogo = docSnap.data();
-                    } else {
-                        setDoc(doc(dbFirestore, "config", "catalogo"), { hoteles: [], tours: [], agencias: [] });
-                    }
+                    if (docSnap.exists()) window.catalogo = docSnap.data();
+                    else setDoc(doc(dbFirestore, "config", "catalogo"), { hoteles: [], tours: [], agencias: [] });
                     window.actualizarTodo();
                     window.renderizarCatalogos();
-                    checkLoad();
                 });
             } catch(e) {
-                alert("Error al sincronizar datos: " + e.message);
-                overlay.innerHTML = "❌ Error de Conexión<br><small>Verifica tu internet o las reglas de Firebase</small>";
+                console.error(e);
             }
         }
 
         initRealTime();
 
-        // --- FUNCIONES DE GUARDADO EN NUBE ---
-        
         window.guardarRegistroEnNube = async (data) => {
             const fid = document.getElementById('reg_firestore_id').value;
-            try {
-                if (fid) { await updateDoc(doc(dbFirestore, "registros", fid), data); } 
-                else { await addDoc(collection(dbFirestore, "registros"), data); }
-                window.cerrarModal('modalRegistro');
-            } catch (e) { alert("Error al guardar: " + e.message); }
+            try { if (fid) await updateDoc(doc(dbFirestore, "registros", fid), data); else await addDoc(collection(dbFirestore, "registros"), data); window.cerrarModal('modalRegistro'); } catch (e) { alert("Error: " + e.message); }
         };
-
         window.guardarPaseEnNube = async (data) => {
             const fid = document.getElementById('pase_firestore_id').value;
-            try {
-                if (fid) { await updateDoc(doc(dbFirestore, "pases", fid), data); } 
-                else { await addDoc(collection(dbFirestore, "pases"), data); }
-                window.cerrarModal('modalPases');
-            } catch (e) { alert("Error al guardar pase: " + e.message); }
+            try { if (fid) await updateDoc(doc(dbFirestore, "pases", fid), data); else await addDoc(collection(dbFirestore, "pases"), data); window.cerrarModal('modalPases'); } catch (e) { alert("Error: " + e.message); }
         };
-
         window.guardarOperacionEnNube = async (data) => {
             const fid = document.getElementById('ops_firestore_id').value;
-            try {
-                if (fid) { await updateDoc(doc(dbFirestore, "operaciones", fid), data); } 
-                else { await addDoc(collection(dbFirestore, "operaciones"), data); }
-                window.nuevaOperacion();
-                window.cambiarVista('ops');
-            } catch (e) { alert("Error operación: " + e.message); }
+            try { if (fid) await updateDoc(doc(dbFirestore, "operaciones", fid), data); else await addDoc(collection(dbFirestore, "operaciones"), data); window.nuevaOperacion(); window.cambiarVista('ops'); } catch (e) { alert("Error: " + e.message); }
         };
-
-        window.guardarGastoEnNube = async (data) => {
-            try { await addDoc(collection(dbFirestore, "gastos"), data); } catch(e){ alert(e); }
-        };
-
-        window.eliminarDocEnNube = async (coll, fid) => {
-            if(confirm("¿Estás seguro de eliminar este registro?")) {
-                try { await deleteDoc(doc(dbFirestore, coll, fid)); } catch(e){ alert(e); }
-            }
-        };
-
-        window.guardarCatalogoEnNube = async () => {
-            try { await setDoc(doc(dbFirestore, "config", "catalogo"), window.catalogo); } catch(e){ alert(e); }
-        };
-
+        window.guardarGastoEnNube = async (data) => { try { await addDoc(collection(dbFirestore, "gastos"), data); } catch(e){ alert(e); } };
+        window.eliminarDocEnNube = async (coll, fid) => { if(confirm("¿Borrar?")) try { await deleteDoc(doc(dbFirestore, coll, fid)); } catch(e){ alert(e); } };
+        window.guardarCatalogoEnNube = async () => { try { await setDoc(doc(dbFirestore, "config", "catalogo"), window.catalogo); } catch(e){ alert(e); } };
         window.liquidarEnNube = async (listaData) => {
-            if(!confirm("¿Marcar registros como PAGADOS?")) return;
+            if(!confirm("¿Marcar PAGADOS?")) return;
             const promesas = [];
             listaData.forEach(row => {
                 if(!row.liq) {
-                    if(row.tipo === 'db') {
-                        const item = window.db.find(x => x.id === row.id);
-                        if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "registros", item.firestoreId), { liquidado: true }));
-                    } else {
-                        const item = window.dbPases.find(x => x.id === row.id);
-                        if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "pases", item.firestoreId), { liquidado: true }));
-                    }
+                    if(row.tipo === 'db') { const item = window.db.find(x => x.id === row.id); if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "registros", item.firestoreId), { liquidado: true })); }
+                    else { const item = window.dbPases.find(x => x.id === row.id); if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "pases", item.firestoreId), { liquidado: true })); }
                 }
             });
-            if(promesas.length > 0) {
-                await Promise.all(promesas);
-                alert("Registros actualizados.");
-                window.generarLiquidacion();
-            } else {
-                alert("Nada pendiente.");
-            }
+            if(promesas.length > 0) { await Promise.all(promesas); alert("Actualizado."); window.generarLiquidacion(); } else { alert("Nada pendiente."); }
         };
+        window.toggleLiquidadoEnNube = async (fid, collectionName, currentState) => {
+            try { await updateDoc(doc(dbFirestore, collectionName, fid), { liquidado: !currentState }); } catch(e) { alert("Error al cambiar estado"); }
+        }
     </script>
 
     <script>
-        window.onload = () => {
-            document.getElementById('filtroMes').value = new Date().toISOString().slice(0, 7);
-            cambiarVista('lista');
-        };
-
+        window.onload = () => { document.getElementById('filtroMes').value = new Date().toISOString().slice(0, 7); cambiarVista('lista'); };
         const fmtMoneda = (v) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
-        function calcularFechaTour(fechaBase, diasSumar) {
-            const parts = fechaBase.split('-'); const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0);
-            date.setDate(date.getDate() + parseInt(diasSumar));
-            const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        function cambiarVista(vista) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('vista' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active');
-            document.getElementById('tabBtn' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active');
-            if(vista === 'ops') { cargarSelectOps(); nuevaOperacion(); renderListaOps(); }
-            if(vista === 'liquidacion') { cargarSelectLiquidacion(); }
-            if(vista === 'gastos') { document.getElementById('g_fecha').value = new Date().toISOString().split('T')[0]; renderGastos(); }
-        }
-
+        function calcularFechaTour(fechaBase, diasSumar) { const parts = fechaBase.split('-'); const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0); date.setDate(date.getDate() + parseInt(diasSumar)); const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
+        function cambiarVista(vista) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('vista' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); document.getElementById('tabBtn' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); if(vista === 'ops') { cargarSelectOps(); nuevaOperacion(); renderListaOps(); } if(vista === 'liquidacion') { cargarSelectLiquidacion(); } if(vista === 'gastos') { document.getElementById('g_fecha').value = new Date().toISOString().split('T')[0]; renderGastos(); } }
         function actualizarTodo() {
-            const txt = document.getElementById('buscadorLista').value.toLowerCase();
-            const mes = document.getElementById('filtroMes').value;
+            const txt = document.getElementById('buscadorLista').value.toLowerCase(); const mes = document.getElementById('filtroMes').value;
             renderLista(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt))));
-            renderPases(mes);
-            renderGastos();
-            renderListaOps();
-            
-            const ft = document.getElementById('filtroTourCalendario');
-            if(ft.options.length<=1 && window.catalogo.tours){
-                ft.innerHTML='<option value="">-- Todos --</option>'+[...new Set(window.catalogo.tours.map(t=>t.nombre))].map(t=>`<option value="${t}">${t}</option>`).join('');
-            }
-            const fa = document.getElementById('filtroAgenciaPases');
-            if(fa.options.length<=1 && window.catalogo.agencias) {
-                fa.innerHTML = '<option value="">-- Todas --</option>' + window.catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-            }
+            renderPases(mes); renderGastos(); renderListaOps();
+            const ft = document.getElementById('filtroTourCalendario'); if(ft.options.length<=1 && window.catalogo.tours) ft.innerHTML='<option value="">-- Todos --</option>'+[...new Set(window.catalogo.tours.map(t=>t.nombre))].map(t=>`<option value="${t}">${t}</option>`).join('');
+            const fa = document.getElementById('filtroAgenciaPases'); if(fa.options.length<=1 && window.catalogo.agencias) fa.innerHTML = '<option value="">-- Todas --</option>' + window.catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
             renderExcel(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))), mes, ft.value);
             renderControl(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))));
         }
-
-        function renderLista(data) {
-            document.getElementById('tbodyLista').innerHTML = data.map(r => {
-                const v = parseFloat(r.precioPaquete)||0; const a = parseFloat(r.adelanto)||0; const s = v-a;
-                let statusBadge = (s<=0 && v>0) ? `<span class="badge-paid">¡PAGADO!</span>` : (s>0 && a>0) ? `<span class="badge-debt" style="color:#b45309; border-color:#b45309;">Falta ${fmtMoneda(s)}</span>` : `<span class="badge-debt">Falta ${fmtMoneda(s)}</span>`;
-                const rowClass = (s<=0 && v>0) ? 'row-ok' : (s>0 && a>0) ? 'row-partial' : 'row-debt';
-                const obs = r.observaciones ? `<div class="obs-box">⚠️ ${r.observaciones}</div>` : '';
-                const habs = Array.isArray(r.habitaciones) ? r.habitaciones.join(', ') : r.habitaciones;
-                const liq = r.liquidado ? `<span class="badge-liq">Liq.</span>` : '';
-                return `<tr class="${rowClass}"><td style="border-left-width: 4px;"><div style="font-weight:bold; font-size:1rem;">${r.nombre} ${liq}</div><div style="font-size:0.8rem;color:#666;">📱 ${r.celular} | Pax: ${r.cantidad}</div>${obs}</td><td><div style="font-weight:600;">🏨 ${r.hotelName}</div><div style="font-size:0.8rem;color:#666;">🛏️ ${habs}</div><div style="font-size:0.8rem;">🏢 ${r.agencia}</div></td><td>${statusBadge}<br><small>Venta: ${fmtMoneda(v)}</small></td><td><div style="display:flex;flex-wrap:wrap;">${r.tours.map(t=>`<span class="tag-tour" title="${t.obs||''}">📅 ${t.fecha.split('-')[2]}: ${t.nombre}</span>`).join('')}</div></td><td style="text-align:right;"><button class="btn-icon btn-edit" onclick="cargarEdicion(${r.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('registros', '${r.firestoreId}')">🗑</button></td></tr>`;
-            }).join('');
-        }
-
+        function renderLista(data) { document.getElementById('tbodyLista').innerHTML = data.map(r => { const v = parseFloat(r.precioPaquete)||0; const a = parseFloat(r.adelanto)||0; const s = v-a; let statusBadge = (s<=0 && v>0) ? `<span class="badge-paid">¡PAGADO!</span>` : (s>0 && a>0) ? `<span class="badge-debt" style="color:#b45309; border-color:#b45309;">Falta ${fmtMoneda(s)}</span>` : `<span class="badge-debt">Falta ${fmtMoneda(s)}</span>`; const rowClass = (s<=0 && v>0) ? 'row-ok' : (s>0 && a>0) ? 'row-partial' : 'row-debt'; const obs = r.observaciones ? `<div class="obs-box">⚠️ ${r.observaciones}</div>` : ''; const habs = Array.isArray(r.habitaciones) ? r.habitaciones.join(', ') : r.habitaciones; const liq = r.liquidado ? `<span class="badge-liq">Liq.</span>` : ''; return `<tr class="${rowClass}"><td style="border-left-width: 4px;"><div style="font-weight:bold; font-size:1rem;">${r.nombre} ${liq}</div><div style="font-size:0.8rem;color:#666;">📱 ${r.celular} | Pax: ${r.cantidad}</div>${obs}</td><td><div style="font-weight:600;">🏨 ${r.hotelName}</div><div style="font-size:0.8rem;color:#666;">🛏️ ${habs}</div><div style="font-size:0.8rem;">🏢 ${r.agencia}</div></td><td>${statusBadge}<br><small>Venta: ${fmtMoneda(v)}</small></td><td><div style="display:flex;flex-wrap:wrap;">${r.tours.map(t=>`<span class="tag-tour" title="${t.obs||''}">📅 ${t.fecha.split('-')[2]}: ${t.nombre}</span>`).join('')}</div></td><td style="text-align:right;"><button class="btn-icon btn-edit" onclick="cargarEdicion(${r.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('registros', '${r.firestoreId}')">🗑</button></td></tr>`; }).join(''); }
         function renderPases(mes) {
-            const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
-            let h = '<thead><tr><th class="col-sticky">Detalle Pase</th>'; for(let i=1; i<=days; i++) h += `<th style="text-align:center;">${i}</th>`; h+='</tr></thead><tbody>';
-            let pasesMes = window.dbPases.filter(p => p.fecha.startsWith(mes));
-            const txt = document.getElementById('buscadorPases').value.toLowerCase();
-            const fAgencia = document.getElementById('filtroAgenciaPases').value;
-            pasesMes = pasesMes.filter(p => p.nombre.toLowerCase().includes(txt) && (fAgencia==="" || p.agencia===fAgencia));
-            
-            pasesMes.forEach(p => {
-                const v = parseFloat(p.precio)||0; const a = parseFloat(p.adelanto)||0; const s = v-a;
-                let statusBadge = (s<=0 && v>0) ? `<br><span class="badge-paid">¡PAGADO!</span>` : `<br><span class="badge-debt">Falta ${fmtMoneda(s)}</span>`;
-                const liq = p.liquidado ? `<span class="badge-liq">Liq.</span>` : '';
-                const obsDisplay = p.observacion ? `<div style="font-size:0.7rem;color:#d97706;background:#fff7ed;padding:2px;">⚠️ ${p.observacion}</div>` : '';
-                h += `<tr><td class="col-sticky"><div class="pax-card"><div style="color:var(--pase-color);font-weight:bold;">${p.nombre} ${liq}</div><div>📱 ${p.celular} (${p.cantidad} Pax)</div><div>🏨 ${p.hotel}</div><div>🏢 ${p.agencia}</div>${statusBadge}${obsDisplay}<div style="margin-top:5px;"><button class="btn-icon btn-edit" onclick="editarPase(${p.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('pases', '${p.firestoreId}')">🗑</button></div></div></td>`;
-                for(let d=1; d<=days; d++) { const f = `${y}-${m}-${String(d).padStart(2,'0')}`; h += (p.fecha === f) ? `<td><div class="pase-item">${p.tour}</div></td>` : `<td></td>`; }
-                h += '</tr>';
-            });
+            const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate(); let h = '<thead><tr><th class="col-sticky">Detalle Pase</th>'; for(let i=1; i<=days; i++) h += `<th style="text-align:center;">${i}</th>`; h+='</tr></thead><tbody>';
+            let pasesMes = window.dbPases.filter(p => p.fecha.startsWith(mes)); const txt = document.getElementById('buscadorPases').value.toLowerCase(); const fAgencia = document.getElementById('filtroAgenciaPases').value; pasesMes = pasesMes.filter(p => p.nombre.toLowerCase().includes(txt) && (fAgencia==="" || p.agencia===fAgencia));
+            pasesMes.forEach(p => { const v = parseFloat(p.precio)||0; const a = parseFloat(p.adelanto)||0; const s = v-a; let statusBadge = (s<=0 && v>0) ? `<br><span class="badge-paid">¡PAGADO!</span>` : `<br><span class="badge-debt">Falta ${fmtMoneda(s)}</span>`; const liq = p.liquidado ? `<span class="badge-liq">Liq.</span>` : ''; const obsDisplay = p.observacion ? `<div style="font-size:0.7rem;color:#d97706;background:#fff7ed;padding:2px;">⚠️ ${p.observacion}</div>` : ''; h += `<tr><td class="col-sticky"><div class="pax-card"><div style="color:var(--pase-color);font-weight:bold;">${p.nombre} ${liq}</div><div>📱 ${p.celular} (${p.cantidad} Pax)</div><div>🏨 ${p.hotel}</div><div>🏢 ${p.agencia}</div>${statusBadge}${obsDisplay}<div style="margin-top:5px;"><button class="btn-icon btn-edit" onclick="editarPase(${p.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('pases', '${p.firestoreId}')">🗑</button></div></div></td>`; for(let d=1; d<=days; d++) { const f = `${y}-${m}-${String(d).padStart(2,'0')}`; h += (p.fecha === f) ? `<td><div class="pase-item">${p.tour}</div></td>` : `<td></td>`; } h += '</tr>'; });
             document.getElementById('tablaPases').innerHTML = h + '</tbody>';
         }
-
-        document.getElementById('formTour').addEventListener('submit', e => { 
-            e.preventDefault(); 
-            const habs = []; document.querySelectorAll('.room-option input:checked').forEach(c => habs.push(c.value));
-            const tours = []; const llg = document.getElementById('llegada').value;
-            document.querySelectorAll('.tour-row-input').forEach(row => { 
-                const tName = row.querySelector('.sel-tour').value; 
-                const tDia = parseInt(row.querySelector('.sel-dia').value); 
-                const tObs = row.querySelector('.sel-obs').value;
-                if(tName && llg) tours.push({ nombre: tName, fecha: calcularFechaTour(llg, tDia), obs: tObs });
+        function renderExcel(data, mes, filtroTour) {
+            const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
+            let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
+            for(let i=1; i<=days; i++) h += `<th class="day-header" onclick="abrirResumenDia(${i})">${i}</th>`;
+            h+='</tr></thead><tbody>';
+            data.forEach(r => {
+                const habs = Array.isArray(r.habitaciones) ? r.habitaciones.join(', ') : r.habitaciones;
+                h+=`<tr data-pax="${r.id}"><td class="col-sticky"><div class="pax-card"><div class="pax-header"><span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div><div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
+                for(let d=1; d<=days; d++) {
+                    const f = `${y}-${m}-${String(d).padStart(2,'0')}`;
+                    const bg = (f >= r.llegada && f <= r.retorno) ? 'cell-stay' : '';
+                    let ts = r.tours.filter(t=>t.fecha===f); if(filtroTour) ts = ts.filter(t=>t.nombre===filtroTour);
+                    h+=`<td class="drop-zone ${bg}" data-dia="${d}" ondragover="window.allowDrop(event)" ondrop="window.dropTour(event)"><div class="tour-stack">${ts.map(t=>`<div class="tour-item" title="${t.nombre} - ${t.obs||''}" draggable="true" ondragstart="window.dragStart(event,${r.id},${r.tours.indexOf(t)})">${t.nombre} ${t.obs?'*':''}</div>`).join('')}</div></td>`;
+                }
+                h+='</tr>';
             });
-            const data = { 
-                id: window.editId || Date.now(),
-                nombre: document.getElementById('nombre').value, celular: document.getElementById('celular').value, agencia: document.getElementById('selAgencia').value, cantidad: document.getElementById('cantidad').value,
-                precioPaquete: document.getElementById('precioPaquete').value, adelanto: document.getElementById('adelanto').value,
-                hotelName: document.getElementById('selHotelName').value, habitaciones: habs, llegada: document.getElementById('llegada').value, retorno: document.getElementById('retorno').value, observaciones: document.getElementById('observaciones').value, tours: tours
+            document.getElementById('tablaExcel').innerHTML = h+'</tbody>';
+        }
+        window.dragStart = (ev,pid,tid) => { window.dragData={pid,tid}; ev.dataTransfer.effectAllowed="move"; };
+        window.allowDrop = (ev) => { ev.preventDefault(); ev.target.closest('td')?.classList.add('drag-over'); };
+        document.addEventListener('dragleave',e=>e.target.closest('td')?.classList.remove('drag-over'));
+        window.dropTour = (ev) => {
+            ev.preventDefault(); const c=ev.target.closest('td'); document.querySelectorAll('.drop-zone').forEach(x=>x.classList.remove('drag-over')); if(!c||!window.dragData)return;
+            const pid=parseInt(c.parentElement.getAttribute('data-pax')); const dia=parseInt(c.getAttribute('data-dia'));
+            const f=document.getElementById('filtroMes').value+'-'+String(dia).padStart(2,'0');
+            if(pid!==window.dragData.pid) return alert("Solo mover mismo pasajero");
+            const p = window.db.find(x=>x.id===pid);
+            if(f<p.llegada || f>p.retorno) return alert("Fecha fuera de estadía");
+            p.tours[window.dragData.tid].fecha=f;
+            document.getElementById('reg_firestore_id').value = p.firestoreId; 
+            window.guardarRegistroEnNube(p);
+        };
+
+        // --- DASHBOARD V51 ---
+        function renderControl(data) { 
+            let html = '';
+            let totalVenta = 0, totalGanancia = 0;
+            let countPagado = 0, countPendiente = 0;
+            let montoCobrar = 0;
+
+            const processRecord = (r, type) => {
+                const habs = Array.isArray(r.habitaciones) ? r.habitaciones : [r.habitaciones];
+                const dur = Math.ceil((new Date(r.retorno)-new Date(r.llegada))/86400000);
+                
+                let costoHosp = 0;
+                if(type === 'db') {
+                    habs.forEach(ht => { 
+                        const hd = window.catalogo.hoteles.find(h=>h.nombre===r.hotelName && h.habitacion===ht); 
+                        costoHosp += (hd ? parseFloat(hd.precio) : 0) * (dur > 0 ? dur : 1); 
+                    });
+                }
+                
+                let costoTours = 0;
+                if (type === 'db') {
+                    r.tours.forEach(t => { 
+                        const td = window.catalogo.tours.find(x=>x.nombre===t.nombre); 
+                        costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad; 
+                    });
+                } else {
+                    const td = window.catalogo.tours.find(x=>x.nombre===r.tour); 
+                    costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad;
+                }
+
+                const costoOp = costoHosp + costoTours;
+                const venta = type === 'db' ? parseFloat(r.precioPaquete)||0 : parseFloat(r.precio)||0;
+                const adelanto = parseFloat(r.adelanto)||0;
+                const saldo = venta - adelanto;
+                const ganancia = venta - costoOp;
+
+                totalVenta += venta;
+                totalGanancia += ganancia;
+                if(r.liquidado) countPagado++; else { countPendiente++; montoCobrar += saldo; }
+
+                const badge = r.liquidado ? '<span class="badge-paid">PAGADO</span>' : '<span class="badge-debt">PENDIENTE</span>';
+                
+                const editFunc = type === 'db' ? `cargarEdicion(${r.id})` : `editarPase(${r.id})`;
+                const toggleFunc = `window.toggleLiquidadoEnNube('${r.firestoreId}', '${type==='db'?'registros':'pases'}', ${r.liquidado})`;
+
+                html += `<tr>
+                    <td><b>${r.nombre}</b><br><small>${r.cantidad} pax</small></td>
+                    <td>${type==='db' ? r.hotelName : r.hotel}<br>${r.agencia}</td>
+                    <td class="money-cell">${fmtMoneda(venta)}</td>
+                    <td class="money-cell">${fmtMoneda(adelanto)}</td>
+                    <td class="money-cell" style="color:${saldo>0?'var(--danger)':'var(--success)'}">${fmtMoneda(saldo)}</td>
+                    <td class="money-cell">${fmtMoneda(costoOp)}</td>
+                    <td class="money-cell" style="font-weight:bold; color:${ganancia>=0?'var(--money)':'red'}">${fmtMoneda(ganancia)}</td>
+                    <td>${badge}</td>
+                    <td>
+                        <button class="btn-icon" style="background:#e0e7ff; color:var(--primary);" onclick="${toggleFunc}" title="Cambiar Estado Pago">💲</button>
+                        <button class="btn-icon btn-edit" onclick="${editFunc}" title="Editar Completo">✏️</button>
+                    </td>
+                </tr>`;
             };
-            window.guardarRegistroEnNube(data);
-        });
 
-        function abrirModalRegistro() { window.editId = null; document.getElementById('reg_firestore_id').value = ''; document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; document.getElementById('formTour').reset(); document.getElementById('listaToursInputs').innerHTML=''; cargarSelects(); document.getElementById('containerHabitaciones').style.display='none'; agregarLineaTour(); document.getElementById('modalRegistro').classList.add('active'); }
-        function cargarEdicion(id) { 
-            const r = window.db.find(x => x.id === id); if(!r) return; 
-            abrirModalRegistro(); window.editId = id; document.getElementById('reg_firestore_id').value = r.firestoreId;
-            document.getElementById('modalRegTitulo').innerText = "✏️ Editar Reserva";
-            document.getElementById('nombre').value = r.nombre; document.getElementById('celular').value = r.celular; document.getElementById('selAgencia').value = r.agencia; document.getElementById('cantidad').value = r.cantidad;
-            document.getElementById('precioPaquete').value = r.precioPaquete; document.getElementById('adelanto').value = r.adelanto;
-            document.getElementById('llegada').value = r.llegada; document.getElementById('retorno').value = r.retorno; document.getElementById('observaciones').value = r.observaciones || '';
-            document.getElementById('selHotelName').value = r.hotelName; cargarHabitacionesDeHotel(r.hotelName, r.habitaciones);
-            document.getElementById('listaToursInputs').innerHTML = '';
-            if(r.tours && r.tours.length > 0) { r.tours.forEach(t => { const diff = Math.ceil((new Date(t.fecha) - new Date(r.llegada)) / 86400000); agregarLineaTour(t.nombre, diff, t.obs); }); } else { agregarLineaTour(); }
+            data.forEach(r => processRecord(r, 'db'));
+            const mes = document.getElementById('filtroMes').value;
+            const pasesMes = window.dbPases.filter(p => p.fecha.startsWith(mes));
+            pasesMes.forEach(p => processRecord(p, 'pase'));
+
+            document.getElementById('tbodyControl').innerHTML = html;
+            document.getElementById('kpi_ventas').innerText = fmtMoneda(totalVenta);
+            document.getElementById('kpi_ganancia').innerText = fmtMoneda(totalGanancia);
+            document.getElementById('kpi_cobrar').innerText = fmtMoneda(montoCobrar);
         }
 
-        // --- PASES (V45 FINAL) ---
-        function abrirModalPases() { window.editId = null; document.getElementById('pase_firestore_id').value = ''; document.getElementById('formPase').reset(); setPasePagoMode('adelanto'); cargarSelectsPase(); document.getElementById('modalPases').classList.add('active'); }
-        function setPasePagoMode(mode) { 
-            document.getElementById('p_modo_pago').value = mode; 
-            if (mode === 'pagado') { document.getElementById('opt_pagado').classList.add('active-green'); document.getElementById('opt_adelanto').classList.remove('active'); syncPasePago(); } 
-            else { document.getElementById('opt_adelanto').classList.add('active'); document.getElementById('opt_pagado').classList.remove('active-green'); document.getElementById('p_adelanto').readOnly = false; } 
-        }
-        function syncPasePago() { if (document.getElementById('p_modo_pago').value === 'pagado') { document.getElementById('p_adelanto').value = document.getElementById('p_precio').value; document.getElementById('p_adelanto').readOnly = true; } }
-        function calcPaseAuto() { const tName = document.getElementById('p_tour').value; const qty = parseFloat(document.getElementById('p_cantidad').value) || 0; const tourData = window.catalogo.tours.find(t => t.nombre === tName); if(tourData && qty > 0) { const total = parseFloat(tourData.precio) * qty; document.getElementById('p_precio').value = total.toFixed(2); syncPasePago(); } }
-        
-        document.getElementById('formPase').addEventListener('submit', e => { 
-            e.preventDefault(); 
-            const precio = parseFloat(document.getElementById('p_precio').value) || 0; const adelanto = parseFloat(document.getElementById('p_adelanto').value) || 0;
-            const modo = document.getElementById('p_modo_pago').value;
-            const data = { 
-                id: window.editId || Date.now(), 
-                nombre: document.getElementById('p_nombre').value, celular: document.getElementById('p_celular').value, agencia: document.getElementById('p_agencia').value, cantidad: document.getElementById('p_cantidad').value, hotel: document.getElementById('p_hotel').value, fecha: document.getElementById('p_fecha').value, tour: document.getElementById('p_tour').value, observacion: document.getElementById('p_obs').value, 
-                precio: precio, adelanto: adelanto, 
-                liquidado: (modo === 'pagado' || (precio > 0 && adelanto >= precio))
-            }; 
-            window.guardarPaseEnNube(data);
-        });
-
-        function editarPase(id) { 
-            const p = window.dbPases.find(x => x.id === id); if(!p) return; 
-            abrirModalPases(); window.editId = id; document.getElementById('pase_firestore_id').value = p.firestoreId;
-            document.getElementById('p_nombre').value = p.nombre; document.getElementById('p_celular').value = p.celular; document.getElementById('p_agencia').value = p.agencia; document.getElementById('p_cantidad').value = p.cantidad; document.getElementById('p_hotel').value = p.hotel; document.getElementById('p_fecha').value = p.fecha; document.getElementById('p_tour').value = p.tour; document.getElementById('p_obs').value = p.observacion || ''; 
-            document.getElementById('p_precio').value = p.precio; document.getElementById('p_adelanto').value = p.adelanto;
-            if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto');
-        }
-
+        document.getElementById('formGasto').addEventListener('submit', e => { e.preventDefault(); const g = { id: Date.now(), fecha: document.getElementById('g_fecha').value, desc: document.getElementById('g_desc').value, monto: parseFloat(document.getElementById('g_monto').value), resp: document.getElementById('g_resp').value }; window.guardarGastoEnNube(g); document.getElementById('g_desc').value = ''; document.getElementById('g_monto').value = ''; document.getElementById('g_resp').value = ''; });
+        function renderGastos() { const mes = document.getElementById('filtroMes').value; const tbody = document.getElementById('tbodyGastos'); const displayTotal = document.getElementById('totalGastosDisplay'); const gastosMes = window.dbGastos.filter(g => g.fecha.startsWith(mes)); gastosMes.sort((a,b) => a.fecha.localeCompare(b.fecha)); let total = 0; let html = ''; gastosMes.forEach(g => { total += g.monto; html += `<tr><td>${g.fecha}</td><td>${g.desc}</td><td>${g.resp}</td><td style="font-weight:bold;">${fmtMoneda(g.monto)}</td><td><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('gastos', '${g.firestoreId}')">🗑</button></td></tr>`; }); tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:gray;padding:20px;">Sin gastos registrados.</td></tr>'; displayTotal.innerText = fmtMoneda(total); }
+        function cargarSelectLiquidacion() { const s = document.getElementById('liq_agencia'); s.innerHTML = '<option value="">Seleccione Agencia...</option>' + catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join(''); }
+        function generarLiquidacion() { const ag = document.getElementById('liq_agencia').value; const desde = document.getElementById('liq_desde').value; const hasta = document.getElementById('liq_hasta').value; window.liquidacionData = []; const estado = document.getElementById('liq_filtro_estado').value; const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; window.db.forEach(r => { if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); } }); window.dbPases.forEach(p => { if(p.agencia === ag && p.fecha >= desde && p.fecha <= hasta && applyFilter(p)) { window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: p.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${p.tour}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); } }); let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; let tV=0, tA=0, tS=0; window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); html+='</tbody></table>'; document.getElementById('tablaLiqContainer').innerHTML=html; document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); document.getElementById('resultadosLiquidacion').style.display = 'block'; }
+        function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
+        function imprimirLiquidacion() { const ag = document.getElementById('liq_agencia').value; const d1 = document.getElementById('liq_desde').value; const d2 = document.getElementById('liq_hasta').value; const tv = document.getElementById('liq_total_venta').innerText; const ta = document.getElementById('liq_total_adelanto').innerText; const td = document.getElementById('liq_total_deuda').innerText; let h = `<div class="print-header"><h1>LIQUIDACIÓN DE AGENCIA</h1><h2>${ag}</h2><p>Periodo: ${d1} al ${d2}</p></div><table class="print-table"><thead><tr><th>FECHA</th><th>PASAJERO</th><th>SERVICIO</th><th>IMPORTE</th><th>A CUENTA</th><th>SALDO</th></tr></thead><tbody>`; window.liquidacionData.forEach(r => { h += `<tr><td>${r.fecha}</td><td>${r.nombre} (${r.pax})</td><td>${r.desc}</td><td>${fmtMoneda(r.v)}</td><td>${fmtMoneda(r.a)}</td><td>${fmtMoneda(r.s)}</td></tr>`; }); h += `</tbody></table><div style="margin-top:20px; display:flex; justify-content:flex-end;"><table style="width:300px; border:1px solid #000; border-collapse:collapse;"><tr><td style="padding:5px; border:1px solid #000;">Total Venta:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${tv}</td></tr><tr><td style="padding:5px; border:1px solid #000;">Total Pagado:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${ta}</td></tr><tr><td style="padding:5px; border:1px solid #000; font-weight:bold;">A PAGAR:</td><td style="padding:5px; border:1px solid #000; text-align:right; font-weight:bold;">${td}</td></tr></table></div><div style="margin-top:40px; text-align:center;">__________________________<br>Firma Conforme</div>`; document.getElementById('printableArea').innerHTML = h; window.print(); document.getElementById('printableArea').innerHTML = ''; }
+        function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
         function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 15; window.opsTempAsignados = []; cargarPendientesOps(); }
-        function cargarPendientesOps() { 
-            const f = document.getElementById('ops_fecha').value; const t = document.getElementById('ops_tour').value; 
-            const divPend = document.getElementById('lista_ops_pendientes'); const divAsig = document.getElementById('lista_ops_asignados'); 
-            divPend.innerHTML = ''; divAsig.innerHTML = ''; 
-            if (!f || !t) return;
-            let htmlPend = ''; let countPend = 0;
-            const candidatosDB = window.db.filter(r => r.tours.some(tour => tour.fecha === f && tour.nombre === t));
-            const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t);
-            
-            // Reutilizamos lógica V43 para mostrar pendientes
-            const renderItem = (id, nombre, pax, hotel, tipo, obs) => {
-                const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo);
-                if (yaAsignadoAqui) return;
-                countPend += parseInt(pax);
-                const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : '';
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}')">></button></div>`;
-            };
-            candidatosDB.forEach(c => { const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', tr.obs); if(h) htmlPend+=h; });
-            candidatosPases.forEach(c => { const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion); if(h) htmlPend+=h; });
-            divPend.innerHTML = htmlPend || '<div style="padding:10px; color:gray;">No hay clientes pendientes.</div>';
-            document.getElementById('count_pendientes').innerText = countPend;
-            renderizarAsignados();
-        }
-        function renderizarAsignados() {
-            const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0;
-            window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; });
-            divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>';
-            document.getElementById('count_asignados').innerText = total;
-            actualizarIndicadorCapacidad(total);
-        }
-        function asignarPax(id, tipo, pax, nombre, hotel) { 
-            const capMax = parseInt(document.getElementById('ops_capacidad').value); 
-            const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0);
-            if (actual + parseInt(pax) > capMax) return alert("Excede capacidad");
-            window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel }); cargarPendientesOps(); 
-        }
+        function cargarPendientesOps() { const f = document.getElementById('ops_fecha').value; const t = document.getElementById('ops_tour').value; const divPend = document.getElementById('lista_ops_pendientes'); const divAsig = document.getElementById('lista_ops_asignados'); divPend.innerHTML = ''; divAsig.innerHTML = ''; if (!f || !t) return; let htmlPend = ''; let countPend = 0; const candidatosDB = window.db.filter(r => r.tours.some(tour => tour.fecha === f && tour.nombre === t)); const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); const renderItem = (id, nombre, pax, hotel, tipo, obs) => { const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); if (yaAsignadoAqui) return; countPend += parseInt(pax); const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}')">></button></div>`; }; candidatosDB.forEach(c => { const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', tr.obs); if(h) htmlPend+=h; }); candidatosPases.forEach(c => { const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion); if(h) htmlPend+=h; }); divPend.innerHTML = htmlPend || '<div style="padding:10px; color:gray;">No hay clientes pendientes.</div>'; document.getElementById('count_pendientes').innerText = countPend; renderizarAsignados(); }
+        function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
+        function asignarPax(id, tipo, pax, nombre, hotel) { const capMax = parseInt(document.getElementById('ops_capacidad').value); const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel }); cargarPendientesOps(); }
         function removerPax(i) { window.opsTempAsignados.splice(i, 1); cargarPendientesOps(); }
         function actualizarIndicadorCapacidad(c=null) { if(c===null) c=window.opsTempAsignados.reduce((s,p)=>s+parseInt(p.pax),0); const m=document.getElementById('ops_capacidad').value; document.getElementById('indicadorCapacidad').innerText=`${c} / ${m}`; }
-        function guardarOperacion() {
-            const data = { 
-                id: document.getElementById('ops_id_actual').value || Date.now(),
-                fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados 
-            };
-            window.guardarOperacionEnNube(data);
-        }
-        function renderListaOps() {
-            const tbody = document.getElementById('tbodyOps');
-            tbody.innerHTML = window.dbOps.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(op => {
-                const total = op.pasajeros.reduce((s,p)=>s+parseInt(p.pax),0);
-                return `<tr><td>${op.fecha}</td><td>${op.tour}</td><td>${op.conductor}</td><td>${total}/${op.capacidad}</td><td>OK</td><td><button class="btn-icon btn-edit" onclick="cargarOp(${op.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('operaciones', '${op.firestoreId}')">🗑</button></td></tr>`;
-            }).join('');
-        }
-        function cargarOp(id) { 
-            const op = window.dbOps.find(x => x.id === id); if(!op) return;
-            document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId;
-            document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad;
-            window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps();
-        }
-
-        function cargarSelects() {
-            const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n=>s.innerHTML+=`<option>${n}</option>`);
-            const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`);
-        }
-        function cargarHabitacionesDeHotel(n, chk=[]) { 
-            const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none';
-            const rms=window.catalogo.hoteles.filter(h=>h.nombre===n); 
-            l.innerHTML = rms.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join('');
-        }
-        function abrirModalCatalogo() { document.getElementById('modalCatalogo').classList.add('active'); cargarSelects(); }
-        document.getElementById('formCatalogo').addEventListener('submit', e => {
-            e.preventDefault(); 
-            const t = document.getElementById('cat_tipo_actual').value; const n = document.getElementById('cat_nombre').value;
-            if(t==='hotel') document.querySelectorAll('.room-row').forEach(r=>{ window.catalogo.hoteles.push({ id: Date.now(), nombre: n, habitacion: r.querySelector('.inp-type').value, capacidad: r.querySelector('.inp-cap').value, precio: 0 }); });
-            else if(t==='tour') window.catalogo.tours.push({ id: Date.now(), nombre: n, precio: document.getElementById('cat_precio_tour').value });
-            else window.catalogo.agencias.push({ id: Date.now(), nombre: n });
-            window.guardarCatalogoEnNube();
-            window.cerrarModal('modalCatalogo');
-        });
-        function renderizarCatalogos() { /* (Reutilizar logica V44) */ }
-        function agregarFilaHabitacion(){ const d=document.createElement('div'); d.className='room-row'; d.innerHTML=`<input type="text" placeholder="Hab" class="inp-type"><input type="number" placeholder="Cap" class="inp-cap"><button type="button" onclick="this.parentElement.remove()">x</button>`; document.getElementById('room_list').appendChild(d); }
-        function cambiarTipoCat(t) { document.getElementById('cat_tipo_actual').value=t; document.getElementById('fields_hotel').style.display=t==='hotel'?'block':'none'; document.getElementById('fields_tour').style.display=t==='tour'?'block':'none'; }
-
-        function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
-        function agregarLineaTour(){ const d=document.createElement('div'); d.className='tour-row-input'; 
-            let opts = '<option value="">Tour</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t=>opts+=`<option value="${t.nombre}">${t.nombre}</option>`);
-            d.innerHTML=`<select class="sel-tour">${opts}</select><select class="sel-dia"><option value="0">Día 1</option><option value="1">Día 2</option><option value="2">Día 3</option><option value="3">Día 4</option></select><input type="text" class="sel-obs" placeholder="Obs"><button type="button" onclick="this.parentElement.remove()" style="color:red;border:none;">x</button>`; 
-            document.getElementById('listaToursInputs').appendChild(d); 
+        function guardarOperacion() { const data = { id: document.getElementById('ops_id_actual').value || Date.now(), fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados }; window.guardarOperacionEnNube(data); }
+        function renderListaOps() { const tbody = document.getElementById('tbodyOps'); tbody.innerHTML = window.dbOps.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(op => { const total = op.pasajeros.reduce((s,p)=>s+parseInt(p.pax),0); return `<tr><td>${op.fecha}</td><td>${op.tour}</td><td>${op.conductor}</td><td>${total}/${op.capacidad}</td><td>OK</td><td><button class="btn-icon btn-edit" onclick="cargarOp(${op.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('operaciones', '${op.firestoreId}')">🗑</button></td></tr>`; }).join(''); }
+        function cargarOp(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
+        function cargarSelects() { const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n=>s.innerHTML+=`<option>${n}</option>`); const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); }
+        function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; const rms=window.catalogo.hoteles.filter(h=>h.nombre===n); l.innerHTML = rms.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); }
+        
+        function abrirModalCatalogo() { 
+            document.getElementById('modalCatalogo').classList.add('active'); 
+            document.getElementById('formCatalogo').reset();
+            document.getElementById('cat_edit_id').value = '';
+            document.getElementById('cat_edit_old_name').value = '';
+            document.getElementById('room_list').innerHTML = '';
+            cambiarTipoCat('hotel');
+            agregarFilaHabitacion(); 
         }
         
-        function generarLiquidacion() {
-            const ag = document.getElementById('liq_agencia').value; const desde = document.getElementById('liq_desde').value; const hasta = document.getElementById('liq_hasta').value;
-            window.liquidacionData = []; 
-            const estado = document.getElementById('liq_filtro_estado').value; 
-            const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; };
-            
-            // Logic similar to V43 but using window.db
-            // ... (rellenar liquidacionData)
-            window.db.forEach(r => { if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); } });
-            window.dbPases.forEach(p => { if(p.agencia === ag && p.fecha >= desde && p.fecha <= hasta && applyFilter(p)) { window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: p.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${p.tour}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); } });
-            
-            let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>';
-            let tV=0, tA=0, tS=0;
-            window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{
-                tV+=d.v; tA+=d.a; tS+=d.s;
-                const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>';
-                html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`;
-            });
-            html+='</tbody></table>';
-            document.getElementById('tablaLiqContainer').innerHTML=html;
-            document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS);
-            document.getElementById('resultadosLiquidacion').style.display = 'block';
-        }
-        function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
+        document.getElementById('formCatalogo').addEventListener('submit', e => { 
+            e.preventDefault(); 
+            const t = document.getElementById('cat_tipo_actual').value; 
+            const n = document.getElementById('cat_nombre').value; 
+            const id = document.getElementById('cat_edit_id').value; 
+            const oldName = document.getElementById('cat_edit_old_name').value;
 
-        function renderExcel(data, mes, filtro) { /* (Mismo código V43) */ }
-        function renderControl(data) { /* (Mismo código V43) */ }
+            if(t==='hotel') {
+                if(oldName && oldName !== n) window.catalogo.hoteles = window.catalogo.hoteles.filter(h => h.nombre !== oldName);
+                if(oldName) window.catalogo.hoteles = window.catalogo.hoteles.filter(h => h.nombre !== oldName); 
+                else window.catalogo.hoteles = window.catalogo.hoteles.filter(h => h.nombre !== n);
+
+                document.querySelectorAll('.room-row').forEach(r=>{ 
+                    window.catalogo.hoteles.push({ 
+                        id: Date.now() + Math.random(), 
+                        nombre: n, 
+                        habitacion: r.querySelector('.inp-type').value, 
+                        capacidad: r.querySelector('.inp-cap').value, 
+                        precio: parseFloat(r.querySelector('.inp-price').value) || 0 // NUEVO: GUARDA PRECIO
+                    }); 
+                });
+            } else if(t==='tour') {
+                if(id) {
+                    const idx = window.catalogo.tours.findIndex(x => x.id == id);
+                    if(idx !== -1) window.catalogo.tours[idx] = { id: id, nombre: n, precio: document.getElementById('cat_precio_tour').value };
+                } else {
+                    window.catalogo.tours.push({ id: Date.now(), nombre: n, precio: document.getElementById('cat_precio_tour').value });
+                }
+            } else { 
+                if(id) {
+                    const idx = window.catalogo.agencias.findIndex(x => x.id == id);
+                    if(idx !== -1) window.catalogo.agencias[idx] = { id: id, nombre: n };
+                } else {
+                    window.catalogo.agencias.push({ id: Date.now(), nombre: n });
+                }
+            }
+            window.guardarCatalogoEnNube(); 
+            window.cerrarModal('modalCatalogo'); 
+        });
+
+        function renderizarCatalogos() { 
+            const txt=document.getElementById('buscadorCatalogo').value.toLowerCase();
+            const gr={}; 
+            if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h=>{if(!gr[h.nombre])gr[h.nombre]=[];gr[h.nombre].push(h);});
+            
+            document.getElementById('cat_hoteles').innerHTML=Object.keys(gr).filter(k=>k.toLowerCase().includes(txt)).map(k=>`<div class="cat-item"><b>${k}</b> <span>${gr[k].length} habs</span> <div><button class="btn-icon btn-edit" onclick="editarCat('hotel','${k}')">✎</button><button class="btn-icon btn-del" onclick="eliminarCat('hotel','${k}')">🗑</button></div></div>`).join('');
+            
+            if(window.catalogo.tours) document.getElementById('cat_tours').innerHTML=window.catalogo.tours.filter(t=>t.nombre.toLowerCase().includes(txt)).map(t=>`<div class="cat-item">${t.nombre} <span>${fmtMoneda(t.precio)}</span> <div><button class="btn-icon btn-edit" onclick="editarCat('tour',${t.id})">✎</button><button class="btn-icon btn-del" onclick="eliminarCat('tour',${t.id})">🗑</button></div></div>`).join('');
+            
+            if(window.catalogo.agencias) document.getElementById('cat_agencias').innerHTML=window.catalogo.agencias.filter(a=>a.nombre.toLowerCase().includes(txt)).map(a=>`<div class="cat-item">${a.nombre} <div><button class="btn-icon btn-edit" onclick="editarCat('agencia',${a.id})">✎</button><button class="btn-icon btn-del" onclick="eliminarCat('agencia',${a.id})">🗑</button></div></div>`).join('');
+        }
+
+        // CORRECCIÓN V49: AGREGAR PRECIO A HABITACION
+        function agregarFilaHabitacion(hab='', cap='', prec=''){ 
+            const d=document.createElement('div'); 
+            d.className='room-row'; 
+            d.innerHTML=`<input type="text" placeholder="Hab" class="inp-type" value="${hab}"><input type="number" placeholder="Cap" class="inp-cap" value="${cap}"><input type="number" placeholder="S/" class="inp-price" value="${prec}"><button type="button" onclick="this.parentElement.remove()" style="color:red;border:none;">x</button>`; 
+            document.getElementById('room_list').appendChild(d); 
+        }
+
+        function cambiarTipoCat(t) { document.getElementById('cat_tipo_actual').value=t; document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active')); const idx=t==='hotel'?0:t==='tour'?1:2; document.querySelectorAll('.type-btn')[idx].classList.add('active'); document.getElementById('fields_hotel').style.display=t==='hotel'?'block':'none'; document.getElementById('fields_tour').style.display=t==='tour'?'block':'none'; }
+        
+        function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+        function agregarLineaTour(){ const d=document.createElement('div'); d.className='tour-row-input'; let opts = '<option value="">Tour</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t=>opts+=`<option value="${t.nombre}">${t.nombre}</option>`); d.innerHTML=`<select class="sel-tour">${opts}</select><select class="sel-dia"><option value="0">Día 1</option><option value="1">Día 2</option><option value="2">Día 3</option><option value="3">Día 4</option></select><input type="text" class="sel-obs" placeholder="Obs"><button type="button" onclick="this.parentElement.remove()" style="color:red;border:none;">x</button>`; document.getElementById('listaToursInputs').appendChild(d); }
+        function abrirModalRegistro() { window.editId = null; document.getElementById('reg_firestore_id').value = ''; document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; document.getElementById('formTour').reset(); document.getElementById('listaToursInputs').innerHTML=''; cargarSelects(); document.getElementById('containerHabitaciones').style.display='none'; agregarLineaTour(); document.getElementById('modalRegistro').classList.add('active'); }
+        function cargarEdicion(id) { const r = window.db.find(x => x.id === id); if(!r) return; abrirModalRegistro(); window.editId = id; document.getElementById('reg_firestore_id').value = r.firestoreId; document.getElementById('modalRegTitulo').innerText = "✏️ Editar Reserva"; document.getElementById('nombre').value = r.nombre; document.getElementById('celular').value = r.celular; document.getElementById('selAgencia').value = r.agencia; document.getElementById('cantidad').value = r.cantidad; document.getElementById('precioPaquete').value = r.precioPaquete; document.getElementById('adelanto').value = r.adelanto; document.getElementById('llegada').value = r.llegada; document.getElementById('retorno').value = r.retorno; document.getElementById('observaciones').value = r.observaciones || ''; document.getElementById('selHotelName').value = r.hotelName; cargarHabitacionesDeHotel(r.hotelName, r.habitaciones); document.getElementById('listaToursInputs').innerHTML = ''; if(r.tours && r.tours.length > 0) { r.tours.forEach(t => { const diff = Math.ceil((new Date(t.fecha) - new Date(r.llegada)) / 86400000); agregarLineaTour(t.nombre, diff, t.obs); }); } else { agregarLineaTour(); } }
+        function abrirModalPases() { window.editId = null; document.getElementById('pase_firestore_id').value = ''; document.getElementById('formPase').reset(); setPasePagoMode('adelanto'); cargarSelectsPase(); document.getElementById('modalPases').classList.add('active'); }
+        function setPasePagoMode(mode) { document.getElementById('p_modo_pago').value = mode; if (mode === 'pagado') { document.getElementById('opt_pagado').classList.add('active-green'); document.getElementById('opt_adelanto').classList.remove('active'); syncPasePago(); } else { document.getElementById('opt_adelanto').classList.add('active'); document.getElementById('opt_pagado').classList.remove('active-green'); document.getElementById('p_adelanto').readOnly = false; } }
+        function syncPasePago() { if (document.getElementById('p_modo_pago').value === 'pagado') { document.getElementById('p_adelanto').value = document.getElementById('p_precio').value; document.getElementById('p_adelanto').readOnly = true; } }
+        function calcPaseAuto() { const tName = document.getElementById('p_tour').value; const qty = parseFloat(document.getElementById('p_cantidad').value) || 0; const tourData = window.catalogo.tours.find(t => t.nombre === tName); if(tourData && qty > 0) { const total = parseFloat(tourData.precio) * qty; document.getElementById('p_precio').value = total.toFixed(2); syncPasePago(); } }
+        document.getElementById('formPase').addEventListener('submit', e => { e.preventDefault(); const precio = parseFloat(document.getElementById('p_precio').value) || 0; const adelanto = parseFloat(document.getElementById('p_adelanto').value) || 0; const modo = document.getElementById('p_modo_pago').value; const data = { id: window.editId || Date.now(), nombre: document.getElementById('p_nombre').value, celular: document.getElementById('p_celular').value, agencia: document.getElementById('p_agencia').value, cantidad: document.getElementById('p_cantidad').value, hotel: document.getElementById('p_hotel').value, fecha: document.getElementById('p_fecha').value, tour: document.getElementById('p_tour').value, observacion: document.getElementById('p_obs').value, precio: precio, adelanto: adelanto, liquidado: (modo === 'pagado' || (precio > 0 && adelanto >= precio)) }; window.guardarPaseEnNube(data); });
+        function editarPase(id) { const p = window.dbPases.find(x => x.id === id); if(!p) return; abrirModalPases(); window.editId = id; document.getElementById('pase_firestore_id').value = p.firestoreId; document.getElementById('p_nombre').value = p.nombre; document.getElementById('p_celular').value = p.celular; document.getElementById('p_agencia').value = p.agencia; document.getElementById('p_cantidad').value = p.cantidad; document.getElementById('p_hotel').value = p.hotel; document.getElementById('p_fecha').value = p.fecha; document.getElementById('p_tour').value = p.tour; document.getElementById('p_obs').value = p.observacion || ''; document.getElementById('p_precio').value = p.precio; document.getElementById('p_adelanto').value = p.adelanto; if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto'); }
+        
+        // CORRECCIÓN: Función de Edición de Catálogo que rellena los datos
+        function editarCat(tipo, idOrName) { 
+            // 1. Abrir Modal (esto resetea el form, así que debemos rellenar DESPUÉS)
+            document.getElementById('modalCatalogo').classList.add('active'); 
+            cambiarTipoCat(tipo);
+
+            if(tipo === 'hotel') { 
+                document.getElementById('cat_nombre').value = idOrName; 
+                document.getElementById('cat_edit_old_name').value = idOrName; 
+                document.getElementById('room_list').innerHTML = ''; 
+                // Rellenar habitaciones
+                const rooms = window.catalogo.hoteles.filter(h => h.nombre === idOrName);
+                rooms.forEach(r => agregarFilaHabitacion(r.habitacion, r.capacidad, r.precio)); // Pasa el precio
+            } else if (tipo === 'tour') { 
+                const t = window.catalogo.tours.find(x => x.id == idOrName); 
+                document.getElementById('cat_nombre').value = t.nombre; 
+                document.getElementById('cat_precio_tour').value = t.precio; 
+                document.getElementById('cat_edit_id').value = t.id; 
+            } else { 
+                const a = window.catalogo.agencias.find(x => x.id == idOrName); 
+                document.getElementById('cat_nombre').value = a.nombre; 
+                document.getElementById('cat_edit_id').value = a.id; 
+            } 
+        }
+
+        function eliminarCat(t,i){
+            if(!confirm("Borrar?"))return;
+            if(t==='hotel') window.catalogo.hoteles=window.catalogo.hoteles.filter(x=>x.nombre!==i);
+            else if(t==='tour') window.catalogo.tours=window.catalogo.tours.filter(x=>x.id!=i);
+            else window.catalogo.agencias=window.catalogo.agencias.filter(x=>x.id!=i);
+            window.guardarCatalogoEnNube();
+        }
     </script>
 </body>
 </html>
