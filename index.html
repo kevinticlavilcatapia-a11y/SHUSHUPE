@@ -138,11 +138,11 @@
         #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; display:flex; justify-content:center; align-items:center; color: var(--primary); font-weight:800; font-size:1.5rem; flex-direction:column; gap:10px; }
         
         @media print {
-            @page { size: A4 landscape; margin: 1cm; }
+            @page { size: A4 portrait; margin: 1cm; }
             body * { visibility: hidden; } #printableArea, #printableArea * { visibility: visible; }
             #printableArea { position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; background: white; color: black; font-family: 'Arial', sans-serif; }
             .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11pt; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; vertical-align: top; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; vertical-align: middle; }
             .print-table th { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; }
             .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
             button, .no-print { display: none !important; }
@@ -251,11 +251,13 @@
         <div class="card" style="padding:20px; border-top: 4px solid var(--expense-color);">
             <h3 style="margin:0; margin-bottom:15px; color:var(--expense-color);">Registro de Gastos Operativos</h3>
             <form id="formGasto" style="display:flex; gap:10px; align-items:flex-end; background:#fff1f2; padding:15px; border-radius:10px; margin-bottom:20px; flex-wrap:wrap;">
+                <input type="hidden" id="g_firestore_id">
                 <div><label class="input-label">Fecha</label><input type="date" id="g_fecha" required></div>
                 <div style="flex:2;"><label class="input-label">Descripción</label><input type="text" id="g_desc" placeholder="Ej. Gasolina..." required></div>
                 <div><label class="input-label">Monto (S/)</label><input type="number" id="g_monto" placeholder="0.00" step="0.01" required></div>
                 <div style="flex:1;"><label class="input-label">Responsable</label><input type="text" id="g_resp" placeholder="Quién gastó"></div>
-                <button type="submit" class="btn-main" style="background:var(--expense-color);">+ Agregar</button>
+                <button type="submit" id="btnGuardarGasto" class="btn-main" style="background:var(--expense-color);">+ Agregar</button>
+                <button type="button" id="btnCancelGasto" onclick="limpiarGastoForm()" style="display:none; background:#ccc; color:#333; padding:10px; border:none; border-radius:6px; cursor:pointer;">Cancelar</button>
             </form>
             <h4 style="margin-bottom:10px;">Gastos del Mes</h4>
             <table style="width:100%"><thead><tr><th>Fecha</th><th>Descripción</th><th>Responsable</th><th>Monto</th><th>Acción</th></tr></thead><tbody id="tbodyGastos"></tbody><tfoot><tr style="background:#f9fafb; font-weight:bold;"><td colspan="3" style="text-align:right;">TOTAL GASTOS:</td><td id="totalGastosDisplay" style="color:var(--expense-color);">S/ 0.00</td><td></td></tr></tfoot></table>
@@ -331,8 +333,6 @@
 
     <div class="modal" id="modalCatalogo"><div class="modal-content" style="max-width:600px;"><div class="modal-header"><h2 style="margin:0;color:var(--primary);">📚 Catálogo</h2><button onclick="cerrarModal('modalCatalogo')" style="border:none;background:none;font-size:1.5rem;">&times;</button></div><div class="modal-body"><div class="type-selector"><button id="typeBtnHotel" class="type-btn active" onclick="cambiarTipoCat('hotel')">🏨 Hotel</button><button id="typeBtnTour" class="type-btn" onclick="cambiarTipoCat('tour')">🗺️ Tour</button><button id="typeBtnAgencia" class="type-btn" onclick="cambiarTipoCat('agencia')">🏢 Agencia</button></div><form id="formCatalogo"><input type="hidden" id="cat_edit_id"><input type="hidden" id="cat_edit_old_name"><input type="hidden" id="cat_tipo_actual" value="hotel"><div class="pro-section"><div class="input-group"><label class="input-label">Nombre</label><input type="text" id="cat_nombre" required style="font-weight:bold; font-size:1rem;"></div></div><div id="fields_tour" style="display:none;" class="pro-section"><div class="input-group"><label class="input-label">Precio Costo</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="cat_precio_tour" class="with-icon"></div></div></div><div id="fields_hotel" class="pro-section"><div class="pro-section-title" style="justify-content:space-between;"><span>🛏️ Habitaciones</span><button type="button" onclick="agregarFilaHabitacion()" style="font-size:0.8rem;color:var(--primary);background:none;border:none;cursor:pointer;">+ Agregar</button></div><div class="room-list-container"><div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 30px;gap:8px;padding:5px;font-size:0.75rem;font-weight:bold;"><span>Nombre</span><span>Cap</span><span>Precio</span><span></span></div><div id="room_list"></div></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;"><button type="submit" class="btn-main">Guardar</button></div></form></div></div></div>
 
-    <div class="modal" id="modalResumenDia"><div class="modal-content" style="max-width:550px;"><div style="padding:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h2>📅 Operaciones</h2><button onclick="cerrarModal('modalResumenDia')" style="border:none;background:none;font-size:1.5rem;">&times;</button></div><h3 id="resumenFechaTitulo"></h3><div style="margin-bottom:15px;"><label>Filtrar:</label><select id="selTourPrint" style="width:100%;"></select></div><div id="listaResumenDia" style="border-top:1px solid #eee;"></div><div style="margin-top:20px;text-align:right;"><button class="btn-main" id="btnImprimirRuta">🖨️ Imprimir</button></div></div></div></div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -403,7 +403,20 @@
             const fid = document.getElementById('ops_firestore_id').value;
             try { if (fid) await updateDoc(doc(dbFirestore, "operaciones", fid), data); else await addDoc(collection(dbFirestore, "operaciones"), data); window.nuevaOperacion(); window.cambiarVista('ops'); } catch (e) { alert("Error: " + e.message); }
         };
-        window.guardarGastoEnNube = async (data) => { try { await addDoc(collection(dbFirestore, "gastos"), data); } catch(e){ alert(e); } };
+        
+        // MODIFICADO: Ahora soporta Actualizar si hay ID
+        window.guardarGastoEnNube = async (data) => { 
+            const fid = document.getElementById('g_firestore_id').value;
+            try { 
+                if(fid) {
+                    await updateDoc(doc(dbFirestore, "gastos", fid), data); 
+                } else {
+                    await addDoc(collection(dbFirestore, "gastos"), data); 
+                }
+                window.limpiarGastoForm();
+            } catch(e){ alert(e); } 
+        };
+        
         window.eliminarDocEnNube = async (coll, fid) => { if(confirm("¿Borrar?")) try { await deleteDoc(doc(dbFirestore, coll, fid)); } catch(e){ alert(e); } };
         window.guardarCatalogoEnNube = async () => { try { await setDoc(doc(dbFirestore, "config", "catalogo"), window.catalogo); } catch(e){ alert(e); } };
         window.liquidarEnNube = async (listaData) => {
@@ -548,15 +561,213 @@
             document.getElementById('kpi_cobrar').innerText = fmtMoneda(montoCobrar);
         }
 
-        document.getElementById('formGasto').addEventListener('submit', e => { e.preventDefault(); const g = { id: Date.now(), fecha: document.getElementById('g_fecha').value, desc: document.getElementById('g_desc').value, monto: parseFloat(document.getElementById('g_monto').value), resp: document.getElementById('g_resp').value }; window.guardarGastoEnNube(g); document.getElementById('g_desc').value = ''; document.getElementById('g_monto').value = ''; document.getElementById('g_resp').value = ''; });
-        function renderGastos() { const mes = document.getElementById('filtroMes').value; const tbody = document.getElementById('tbodyGastos'); const displayTotal = document.getElementById('totalGastosDisplay'); const gastosMes = window.dbGastos.filter(g => g.fecha.startsWith(mes)); gastosMes.sort((a,b) => a.fecha.localeCompare(b.fecha)); let total = 0; let html = ''; gastosMes.forEach(g => { total += g.monto; html += `<tr><td>${g.fecha}</td><td>${g.desc}</td><td>${g.resp}</td><td style="font-weight:bold;">${fmtMoneda(g.monto)}</td><td><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('gastos', '${g.firestoreId}')">🗑</button></td></tr>`; }); tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:gray;padding:20px;">Sin gastos registrados.</td></tr>'; displayTotal.innerText = fmtMoneda(total); }
+        // ============================================
+        // LOGICA GASTOS ACTUALIZADA
+        // ============================================
+        document.getElementById('formGasto').addEventListener('submit', e => { 
+            e.preventDefault(); 
+            const g = { 
+                id: window.editGastoId || Date.now(), 
+                fecha: document.getElementById('g_fecha').value, 
+                desc: document.getElementById('g_desc').value, 
+                monto: parseFloat(document.getElementById('g_monto').value), 
+                resp: document.getElementById('g_resp').value 
+            }; 
+            window.guardarGastoEnNube(g); 
+        });
+
+        window.cargarEdicionGasto = function(id) {
+            const g = window.dbGastos.find(x => x.id == id);
+            if(!g) return;
+            document.getElementById('g_firestore_id').value = g.firestoreId;
+            document.getElementById('g_fecha').value = g.fecha;
+            document.getElementById('g_desc').value = g.desc;
+            document.getElementById('g_monto').value = g.monto;
+            document.getElementById('g_resp').value = g.resp;
+            
+            // Visuales
+            window.editGastoId = g.id;
+            const btn = document.getElementById('btnGuardarGasto');
+            btn.innerText = "Actualizar Gasto";
+            btn.style.background = "#d97706"; // Color Naranja
+            document.getElementById('btnCancelGasto').style.display = 'block';
+        };
+
+        window.limpiarGastoForm = function() {
+            document.getElementById('g_firestore_id').value = '';
+            document.getElementById('g_desc').value = ''; 
+            document.getElementById('g_monto').value = ''; 
+            document.getElementById('g_resp').value = '';
+            
+            // Visuales
+            window.editGastoId = null;
+            const btn = document.getElementById('btnGuardarGasto');
+            btn.innerText = "+ Agregar";
+            btn.style.background = "var(--expense-color)";
+            document.getElementById('btnCancelGasto').style.display = 'none';
+        };
+
+        function renderGastos() { 
+            const mes = document.getElementById('filtroMes').value; 
+            const tbody = document.getElementById('tbodyGastos'); 
+            const displayTotal = document.getElementById('totalGastosDisplay'); 
+            const gastosMes = window.dbGastos.filter(g => g.fecha.startsWith(mes)); 
+            gastosMes.sort((a,b) => a.fecha.localeCompare(b.fecha)); 
+            let total = 0; 
+            let html = ''; 
+            gastosMes.forEach(g => { 
+                total += g.monto; 
+                html += `<tr>
+                    <td>${g.fecha}</td>
+                    <td>${g.desc}</td>
+                    <td>${g.resp}</td>
+                    <td style="font-weight:bold;">${fmtMoneda(g.monto)}</td>
+                    <td>
+                        <button class="btn-icon btn-edit" onclick="cargarEdicionGasto('${g.id}')">✎</button>
+                        <button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('gastos', '${g.firestoreId}')">🗑</button>
+                    </td>
+                </tr>`; 
+            }); 
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:gray;padding:20px;">Sin gastos registrados.</td></tr>'; 
+            displayTotal.innerText = fmtMoneda(total); 
+        }
+
+        // ============================================
+
         function cargarSelectLiquidacion() { const s = document.getElementById('liq_agencia'); s.innerHTML = '<option value="">Seleccione Agencia...</option>' + catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join(''); }
         function generarLiquidacion() { const ag = document.getElementById('liq_agencia').value; const desde = document.getElementById('liq_desde').value; const hasta = document.getElementById('liq_hasta').value; window.liquidacionData = []; const estado = document.getElementById('liq_filtro_estado').value; const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; window.db.forEach(r => { if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); } }); window.dbPases.forEach(p => { if(p.agencia === ag && p.fecha >= desde && p.fecha <= hasta && applyFilter(p)) { window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: p.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${p.tour}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); } }); let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; let tV=0, tA=0, tS=0; window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); html+='</tbody></table>'; document.getElementById('tablaLiqContainer').innerHTML=html; document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); document.getElementById('resultadosLiquidacion').style.display = 'block'; }
         function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
         function imprimirLiquidacion() { const ag = document.getElementById('liq_agencia').value; const d1 = document.getElementById('liq_desde').value; const d2 = document.getElementById('liq_hasta').value; const tv = document.getElementById('liq_total_venta').innerText; const ta = document.getElementById('liq_total_adelanto').innerText; const td = document.getElementById('liq_total_deuda').innerText; let h = `<div class="print-header"><h1>LIQUIDACIÓN DE AGENCIA</h1><h2>${ag}</h2><p>Periodo: ${d1} al ${d2}</p></div><table class="print-table"><thead><tr><th>FECHA</th><th>PASAJERO</th><th>SERVICIO</th><th>IMPORTE</th><th>A CUENTA</th><th>SALDO</th></tr></thead><tbody>`; window.liquidacionData.forEach(r => { h += `<tr><td>${r.fecha}</td><td>${r.nombre} (${r.pax})</td><td>${r.desc}</td><td>${fmtMoneda(r.v)}</td><td>${fmtMoneda(r.a)}</td><td>${fmtMoneda(r.s)}</td></tr>`; }); h += `</tbody></table><div style="margin-top:20px; display:flex; justify-content:flex-end;"><table style="width:300px; border:1px solid #000; border-collapse:collapse;"><tr><td style="padding:5px; border:1px solid #000;">Total Venta:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${tv}</td></tr><tr><td style="padding:5px; border:1px solid #000;">Total Pagado:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${ta}</td></tr><tr><td style="padding:5px; border:1px solid #000; font-weight:bold;">A PAGAR:</td><td style="padding:5px; border:1px solid #000; text-align:right; font-weight:bold;">${td}</td></tr></table></div><div style="margin-top:40px; text-align:center;">__________________________<br>Firma Conforme</div>`; document.getElementById('printableArea').innerHTML = h; window.print(); document.getElementById('printableArea').innerHTML = ''; }
         function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
         function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 15; window.opsTempAsignados = []; cargarPendientesOps(); }
-        function cargarPendientesOps() { const f = document.getElementById('ops_fecha').value; const t = document.getElementById('ops_tour').value; const divPend = document.getElementById('lista_ops_pendientes'); const divAsig = document.getElementById('lista_ops_asignados'); divPend.innerHTML = ''; divAsig.innerHTML = ''; if (!f || !t) return; let htmlPend = ''; let countPend = 0; const candidatosDB = window.db.filter(r => r.tours.some(tour => tour.fecha === f && tour.nombre === t)); const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); const renderItem = (id, nombre, pax, hotel, tipo, obs) => { const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); if (yaAsignadoAqui) return; countPend += parseInt(pax); const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}')">></button></div>`; }; candidatosDB.forEach(c => { const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', tr.obs); if(h) htmlPend+=h; }); candidatosPases.forEach(c => { const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion); if(h) htmlPend+=h; }); divPend.innerHTML = htmlPend || '<div style="padding:10px; color:gray;">No hay clientes pendientes.</div>'; document.getElementById('count_pendientes').innerText = countPend; renderizarAsignados(); }
+        
+        function cargarPendientesOps() { 
+            const f = document.getElementById('ops_fecha').value; 
+            const t = document.getElementById('ops_tour').value; 
+            const idActual = document.getElementById('ops_id_actual').value; 
+
+            const divPend = document.getElementById('lista_ops_pendientes'); 
+            const divAsig = document.getElementById('lista_ops_asignados'); 
+            divPend.innerHTML = ''; 
+            divAsig.innerHTML = ''; 
+            
+            if (!f || !t) return; 
+
+            const bloqueados = new Set();
+            window.dbOps.forEach(op => {
+                if (String(op.id) === String(idActual)) return;
+                if (op.fecha === f && op.tour === t) {
+                    op.pasajeros.forEach(p => {
+                        bloqueados.add(`${p.tipo}_${p.refId}`);
+                    });
+                }
+            });
+
+            let htmlPend = ''; 
+            let countPend = 0; 
+            
+            const candidatosDB = window.db.filter(r => r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
+            const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
+
+            const renderItem = (id, nombre, pax, hotel, tipo, obs) => { 
+                const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); 
+                if (yaAsignadoAqui) return; 
+
+                if (bloqueados.has(`${tipo}_${id}`)) return;
+
+                countPend += parseInt(pax); 
+                const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; 
+                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}')">></button></div>`; 
+            }; 
+
+            candidatosDB.forEach(c => { 
+                const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); 
+                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', tr.obs); 
+                if(h) htmlPend+=h; 
+            }); 
+            candidatosPases.forEach(c => { 
+                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion); 
+                if(h) htmlPend+=h; 
+            }); 
+
+            divPend.innerHTML = htmlPend || '<div style="padding:10px; color:gray;">No hay clientes pendientes.</div>'; 
+            document.getElementById('count_pendientes').innerText = countPend; 
+            renderizarAsignados(); 
+        }
+
+        window.imprimirManifiesto = function() {
+            const fecha = document.getElementById('ops_fecha').value;
+            const tour = document.getElementById('ops_tour').value;
+            const conductor = document.getElementById('ops_conductor').value || "---";
+            const guia = document.getElementById('ops_guia').value || "---";
+            const capacidad = document.getElementById('ops_capacidad').value;
+            const paxList = window.opsTempAsignados;
+
+            if (paxList.length === 0) return alert("No hay pasajeros asignados para imprimir.");
+
+            let totalPax = paxList.reduce((sum, p) => sum + parseInt(p.pax), 0);
+
+            let h = `
+                <div class="print-header">
+                    <h1>MANIFIESTO DE PASAJEROS</h1>
+                    <h2>${tour}</h2>
+                    <table style="width:100%; margin-top:10px; border:none;">
+                        <tr>
+                            <td style="border:none;"><strong>Fecha:</strong> ${fecha}</td>
+                            <td style="border:none;"><strong>Vehículo Cap:</strong> ${capacidad}</td>
+                        </tr>
+                        <tr>
+                            <td style="border:none;"><strong>Conductor:</strong> ${conductor}</td>
+                            <td style="border:none;"><strong>Guía:</strong> ${guia}</td>
+                        </tr>
+                    </table>
+                </div>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>PASAJERO</th>
+                            <th style="width:50px;">PAX</th>
+                            <th>HOTEL / RECOJO</th>
+                            <th>OBSERVACIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            paxList.forEach((p, index) => {
+                h += `
+                    <tr>
+                        <td style="text-align:center;">${index + 1}</td>
+                        <td>${p.nombre}</td>
+                        <td style="text-align:center;">${p.pax}</td>
+                        <td>${p.hotel}</td>
+                        <td></td> 
+                    </tr>
+                `;
+            });
+
+            h += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align:right; font-weight:bold; padding:10px;">TOTAL PASAJEROS:</td>
+                            <td style="text-align:center; font-weight:bold; padding:10px;">${totalPax}</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div style="margin-top:50px; display:flex; justify-content:space-around;">
+                    <div style="text-align:center; border-top:1px solid #000; width:200px; padding-top:10px;">Firma Conductor</div>
+                    <div style="text-align:center; border-top:1px solid #000; width:200px; padding-top:10px;">Firma Guía</div>
+                </div>
+            `;
+
+            document.getElementById('printableArea').innerHTML = h;
+            window.print();
+            document.getElementById('printableArea').innerHTML = '';
+        };
+
         function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
         function asignarPax(id, tipo, pax, nombre, hotel) { const capMax = parseInt(document.getElementById('ops_capacidad').value); const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel }); cargarPendientesOps(); }
         function removerPax(i) { window.opsTempAsignados.splice(i, 1); cargarPendientesOps(); }
@@ -566,24 +777,11 @@
         function cargarOp(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
         function cargarSelects() { const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n=>s.innerHTML+=`<option>${n}</option>`); const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); }
         
-        // --- NUEVA FUNCIÓN AÑADIDA PARA CORREGIR EL ERROR DEL MODAL PASES ---
         function cargarSelectsPase() {
-            // Cargar Agencias
-            const sa = document.getElementById('p_agencia');
-            sa.innerHTML = '<option value="">Seleccione Agencia...</option>';
-            if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
-            
-            // Cargar Tours
-            const st = document.getElementById('p_tour');
-            st.innerHTML = '<option value="">Seleccione Tour...</option>';
-            if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
-
-            // Cargar Hoteles (Para recojo)
-            const sh = document.getElementById('p_hotel');
-            sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>';
-            if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n => sh.innerHTML += `<option value="${n}">${n}</option>`);
+            const sa = document.getElementById('p_agencia'); sa.innerHTML = '<option value="">Seleccione Agencia...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
+            const st = document.getElementById('p_tour'); st.innerHTML = '<option value="">Seleccione Tour...</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
+            const sh = document.getElementById('p_hotel'); sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n => sh.innerHTML += `<option value="${n}">${n}</option>`);
         }
-        // -------------------------------------------------------------------
 
         function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; const rms=window.catalogo.hoteles.filter(h=>h.nombre===n); l.innerHTML = rms.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); }
         
@@ -670,19 +868,15 @@
         document.getElementById('formPase').addEventListener('submit', e => { e.preventDefault(); const precio = parseFloat(document.getElementById('p_precio').value) || 0; const adelanto = parseFloat(document.getElementById('p_adelanto').value) || 0; const modo = document.getElementById('p_modo_pago').value; const data = { id: window.editId || Date.now(), nombre: document.getElementById('p_nombre').value, celular: document.getElementById('p_celular').value, agencia: document.getElementById('p_agencia').value, cantidad: document.getElementById('p_cantidad').value, hotel: document.getElementById('p_hotel').value, fecha: document.getElementById('p_fecha').value, tour: document.getElementById('p_tour').value, observacion: document.getElementById('p_obs').value, precio: precio, adelanto: adelanto, liquidado: (modo === 'pagado' || (precio > 0 && adelanto >= precio)) }; window.guardarPaseEnNube(data); });
         function editarPase(id) { const p = window.dbPases.find(x => x.id === id); if(!p) return; abrirModalPases(); window.editId = id; document.getElementById('pase_firestore_id').value = p.firestoreId; document.getElementById('p_nombre').value = p.nombre; document.getElementById('p_celular').value = p.celular; document.getElementById('p_agencia').value = p.agencia; document.getElementById('p_cantidad').value = p.cantidad; document.getElementById('p_hotel').value = p.hotel; document.getElementById('p_fecha').value = p.fecha; document.getElementById('p_tour').value = p.tour; document.getElementById('p_obs').value = p.observacion || ''; document.getElementById('p_precio').value = p.precio; document.getElementById('p_adelanto').value = p.adelanto; if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto'); }
         
-        // CORRECCIÓN: Función de Edición de Catálogo que rellena los datos
         function editarCat(tipo, idOrName) { 
-            // 1. Abrir Modal (esto resetea el form, así que debemos rellenar DESPUÉS)
             document.getElementById('modalCatalogo').classList.add('active'); 
             cambiarTipoCat(tipo);
-
             if(tipo === 'hotel') { 
                 document.getElementById('cat_nombre').value = idOrName; 
                 document.getElementById('cat_edit_old_name').value = idOrName; 
                 document.getElementById('room_list').innerHTML = ''; 
-                // Rellenar habitaciones
                 const rooms = window.catalogo.hoteles.filter(h => h.nombre === idOrName);
-                rooms.forEach(r => agregarFilaHabitacion(r.habitacion, r.capacidad, r.precio)); // Pasa el precio
+                rooms.forEach(r => agregarFilaHabitacion(r.habitacion, r.capacidad, r.precio)); 
             } else if (tipo === 'tour') { 
                 const t = window.catalogo.tours.find(x => x.id == idOrName); 
                 document.getElementById('cat_nombre').value = t.nombre; 
@@ -702,6 +896,46 @@
             else window.catalogo.agencias=window.catalogo.agencias.filter(x=>x.id!=i);
             window.guardarCatalogoEnNube();
         }
+
+        document.getElementById('formTour').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const llegada = document.getElementById('llegada').value;
+            const habitaciones = [];
+            document.querySelectorAll('#listaCheckHabitaciones input:checked').forEach(chk => {
+                habitaciones.push(chk.value);
+            });
+            const tours = [];
+            document.querySelectorAll('#listaToursInputs .tour-row-input').forEach(row => {
+                const tName = row.querySelector('.sel-tour').value;
+                const tDiaIdx = parseInt(row.querySelector('.sel-dia').value);
+                const tObs = row.querySelector('.sel-obs').value;
+                if(tName) {
+                    const fechaTour = calcularFechaTour(llegada, tDiaIdx);
+                    tours.push({ nombre: tName, fecha: fechaTour, obs: tObs });
+                }
+            });
+            const data = {
+                id: window.editId || Date.now(),
+                nombre: document.getElementById('nombre').value,
+                celular: document.getElementById('celular').value,
+                agencia: document.getElementById('selAgencia').value,
+                cantidad: document.getElementById('cantidad').value,
+                hotelName: document.getElementById('selHotelName').value,
+                llegada: llegada,
+                retorno: document.getElementById('retorno').value,
+                habitaciones: habitaciones,
+                precioPaquete: parseFloat(document.getElementById('precioPaquete').value) || 0,
+                adelanto: parseFloat(document.getElementById('adelanto').value) || 0,
+                observaciones: document.getElementById('observaciones').value,
+                tours: tours,
+                liquidado: false 
+            };
+            if(window.editId) {
+                const old = window.db.find(x => x.id === window.editId);
+                if(old) data.liquidado = old.liquidado;
+            }
+            await window.guardarRegistroEnNube(data);
+        });
     </script>
 </body>
 </html>
