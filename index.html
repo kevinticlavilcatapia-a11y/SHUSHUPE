@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema SALIDAS - V51 (Clean Dashboard)</title>
+    <title>Sistema SALIDAS - Dashboard</title>
     <style>
         /* ESTILOS GENERALES Y PRO */
         :root {
@@ -81,7 +81,7 @@
         .badge-paid { color: var(--success); font-weight: 800; font-size: 0.8rem; background: #dcfce7; padding: 2px 6px; border-radius: 4px; border: 1px solid #86efac; }
         .badge-liq { background:#ecfdf5; color:#065f46; padding:2px 6px; border-radius:4px; font-size:0.75rem; border:1px solid #6ee7b7; display: inline-block; margin-top:2px; }
 
-        /* DASHBOARD V51 (SIMPLIFICADO) */
+        /* DASHBOARD (SIMPLIFICADO) */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .kpi-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
         .kpi-title { font-size: 0.85rem; color: var(--text-sec); font-weight: 600; text-transform: uppercase; }
@@ -155,7 +155,7 @@
     <div id="printableArea"></div>
 
     <div class="header-container">
-        <div class="title-section"><h1>🚀 SALIDAS <small style="font-size:0.8rem;color:gray;">V51</small></h1></div>
+        <div class="title-section"><h1>🚀 SALIDAS</h1></div>
         <div class="main-controls">
             <button class="btn-sec" onclick="descargarBackup()" title="Backup">💾</button>
             <label class="btn-sec" style="cursor:pointer;" title="Importar">
@@ -476,7 +476,7 @@
             window.guardarRegistroEnNube(p);
         };
 
-        // --- DASHBOARD V51 ---
+        // --- DASHBOARD (SIMPLIFICADO) ---
         function renderControl(data) { 
             let html = '';
             let totalVenta = 0, totalGanancia = 0;
@@ -565,6 +565,26 @@
         function renderListaOps() { const tbody = document.getElementById('tbodyOps'); tbody.innerHTML = window.dbOps.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(op => { const total = op.pasajeros.reduce((s,p)=>s+parseInt(p.pax),0); return `<tr><td>${op.fecha}</td><td>${op.tour}</td><td>${op.conductor}</td><td>${total}/${op.capacidad}</td><td>OK</td><td><button class="btn-icon btn-edit" onclick="cargarOp(${op.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('operaciones', '${op.firestoreId}')">🗑</button></td></tr>`; }).join(''); }
         function cargarOp(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
         function cargarSelects() { const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n=>s.innerHTML+=`<option>${n}</option>`); const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); }
+        
+        // --- NUEVA FUNCIÓN AÑADIDA PARA CORREGIR EL ERROR DEL MODAL PASES ---
+        function cargarSelectsPase() {
+            // Cargar Agencias
+            const sa = document.getElementById('p_agencia');
+            sa.innerHTML = '<option value="">Seleccione Agencia...</option>';
+            if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
+            
+            // Cargar Tours
+            const st = document.getElementById('p_tour');
+            st.innerHTML = '<option value="">Seleccione Tour...</option>';
+            if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
+
+            // Cargar Hoteles (Para recojo)
+            const sh = document.getElementById('p_hotel');
+            sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>';
+            if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n => sh.innerHTML += `<option value="${n}">${n}</option>`);
+        }
+        // -------------------------------------------------------------------
+
         function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; const rms=window.catalogo.hoteles.filter(h=>h.nombre===n); l.innerHTML = rms.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); }
         
         function abrirModalCatalogo() { 
@@ -642,7 +662,7 @@
         function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
         function agregarLineaTour(){ const d=document.createElement('div'); d.className='tour-row-input'; let opts = '<option value="">Tour</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t=>opts+=`<option value="${t.nombre}">${t.nombre}</option>`); d.innerHTML=`<select class="sel-tour">${opts}</select><select class="sel-dia"><option value="0">Día 1</option><option value="1">Día 2</option><option value="2">Día 3</option><option value="3">Día 4</option></select><input type="text" class="sel-obs" placeholder="Obs"><button type="button" onclick="this.parentElement.remove()" style="color:red;border:none;">x</button>`; document.getElementById('listaToursInputs').appendChild(d); }
         function abrirModalRegistro() { window.editId = null; document.getElementById('reg_firestore_id').value = ''; document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; document.getElementById('formTour').reset(); document.getElementById('listaToursInputs').innerHTML=''; cargarSelects(); document.getElementById('containerHabitaciones').style.display='none'; agregarLineaTour(); document.getElementById('modalRegistro').classList.add('active'); }
-        function cargarEdicion(id) { const r = window.db.find(x => x.id === id); if(!r) return; abrirModalRegistro(); window.editId = id; document.getElementById('reg_firestore_id').value = r.firestoreId; document.getElementById('modalRegTitulo').innerText = "✏️ Editar Reserva"; document.getElementById('nombre').value = r.nombre; document.getElementById('celular').value = r.celular; document.getElementById('selAgencia').value = r.agencia; document.getElementById('cantidad').value = r.cantidad; document.getElementById('precioPaquete').value = r.precioPaquete; document.getElementById('adelanto').value = r.adelanto; document.getElementById('llegada').value = r.llegada; document.getElementById('retorno').value = r.retorno; document.getElementById('observaciones').value = r.observaciones || ''; document.getElementById('selHotelName').value = r.hotelName; cargarHabitacionesDeHotel(r.hotelName, r.habitaciones); document.getElementById('listaToursInputs').innerHTML = ''; if(r.tours && r.tours.length > 0) { r.tours.forEach(t => { const diff = Math.ceil((new Date(t.fecha) - new Date(r.llegada)) / 86400000); agregarLineaTour(t.nombre, diff, t.obs); }); } else { agregarLineaTour(); } }
+        function cargarEdicion(id) { const r = window.db.find(x => x.id === id); if(!r) return; abrirModalRegistro(); window.editId = id; document.getElementById('reg_firestore_id').value = r.firestoreId; document.getElementById('nombre').value = r.nombre; document.getElementById('celular').value = r.celular; document.getElementById('selAgencia').value = r.agencia; document.getElementById('cantidad').value = r.cantidad; document.getElementById('precioPaquete').value = r.precioPaquete; document.getElementById('adelanto').value = r.adelanto; document.getElementById('llegada').value = r.llegada; document.getElementById('retorno').value = r.retorno; document.getElementById('observaciones').value = r.observaciones || ''; document.getElementById('selHotelName').value = r.hotelName; cargarHabitacionesDeHotel(r.hotelName, r.habitaciones); document.getElementById('listaToursInputs').innerHTML = ''; if(r.tours && r.tours.length > 0) { r.tours.forEach(t => { const diff = Math.ceil((new Date(t.fecha) - new Date(r.llegada)) / 86400000); agregarLineaTour(t.nombre, diff, t.obs); }); } else { agregarLineaTour(); } }
         function abrirModalPases() { window.editId = null; document.getElementById('pase_firestore_id').value = ''; document.getElementById('formPase').reset(); setPasePagoMode('adelanto'); cargarSelectsPase(); document.getElementById('modalPases').classList.add('active'); }
         function setPasePagoMode(mode) { document.getElementById('p_modo_pago').value = mode; if (mode === 'pagado') { document.getElementById('opt_pagado').classList.add('active-green'); document.getElementById('opt_adelanto').classList.remove('active'); syncPasePago(); } else { document.getElementById('opt_adelanto').classList.add('active'); document.getElementById('opt_pagado').classList.remove('active-green'); document.getElementById('p_adelanto').readOnly = false; } }
         function syncPasePago() { if (document.getElementById('p_modo_pago').value === 'pagado') { document.getElementById('p_adelanto').value = document.getElementById('p_precio').value; document.getElementById('p_adelanto').readOnly = true; } }
