@@ -669,7 +669,7 @@
             const candidatosDB = window.db.filter(r => r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
             const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
 
-            const renderItem = (id, nombre, pax, hotel, tipo, obs) => { 
+            const renderItem = (id, nombre, pax, hotel, tipo, obs, celular) => { // Added celular
                 const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); 
                 if (yaAsignadoAqui) return; 
 
@@ -677,16 +677,16 @@
 
                 countPend += parseInt(pax); 
                 const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; 
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}')">></button></div>`; 
+                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}', '${celular || ""}')">></button></div>`; 
             }; 
 
             candidatosDB.forEach(c => { 
                 const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); 
-                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', tr.obs); 
+                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', tr.obs, c.celular); 
                 if(h) htmlPend+=h; 
             }); 
             candidatosPases.forEach(c => { 
-                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion); 
+                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion, c.celular); 
                 if(h) htmlPend+=h; 
             }); 
 
@@ -727,7 +727,7 @@
                         <tr>
                             <th style="width:50px;">#</th>
                             <th>PASAJERO</th>
-                            <th style="width:50px;">PAX</th>
+                            <th>CELULAR</th> <th style="width:50px;">PAX</th>
                             <th>HOTEL / RECOJO</th>
                             <th>OBSERVACIONES</th>
                         </tr>
@@ -740,7 +740,7 @@
                     <tr>
                         <td style="text-align:center;">${index + 1}</td>
                         <td>${p.nombre}</td>
-                        <td style="text-align:center;">${p.pax}</td>
+                        <td>${p.celular || '---'}</td> <td style="text-align:center;">${p.pax}</td>
                         <td>${p.hotel}</td>
                         <td></td> 
                     </tr>
@@ -751,7 +751,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="2" style="text-align:right; font-weight:bold; padding:10px;">TOTAL PASAJEROS:</td>
+                            <td colspan="3" style="text-align:right; font-weight:bold; padding:10px;">TOTAL PASAJEROS:</td>
                             <td style="text-align:center; font-weight:bold; padding:10px;">${totalPax}</td>
                             <td colspan="2"></td>
                         </tr>
@@ -769,7 +769,15 @@
         };
 
         function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
-        function asignarPax(id, tipo, pax, nombre, hotel) { const capMax = parseInt(document.getElementById('ops_capacidad').value); const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel }); cargarPendientesOps(); }
+        
+        function asignarPax(id, tipo, pax, nombre, hotel, celular) { // Added celular
+            const capMax = parseInt(document.getElementById('ops_capacidad').value); 
+            const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); 
+            if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); 
+            window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel, celular }); 
+            cargarPendientesOps(); 
+        }
+        
         function removerPax(i) { window.opsTempAsignados.splice(i, 1); cargarPendientesOps(); }
         function actualizarIndicadorCapacidad(c=null) { if(c===null) c=window.opsTempAsignados.reduce((s,p)=>s+parseInt(p.pax),0); const m=document.getElementById('ops_capacidad').value; document.getElementById('indicadorCapacidad').innerText=`${c} / ${m}`; }
         function guardarOperacion() { const data = { id: document.getElementById('ops_id_actual').value || Date.now(), fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados }; window.guardarOperacionEnNube(data); }
