@@ -66,7 +66,7 @@
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
 
-        /* NUEVO: ESTILO PARA OBSERVACIONES GENERALES EN CALENDARIO */
+        /* OBSERVACIONES GENERALES EN CALENDARIO */
         .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
 
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
@@ -746,7 +746,7 @@
         function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
         function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 15; window.opsTempAsignados = []; cargarPendientesOps(); }
         
-        // MODIFICADO: Corrección en filtro de Operaciones (Robustez)
+        // MODIFICADO: Lógica Robusta para Cargar Pendientes (Con Obs + Notas)
         function cargarPendientesOps() { 
             const f = document.getElementById('ops_fecha').value; 
             const t = document.getElementById('ops_tour').value; 
@@ -772,29 +772,48 @@
             let htmlPend = ''; 
             let countPend = 0; 
             
-            // Filtro robusto para DB: Asegurar que tours sea Array y que nombre coincida exactamente
+            // Filtro robusto: Array.isArray + coincidencia
             const candidatosDB = window.db.filter(r => Array.isArray(r.tours) && r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
             const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
 
-            const renderItem = (id, nombre, pax, hotel, tipo, obs, celular) => { 
+            const renderItem = (id, nombre, pax, hotel, tipo, fullObs, celular) => { 
                 const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); 
                 if (yaAsignadoAqui) return; 
 
                 if (bloqueados.has(`${tipo}_${id}`)) return;
 
                 countPend += parseInt(pax); 
-                const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; 
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}', '${celular || ""}')">></button></div>`; 
+                
+                // Mostrar un pequeño indicador visual si hay observaciones
+                const obsTag = fullObs ? `<span style="color:orange;font-size:0.7rem; display:block;">📝 ${fullObs.substring(0,30)}...</span>` : ''; 
+                
+                // Escapar caracteres para el onclick
+                const safeNombre = nombre.replace(/'/g, "").replace(/"/g, "");
+                const safeHotel = hotel.replace(/'/g, "").replace(/"/g, "");
+                const safeObs = fullObs.replace(/'/g, "").replace(/"/g, "");
+
+                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${safeNombre}', '${safeHotel}', '${celular || ""}', '${safeObs}')">></button></div>`; 
             }; 
 
             candidatosDB.forEach(c => { 
-                const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); 
-                const obsTourToShow = tr ? (tr.obsTour || tr.obs || '') : '';
-                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', obsTourToShow, c.celular); 
+                // 1. Buscar el tour específico
+                const tr = c.tours.find(x => x.fecha === f && x.nombre === t); 
+                // 2. Buscar si hay NOTA del día (mismo día, sin nombre de tour)
+                const notaDia = c.tours.find(x => x.fecha === f && !x.nombre);
+
+                // 3. Construir String de Observaciones Completo
+                let obsParts = [];
+                if(c.observaciones) obsParts.push(`[Gen: ${c.observaciones}]`);
+                if(tr && (tr.obsTour || tr.obs)) obsParts.push(`[Tour: ${tr.obsTour || tr.obs}]`);
+                if(notaDia && notaDia.obsDia) obsParts.push(`[Nota: ${notaDia.obsDia}]`);
+                
+                const fullObs = obsParts.join(' ');
+
+                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', fullObs, c.celular); 
                 if(h) htmlPend+=h; 
             }); 
             candidatosPases.forEach(c => { 
-                const h=renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion, c.celular); 
+                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion || '', c.celular); 
                 if(h) htmlPend+=h; 
             }); 
 
@@ -803,6 +822,7 @@
             renderizarAsignados(); 
         }
 
+        // MODIFICADO: Inclusión de Observaciones en Impresión
         window.imprimirManifiesto = function() {
             const fecha = document.getElementById('ops_fecha').value;
             const tour = document.getElementById('ops_tour').value;
@@ -852,7 +872,7 @@
                         <td>${p.celular || '---'}</td>
                         <td style="text-align:center;">${p.pax}</td>
                         <td>${p.hotel}</td>
-                        <td></td> 
+                        <td style="font-size:0.8rem;">${p.obs || ''}</td> 
                     </tr>
                 `;
             });
@@ -880,11 +900,12 @@
 
         function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
         
-        function asignarPax(id, tipo, pax, nombre, hotel, celular) { 
+        // MODIFICADO: Aceptar obs en asignación
+        function asignarPax(id, tipo, pax, nombre, hotel, celular, obs) { 
             const capMax = parseInt(document.getElementById('ops_capacidad').value); 
             const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); 
             if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); 
-            window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel, celular }); 
+            window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel, celular, obs }); 
             cargarPendientesOps(); 
         }
         
