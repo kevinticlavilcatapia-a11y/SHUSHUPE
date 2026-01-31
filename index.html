@@ -61,15 +61,11 @@
         
         .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px;}
         .tour-obs-cal { font-size: 0.65rem; color: #2563eb; font-style: italic; line-height: 1; font-weight:bold; }
-        
-        /* NUEVO: CLASE PARA OBS DE OPS EN CALENDARIO */
         .tour-obs-ops { font-size: 0.65rem; color: #d97706; font-style: italic; margin-top: 2px; border-top: 1px dashed #eee; padding-top: 2px; }
-
-        /* CLASE PARA NOTAS (SIN TOUR) - BLOQUEADA */
+        
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
 
-        /* OBSERVACIONES GENERALES EN CALENDARIO */
         .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
 
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
@@ -130,7 +126,6 @@
         .room-option input:checked + .room-card .r-num { color: white; }
         .room-option input:checked + .room-card .r-cap { color: rgba(255,255,255,0.8); }
         
-        /* ESTILO PARA FILAS DE ITINERARIO */
         .tour-row-input { margin-bottom: 5px; background: white; padding: 5px; border-radius: 6px; border: 1px solid #eee; display: flex; gap: 5px; align-items: center;}
         
         .pro-section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
@@ -790,6 +785,177 @@
 
         // ============================================
 
+        // FUNCIONES DE CATALOGO (HOTEL / TOUR / AGENCIA)
+        // ============================================
+        
+        // RENDERIZAR CATALOGO
+        window.renderizarCatalogos = function() {
+            const txt = document.getElementById('buscadorCatalogo').value.toLowerCase();
+            
+            // 1. Hoteles
+            let htmlHoteles = '';
+            const hoteles = window.catalogo.hoteles || [];
+            hoteles.forEach(h => {
+                if(h.nombre.toLowerCase().includes(txt)) {
+                    // Mostrar habitaciones debajo
+                    let sub = '';
+                    if(h.habitaciones && h.habitaciones.length > 0) {
+                        sub = `<div style="font-size:0.75rem; color:#666; margin-top:4px;">`;
+                        h.habitaciones.forEach(r => {
+                            sub += `<div>• ${r.habitacion} (Cap: ${r.capacidad}) - S/ ${r.precio}</div>`;
+                        });
+                        sub += `</div>`;
+                    }
+                    
+                    htmlHoteles += `<div class="cat-item">
+                        <div><div style="font-weight:bold;">${h.nombre}</div>${sub}</div>
+                        <div>
+                            <button class="btn-icon btn-edit" onclick="editarCat('hotel', '${h.nombre}')">✎</button>
+                            <button class="btn-icon btn-del" onclick="eliminarCat('hotel', '${h.nombre}')">🗑</button>
+                        </div>
+                    </div>`;
+                }
+            });
+            document.getElementById('cat_hoteles').innerHTML = htmlHoteles;
+
+            // 2. Tours
+            let htmlTours = '';
+            const tours = window.catalogo.tours || [];
+            tours.forEach(t => {
+                if(t.nombre.toLowerCase().includes(txt)) {
+                    htmlTours += `<div class="cat-item">
+                        <div><div style="font-weight:bold;">${t.nombre}</div><div style="font-size:0.75rem;">Costo: S/ ${t.precio}</div></div>
+                        <div>
+                            <button class="btn-icon btn-edit" onclick="editarCat('tour', '${t.id}')">✎</button>
+                            <button class="btn-icon btn-del" onclick="eliminarCat('tour', '${t.id}')">🗑</button>
+                        </div>
+                    </div>`;
+                }
+            });
+            document.getElementById('cat_tours').innerHTML = htmlTours;
+
+            // 3. Agencias
+            let htmlAgencias = '';
+            const agencias = window.catalogo.agencias || [];
+            agencias.forEach(a => {
+                if(a.nombre.toLowerCase().includes(txt)) {
+                    htmlAgencias += `<div class="cat-item">
+                        <div style="font-weight:bold;">${a.nombre}</div>
+                        <div>
+                            <button class="btn-icon btn-edit" onclick="editarCat('agencia', '${a.id}')">✎</button>
+                            <button class="btn-icon btn-del" onclick="eliminarCat('agencia', '${a.id}')">🗑</button>
+                        </div>
+                    </div>`;
+                }
+            });
+            document.getElementById('cat_agencias').innerHTML = htmlAgencias;
+        };
+
+        // CAMBIAR TIPO EN MODAL CATALOGO
+        window.cambiarTipoCat = function(tipo) {
+            document.getElementById('cat_tipo_actual').value = tipo;
+            
+            // Update UI buttons
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            if(tipo === 'hotel') document.getElementById('typeBtnHotel').classList.add('active');
+            if(tipo === 'tour') document.getElementById('typeBtnTour').classList.add('active');
+            if(tipo === 'agencia') document.getElementById('typeBtnAgencia').classList.add('active');
+
+            // Show/Hide Fields
+            document.getElementById('fields_hotel').style.display = (tipo === 'hotel') ? 'block' : 'none';
+            document.getElementById('fields_tour').style.display = (tipo === 'tour') ? 'block' : 'none';
+            
+            // Limpiar inputs
+            if(!window.isEditingCat) {
+                document.getElementById('cat_edit_id').value = '';
+                document.getElementById('cat_edit_old_name').value = '';
+                document.getElementById('cat_nombre').value = '';
+                document.getElementById('cat_precio_tour').value = '';
+                document.getElementById('room_list').innerHTML = '';
+            }
+        };
+
+        // AGREGAR FILA HABITACION (DOM)
+        window.agregarFilaHabitacion = function(nombre='', cap='', precio='') {
+            const div = document.createElement('div');
+            div.className = 'room-row';
+            div.innerHTML = `
+                <input type="text" class="r-name" placeholder="Ej. 101 / Matrimonial" value="${nombre}" required>
+                <input type="number" class="r-cap" placeholder="Pax" value="${cap}" required>
+                <input type="number" class="r-price" placeholder="S/" value="${precio}" required>
+                <button type="button" onclick="this.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;">&times;</button>
+            `;
+            document.getElementById('room_list').appendChild(div);
+        };
+
+        // ABRIR MODAL CATALOGO
+        window.abrirModalCatalogo = function() {
+            window.isEditingCat = false;
+            document.getElementById('modalCatalogo').classList.add('active');
+            cambiarTipoCat('hotel'); // Default
+        }
+
+        // GUARDAR CATALOGO
+        document.getElementById('formCatalogo').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const tipo = document.getElementById('cat_tipo_actual').value;
+            const nombre = document.getElementById('cat_nombre').value.trim();
+            const editId = document.getElementById('cat_edit_id').value; // Para tour/agencia
+            const oldName = document.getElementById('cat_edit_old_name').value; // Para hotel
+
+            if(!nombre) return alert("Ingrese un nombre");
+
+            if(tipo === 'hotel') {
+                // Recolectar habitaciones
+                const habitaciones = [];
+                document.querySelectorAll('#room_list .room-row').forEach(row => {
+                    habitaciones.push({
+                        habitacion: row.querySelector('.r-name').value,
+                        capacidad: row.querySelector('.r-cap').value,
+                        precio: row.querySelector('.r-price').value
+                    });
+                });
+
+                const newHotel = { nombre, habitaciones };
+
+                if(oldName) {
+                    // Editar existente: Encontrar y reemplazar
+                    const idx = window.catalogo.hoteles.findIndex(h => h.nombre === oldName);
+                    if(idx >= 0) window.catalogo.hoteles[idx] = newHotel;
+                } else {
+                    // Nuevo
+                    window.catalogo.hoteles.push(newHotel);
+                }
+
+            } else if (tipo === 'tour') {
+                const precio = document.getElementById('cat_precio_tour').value;
+                const newTour = { id: editId || Date.now().toString(), nombre, precio };
+                
+                if(editId) {
+                    const idx = window.catalogo.tours.findIndex(t => t.id == editId);
+                    if(idx >= 0) window.catalogo.tours[idx] = newTour;
+                } else {
+                    window.catalogo.tours.push(newTour);
+                }
+
+            } else if (tipo === 'agencia') {
+                const newAgencia = { id: editId || Date.now().toString(), nombre };
+                
+                if(editId) {
+                    const idx = window.catalogo.agencias.findIndex(a => a.id == editId);
+                    if(idx >= 0) window.catalogo.agencias[idx] = newAgencia;
+                } else {
+                    window.catalogo.agencias.push(newAgencia);
+                }
+            }
+
+            window.guardarCatalogoEnNube();
+            window.cerrarModal('modalCatalogo');
+            window.renderizarCatalogos();
+        });
+
+        // ============================================
+
         function cargarSelectLiquidacion() { const s = document.getElementById('liq_agencia'); s.innerHTML = '<option value="">Seleccione Agencia...</option>' + catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join(''); }
         function generarLiquidacion() { const ag = document.getElementById('liq_agencia').value; const desde = document.getElementById('liq_desde').value; const hasta = document.getElementById('liq_hasta').value; window.liquidacionData = []; const estado = document.getElementById('liq_filtro_estado').value; const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; window.db.forEach(r => { if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); } }); window.dbPases.forEach(p => { if(p.agencia === ag && p.fecha >= desde && p.fecha <= hasta && applyFilter(p)) { window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: p.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${p.tour}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); } }); let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; let tV=0, tA=0, tS=0; window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); html+='</tbody></table>'; document.getElementById('tablaLiqContainer').innerHTML=html; document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); document.getElementById('resultadosLiquidacion').style.display = 'block'; }
         function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
@@ -965,15 +1131,22 @@
         function guardarOperacion() { const data = { id: document.getElementById('ops_id_actual').value || Date.now(), fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados }; window.guardarOperacionEnNube(data); }
         function renderListaOps() { const tbody = document.getElementById('tbodyOps'); tbody.innerHTML = window.dbOps.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(op => { const total = op.pasajeros.reduce((s,p)=>s+parseInt(p.pax),0); return `<tr><td>${op.fecha}</td><td>${op.tour}</td><td>${op.conductor}</td><td>${total}/${op.capacidad}</td><td>OK</td><td><button class="btn-icon btn-edit" onclick="cargarOp(${op.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('operaciones', '${op.firestoreId}')">🗑</button></td></tr>`; }).join(''); }
         function cargarOp(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
-        function cargarSelects() { const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n=>s.innerHTML+=`<option>${n}</option>`); const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); }
+        function cargarSelects() { const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h=>s.innerHTML+=`<option value="${h.nombre}">${h.nombre}</option>`); const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); }
         
         function cargarSelectsPase() {
             const sa = document.getElementById('p_agencia'); sa.innerHTML = '<option value="">Seleccione Agencia...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
             const st = document.getElementById('p_tour'); st.innerHTML = '<option value="">Seleccione Tour...</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
-            const sh = document.getElementById('p_hotel'); sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>'; if(window.catalogo.hoteles) [...new Set(window.catalogo.hoteles.map(h=>h.nombre))].forEach(n => sh.innerHTML += `<option value="${n}">${n}</option>`);
+            const sh = document.getElementById('p_hotel'); sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>'; if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h => sh.innerHTML += `<option value="${h.nombre}">${h.nombre}</option>`);
         }
 
-        function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; const rms=window.catalogo.hoteles.filter(h=>h.nombre===n); l.innerHTML = rms.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); }
+        function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; 
+            const hotelObj = window.catalogo.hoteles.find(h=>h.nombre===n);
+            if(hotelObj && hotelObj.habitaciones) {
+                l.innerHTML = hotelObj.habitaciones.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); 
+            } else {
+                l.innerHTML = 'Sin habitaciones registradas.';
+            }
+        }
         
         // ============================================
         // NUEVA LÓGICA DE ITINERARIO (Tour vs Nota)
@@ -1063,14 +1236,17 @@
         function editarPase(id) { const p = window.dbPases.find(x => x.id === id); if(!p) return; abrirModalPases(); window.editId = id; document.getElementById('pase_firestore_id').value = p.firestoreId; document.getElementById('p_nombre').value = p.nombre; document.getElementById('p_celular').value = p.celular; document.getElementById('p_agencia').value = p.agencia; document.getElementById('p_cantidad').value = p.cantidad; document.getElementById('p_hotel').value = p.hotel; document.getElementById('p_fecha').value = p.fecha; document.getElementById('p_tour').value = p.tour; document.getElementById('p_obs').value = p.observacion || ''; document.getElementById('p_precio').value = p.precio; document.getElementById('p_adelanto').value = p.adelanto; if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto'); }
         
         function editarCat(tipo, idOrName) { 
+            window.isEditingCat = true;
             document.getElementById('modalCatalogo').classList.add('active'); 
             cambiarTipoCat(tipo);
             if(tipo === 'hotel') { 
                 document.getElementById('cat_nombre').value = idOrName; 
                 document.getElementById('cat_edit_old_name').value = idOrName; 
                 document.getElementById('room_list').innerHTML = ''; 
-                const rooms = window.catalogo.hoteles.filter(h => h.nombre === idOrName);
-                rooms.forEach(r => agregarFilaHabitacion(r.habitacion, r.capacidad, r.precio)); 
+                const hotel = window.catalogo.hoteles.find(h => h.nombre === idOrName);
+                if(hotel && hotel.habitaciones) {
+                    hotel.habitaciones.forEach(r => agregarFilaHabitacion(r.habitacion, r.capacidad, r.precio)); 
+                }
             } else if (tipo === 'tour') { 
                 const t = window.catalogo.tours.find(x => x.id == idOrName); 
                 document.getElementById('cat_nombre').value = t.nombre; 
