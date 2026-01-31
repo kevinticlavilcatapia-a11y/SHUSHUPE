@@ -61,8 +61,10 @@
         
         .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px;}
         .tour-obs-cal { font-size: 0.65rem; color: #2563eb; font-style: italic; line-height: 1; font-weight:bold; }
-        /* CLASE PARA NOTAS (SIN TOUR) */
-        .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; }
+        
+        /* CLASE PARA NOTAS (SIN TOUR) - BLOQUEADA */
+        .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
+        .tour-item.locked:hover { transform: none; box-shadow: none; }
 
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
         .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); }
@@ -122,8 +124,8 @@
         .room-option input:checked + .room-card .r-num { color: white; }
         .room-option input:checked + .room-card .r-cap { color: rgba(255,255,255,0.8); }
         
-        /* MODIFICADO: Estilo Grid para inputs de tour + obs */
-        .tour-row-input { display: grid; grid-template-columns: 1.5fr 0.8fr 1fr 1fr 30px; gap: 5px; margin-bottom: 5px; background: white; padding: 5px; border-radius: 6px; border: 1px solid #eee; }
+        /* ESTILO PARA FILAS DE ITINERARIO */
+        .tour-row-input { margin-bottom: 5px; background: white; padding: 5px; border-radius: 6px; border: 1px solid #eee; display: flex; gap: 5px; align-items: center;}
         
         .pro-section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .pro-section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
@@ -313,7 +315,18 @@
                     <div class="pro-section"><div class="pro-section-title">👤 Datos del Cliente</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;"><div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div></div></div>
                     <div class="pro-section"><div class="pro-section-title">🏨 Alojamiento</div><div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:20px;"><div><div class="input-group" style="margin-bottom:15px;"><label class="input-label">Hotel</label><select id="selHotelName" required onchange="cargarHabitacionesDeHotel(this.value)"></select></div><label class="input-label">Fechas</label><div class="date-range-container"><div style="flex:1;"><label style="font-size:0.7rem;">LLEGADA</label><input type="date" id="llegada" required onchange="validarFechas()" style="border:none;"></div><div class="date-separator">➝</div><div style="flex:1; text-align:right;"><label style="font-size:0.7rem;">SALIDA</label><input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right;"></div></div></div><div id="containerHabitaciones" style="display:none; border-left: 1px solid #eee; padding-left: 20px;"><label class="input-label">Habitaciones</label><div id="listaCheckHabitaciones" class="room-checkbox-container"></div></div></div></div>
                     <div class="pro-section"><div class="pro-section-title">💰 Detalles</div><div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;"><div class="input-group"><label class="input-label">Precio Total</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="precioPaquete" required class="with-icon" style="font-weight:bold;"></div></div><div class="input-group"><label class="input-label">Adelanto</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="adelanto" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Observaciones</label><input type="text" id="observaciones" style="width:100%;"></div></div></div>
-                    <div class="pro-section" style="background:#f8fafc;"><div class="pro-section-title" style="justify-content:space-between;"><span>🗺️ Itinerario</span><button type="button" onclick="agregarLineaTour()" class="btn-main" style="padding:4px 10px; height:auto;">+ Tour/Nota</button></div><div id="listaToursInputs"></div></div>
+                    
+                    <div class="pro-section" style="background:#f8fafc;">
+                        <div class="pro-section-title" style="justify-content:space-between;">
+                            <span>🗺️ Itinerario</span>
+                            <div style="display:flex; gap:5px;">
+                                <button type="button" onclick="agregarLineaItinerario('tour')" class="btn-main" style="padding:4px 10px; height:auto; background:var(--primary);">+ Tour</button>
+                                <button type="button" onclick="agregarLineaItinerario('nota')" class="btn-main" style="padding:4px 10px; height:auto; background:#f59e0b;">+ Nota</button>
+                            </div>
+                        </div>
+                        <div id="listaToursInputs"></div>
+                    </div>
+                    
                     <button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:15px; margin-top:10px;">💾 Guardar Registro</button>
                 </form>
             </div>
@@ -521,7 +534,7 @@
             document.getElementById('tablaPases').innerHTML = h + '</tbody>';
         }
         
-        // MODIFICADO: Renderizar Notas Amarillas si no hay Tour
+        // MODIFICADO: Bloqueo de Notas (Sin Tour)
         function renderExcel(data, mes, filtroTour) {
             const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
             let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
@@ -538,16 +551,15 @@
                     h+=`<td class="drop-zone ${bg}" data-dia="${d}" ondragover="window.allowDrop(event)" ondrop="window.dropTour(event)">
                         <div class="tour-stack">
                             ${ts.map(t=>{
-                                const obsDiaHtml = t.obsDia ? `<div class="tour-obs-cal">📅 ${t.obsDia}</div>` : '';
-                                
-                                // CASO 1: Es una Nota de Día (Sin Tour) -> BLOQUEADO
+                                // CASO 1: NOTA (Sin Tour) -> BLOQUEADO (draggable=false)
                                 if(!t.nombre) {
                                     return `<div class="tour-item locked" draggable="false">
                                         <div class="tour-name" style="font-weight:normal; font-style:italic;">📌 ${t.obsDia}</div>
                                     </div>`;
                                 }
                                 
-                                // CASO 2: Es un Tour Normal -> DRAGGABLE
+                                // CASO 2: TOUR -> MOVIIBLE
+                                const obsDiaHtml = t.obsDia ? `<div class="tour-obs-cal">📅 ${t.obsDia}</div>` : '';
                                 return `<div class="tour-item" title="${t.nombre} (Ops: ${t.obsTour||''})" draggable="true" ondragstart="window.dragStart(event,${r.id},${r.tours.indexOf(t)})">
                                     <div class="tour-name">${t.nombre}</div>
                                     ${obsDiaHtml}
@@ -764,7 +776,7 @@
 
                 countPend += parseInt(pax); 
                 const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; 
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}', '${celular || ""}')">></button></div>`; 
+                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${p.cantidad}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}', '${celular || ""}')">></button></div>`; 
             }; 
 
             candidatosDB.forEach(c => { 
@@ -883,34 +895,56 @@
 
         function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; const rms=window.catalogo.hoteles.filter(h=>h.nombre===n); l.innerHTML = rms.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); }
         
-        // MODIFICADO: Aceptar parámetros para editar correctamente y más días
-        function agregarLineaTour(tourVal='', diaVal=0, obsTourVal='', obsDiaVal=''){ 
+        // ============================================
+        // NUEVA LÓGICA DE ITINERARIO (Tour vs Nota)
+        // ============================================
+        function agregarLineaItinerario(tipo, valor='', diaVal=0, obs='') { 
             const d=document.createElement('div'); 
             d.className='tour-row-input'; 
-            
-            let opts = '<option value="">Tour</option>'; 
-            if(window.catalogo.tours) window.catalogo.tours.forEach(t=>{
-                opts+=`<option value="${t.nombre}" ${t.nombre===tourVal?'selected':''}>${t.nombre}</option>`;
-            }); 
-            
-            // Generar días dinámicamente
+            d.setAttribute('data-tipo', tipo);
+
             let dayOpts = obtenerOpcionesFechas(diaVal);
 
-            d.innerHTML=`
-                <select class="sel-tour">${opts}</select>
-                <select class="sel-dia">${dayOpts}</select>
-                <input type="text" class="sel-obs-tour" placeholder="Obs Ops" value="${obsTourVal}">
-                <input type="text" class="sel-obs-dia" placeholder="Obs Cal" value="${obsDiaVal}">
-                <button type="button" onclick="this.parentElement.remove()" style="color:red;border:none;">x</button>
-            `; 
+            let html = '';
+            
+            if(tipo === 'tour') {
+                // MODO TOUR: Select Tour + Select Dia + Obs Tour
+                let opts = '<option value="">-- Seleccione Tour --</option>'; 
+                if(window.catalogo.tours) window.catalogo.tours.forEach(t=>{
+                    opts+=`<option value="${t.nombre}" ${t.nombre===valor?'selected':''}>${t.nombre}</option>`;
+                });
+                
+                html = `
+                    <select class="sel-tour" style="flex:1.5;">${opts}</select>
+                    <select class="sel-dia" style="flex:1;">${dayOpts}</select>
+                    <input type="text" class="sel-obs" placeholder="Obs Tour (Veggie, etc.)" value="${obs}" style="flex:1.5;">
+                `;
+            } else {
+                // MODO NOTA: Input Texto + Select Dia
+                html = `
+                    <input type="text" class="sel-nota-texto" placeholder="⚠️ Escriba la Nota (Ej. Día Libre, Vuelo Salida)" value="${valor}" style="flex:2.5; font-weight:bold; color:#d97706; background:#fffbeb;">
+                    <select class="sel-dia" style="flex:1;">${dayOpts}</select>
+                `;
+            }
+
+            html += `<button type="button" onclick="this.parentElement.remove()" style="color:red;border:none;cursor:pointer;font-weight:bold;margin-left:5px;">🗑</button>`;
+            
+            d.innerHTML = html;
             document.getElementById('listaToursInputs').appendChild(d); 
         }
 
-        function abrirModalRegistro() { window.editId = null; document.getElementById('reg_firestore_id').value = ''; document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; document.getElementById('formTour').reset(); document.getElementById('listaToursInputs').innerHTML=''; cargarSelects(); document.getElementById('containerHabitaciones').style.display='none'; agregarLineaTour(); document.getElementById('modalRegistro').classList.add('active'); }
+        function abrirModalRegistro() { window.editId = null; document.getElementById('reg_firestore_id').value = ''; document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; document.getElementById('formTour').reset(); document.getElementById('listaToursInputs').innerHTML=''; cargarSelects(); document.getElementById('containerHabitaciones').style.display='none'; 
+            // Por defecto agregamos una linea de tour vacía
+            agregarLineaItinerario('tour'); 
+            document.getElementById('modalRegistro').classList.add('active'); 
+        }
         
         function cargarEdicion(id) { 
             const r = window.db.find(x => x.id === id); if(!r) return; 
             abrirModalRegistro(); 
+            // Limpiar lo que crea por defecto abrirModalRegistro
+            document.getElementById('listaToursInputs').innerHTML = ''; 
+
             window.editId = id; 
             document.getElementById('reg_firestore_id').value = r.firestoreId; 
             document.getElementById('nombre').value = r.nombre; 
@@ -924,17 +958,20 @@
             document.getElementById('observaciones').value = r.observaciones || ''; 
             document.getElementById('selHotelName').value = r.hotelName; 
             cargarHabitacionesDeHotel(r.hotelName, r.habitaciones); 
-            document.getElementById('listaToursInputs').innerHTML = ''; 
+            
             if(r.tours && r.tours.length > 0) { 
                 r.tours.forEach(t => { 
                     const diff = Math.ceil((new Date(t.fecha) - new Date(r.llegada)) / 86400000); 
-                    // Se cargan obsTour y obsDia
-                    const obsTourLoad = t.obsTour || t.obs || '';
-                    const obsDiaLoad = t.obsDia || '';
-                    agregarLineaTour(t.nombre, diff, obsTourLoad, obsDiaLoad); 
+                    if(t.nombre) {
+                        // Es un Tour
+                        agregarLineaItinerario('tour', t.nombre, diff, (t.obsTour || t.obs)); 
+                    } else {
+                        // Es una Nota (obsDia se guarda en el campo de texto de nota)
+                        agregarLineaItinerario('nota', t.obsDia, diff);
+                    }
                 }); 
             } else { 
-                agregarLineaTour(); 
+                agregarLineaItinerario('tour'); 
             } 
         }
 
@@ -982,25 +1019,38 @@
                 habitaciones.push(chk.value);
             });
             const tours = [];
+            
+            // Recorrer filas de itinerario
             document.querySelectorAll('#listaToursInputs .tour-row-input').forEach(row => {
-                const tName = row.querySelector('.sel-tour').value;
+                const tipo = row.getAttribute('data-tipo');
                 const tDiaIdx = parseInt(row.querySelector('.sel-dia').value);
-                // NUEVOS CAMPOS:
-                const tObsTour = row.querySelector('.sel-obs-tour').value;
-                const tObsDia = row.querySelector('.sel-obs-dia').value;
-                
-                // MODIFICADO: Guardar si hay tour O hay nota del día
-                if(tName || tObsDia) {
-                    const fechaTour = calcularFechaTour(llegada, tDiaIdx);
-                    // SE GUARDAN LOS DOS TIPOS DE OBSERVACIONES
-                    tours.push({ 
-                        nombre: tName, 
-                        fecha: fechaTour, 
-                        obsTour: tObsTour, 
-                        obsDia: tObsDia 
-                    });
+                const fechaTour = calcularFechaTour(llegada, tDiaIdx);
+
+                if(tipo === 'tour') {
+                    const tName = row.querySelector('.sel-tour').value;
+                    const tObs = row.querySelector('.sel-obs').value;
+                    if(tName) {
+                        tours.push({ 
+                            nombre: tName, 
+                            fecha: fechaTour, 
+                            obsTour: tObs, 
+                            obsDia: '' // No es nota de día
+                        });
+                    }
+                } else {
+                    // Es Nota
+                    const notaTexto = row.querySelector('.sel-nota-texto').value;
+                    if(notaTexto) {
+                        tours.push({ 
+                            nombre: '', // Vacio para identificar como nota
+                            fecha: fechaTour, 
+                            obsTour: '', 
+                            obsDia: notaTexto 
+                        });
+                    }
                 }
             });
+
             const data = {
                 id: window.editId || Date.now(),
                 nombre: document.getElementById('nombre').value,
