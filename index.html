@@ -66,6 +66,9 @@
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
 
+        /* NUEVO: ESTILO PARA OBSERVACIONES GENERALES EN CALENDARIO */
+        .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
+
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
         .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); }
 
@@ -534,7 +537,7 @@
             document.getElementById('tablaPases').innerHTML = h + '</tbody>';
         }
         
-        // MODIFICADO: Bloqueo de Notas (Sin Tour)
+        // MODIFICADO: Bloqueo de Notas (Sin Tour) + Observaciones Generales
         function renderExcel(data, mes, filtroTour) {
             const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
             let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
@@ -542,7 +545,10 @@
             h+='</tr></thead><tbody>';
             data.forEach(r => {
                 const habs = Array.isArray(r.habitaciones) ? r.habitaciones.join(', ') : r.habitaciones;
-                h+=`<tr data-pax="${r.id}"><td class="col-sticky"><div class="pax-card"><div class="pax-header"><span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div><div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
+                // NUEVO: Agregar observaciones generales
+                const obsGeneral = r.observaciones ? `<div class="obs-general-cal">⚠️ ${r.observaciones}</div>` : '';
+
+                h+=`<tr data-pax="${r.id}"><td class="col-sticky"><div class="pax-card"><div class="pax-header"><span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div>${obsGeneral}<div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
                 for(let d=1; d<=days; d++) {
                     const f = `${y}-${m}-${String(d).padStart(2,'0')}`;
                     const bg = (f >= r.llegada && f <= r.retorno) ? 'cell-stay' : '';
@@ -740,6 +746,7 @@
         function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
         function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 15; window.opsTempAsignados = []; cargarPendientesOps(); }
         
+        // MODIFICADO: Corrección en filtro de Operaciones (Robustez)
         function cargarPendientesOps() { 
             const f = document.getElementById('ops_fecha').value; 
             const t = document.getElementById('ops_tour').value; 
@@ -765,7 +772,8 @@
             let htmlPend = ''; 
             let countPend = 0; 
             
-            const candidatosDB = window.db.filter(r => r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
+            // Filtro robusto para DB: Asegurar que tours sea Array y que nombre coincida exactamente
+            const candidatosDB = window.db.filter(r => Array.isArray(r.tours) && r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
             const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
 
             const renderItem = (id, nombre, pax, hotel, tipo, obs, celular) => { 
@@ -776,12 +784,12 @@
 
                 countPend += parseInt(pax); 
                 const obsTag = obs ? `<span style="color:orange;font-size:0.7rem;">⚠️ ${obs}</span>` : ''; 
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${p.cantidad}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}', '${celular || ""}')">></button></div>`; 
+                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${nombre.replace(/'/g, "")}', '${hotel.replace(/'/g, "")}', '${celular || ""}')">></button></div>`; 
             }; 
 
             candidatosDB.forEach(c => { 
                 const tr=c.tours.find(x=>x.fecha===f && x.nombre===t); 
-                const obsTourToShow = tr.obsTour || tr.obs || '';
+                const obsTourToShow = tr ? (tr.obsTour || tr.obs || '') : '';
                 const h=renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', obsTourToShow, c.celular); 
                 if(h) htmlPend+=h; 
             }); 
