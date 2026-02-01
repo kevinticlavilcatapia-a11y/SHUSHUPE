@@ -116,16 +116,11 @@
         .type-btn { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 8px; cursor: pointer; font-weight: 600; color: #4b5563; transition: 0.2s; display:flex; justify-content:center; align-items:center; gap:8px;}
         .type-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .room-list-container { background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 250px; overflow-y: auto; }
-        .room-checkbox-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px; max-height: 200px; overflow-y: auto;}
-        .room-option { cursor: pointer; position: relative; }
-        .room-option input[type="checkbox"] { display: none; }
-        .room-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 6px; transition: all 0.2s; height: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .room-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .room-card .r-num { font-weight: 700; font-size: 1rem; color: var(--text-main); }
-        .room-card .r-cap { font-size: 0.7rem; color: var(--text-sec); }
-        .room-option input:checked + .room-card { background: var(--primary); border-color: var(--primary); color: white; }
-        .room-option input:checked + .room-card .r-num { color: white; }
-        .room-option input:checked + .room-card .r-cap { color: rgba(255,255,255,0.8); }
+        
+        /* ESTILOS PARA LA NUEVA LISTA DE HABITACIONES */
+        .added-room-item { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        .added-room-info { display: flex; flex-direction: column; }
+        .added-room-hotel { font-weight: 700; color: var(--primary); font-size: 0.75rem; text-transform: uppercase; }
         
         .tour-row-input { margin-bottom: 5px; background: white; padding: 5px; border-radius: 6px; border: 1px solid #eee; display: flex; gap: 5px; align-items: center;}
         
@@ -136,7 +131,7 @@
         .input-wrapper { position: relative; }
         .input-icon-left { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
         .with-icon { padding-left: 35px; }
-        .date-range-container { display: flex; gap: 10px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+        .date-range-container { display: flex; gap: 10px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
         .date-separator { color: #9ca3af; font-size: 1.2rem; }
         .pay-toggle-container { display: flex; background: #e5e7eb; padding: 4px; border-radius: 8px; margin-bottom: 15px; }
         .pay-toggle-opt { flex: 1; text-align: center; padding: 8px; cursor: pointer; border-radius: 6px; font-size: 0.9rem; font-weight: 600; color: #6b7280; transition: 0.2s; }
@@ -145,6 +140,9 @@
 
         #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; display:flex; justify-content:center; align-items:center; color: var(--primary); font-weight:800; font-size:1.5rem; flex-direction:column; gap:10px; }
         
+        .btn-main { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-main:hover { background: var(--primary-dark); }
+
         @media print {
             @page { size: A4 portrait; margin: 1cm; }
             body * { visibility: hidden; } #printableArea, #printableArea * { visibility: visible; }
@@ -309,8 +307,50 @@
             <div class="modal-body">
                 <form id="formTour">
                     <input type="hidden" id="reg_firestore_id">
-                    <div class="pro-section"><div class="pro-section-title">👤 Datos del Cliente</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;"><div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div></div></div>
-                    <div class="pro-section"><div class="pro-section-title">🏨 Alojamiento</div><div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:20px;"><div><div class="input-group" style="margin-bottom:15px;"><label class="input-label">Hotel</label><select id="selHotelName" required onchange="cargarHabitacionesDeHotel(this.value)"></select></div><label class="input-label">Fechas</label><div class="date-range-container"><div style="flex:1;"><label style="font-size:0.7rem;">LLEGADA</label><input type="date" id="llegada" required onchange="validarFechas()" style="border:none;"></div><div class="date-separator">➝</div><div style="flex:1; text-align:right;"><label style="font-size:0.7rem;">SALIDA</label><input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right;"></div></div></div><div id="containerHabitaciones" style="display:none; border-left: 1px solid #eee; padding-left: 20px;"><label class="input-label">Habitaciones</label><div id="listaCheckHabitaciones" class="room-checkbox-container"></div></div></div></div>
+                    
+                    <div class="pro-section">
+                        <div class="pro-section-title">👤 Datos del Cliente</div>
+                        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;">
+                            <div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div>
+                            <div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div>
+                            <div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div>
+                            <div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div>
+                        </div>
+                        
+                        <div style="margin-top:10px;">
+                            <label class="input-label">Fechas de Estadía</label>
+                            <div class="date-range-container">
+                                <div style="flex:1;">
+                                    <label style="font-size:0.7rem;">LLEGADA</label>
+                                    <input type="date" id="llegada" required onchange="validarFechas()" style="border:none; background:transparent;">
+                                </div>
+                                <div class="date-separator">➝</div>
+                                <div style="flex:1; text-align:right;">
+                                    <label style="font-size:0.7rem;">SALIDA</label>
+                                    <input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right; background:transparent;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pro-section">
+                        <div class="pro-section-title">🏨 Alojamiento (Habitaciones)</div>
+                        <div style="background: #f0f9ff; padding: 10px; border-radius: 8px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
+                            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap: wrap;">
+                                <div style="flex:1.5; min-width: 200px;">
+                                    <label class="input-label">1. Seleccionar Hotel</label>
+                                    <select id="selHotelAdd" onchange="actualizarSelectRoom()"></select>
+                                </div>
+                                <div style="flex:1; min-width: 150px;">
+                                    <label class="input-label">2. Habitación</label>
+                                    <select id="selRoomAdd"></select>
+                                </div>
+                                <button type="button" class="btn-main" onclick="agregarHabitacion()" style="padding: 10px 15px;">+ Agregar</button>
+                            </div>
+                        </div>
+                        <div id="listaHabitacionesAgregadas"></div>
+                    </div>
+
                     <div class="pro-section"><div class="pro-section-title">💰 Detalles</div><div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;"><div class="input-group"><label class="input-label">Precio Total</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="precioPaquete" required class="with-icon" style="font-weight:bold;"></div></div><div class="input-group"><label class="input-label">Adelanto</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="adelanto" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Observaciones</label><input type="text" id="observaciones" style="width:100%;"></div></div></div>
                     
                     <div class="pro-section" style="background:#f8fafc;">
@@ -373,6 +413,7 @@
         window.db = []; window.dbPases = []; window.dbOps = []; window.dbGastos = []; 
         window.catalogo = { hoteles: [], tours: [], agencias: [] };
         window.editId = null; window.dragData = null; window.opsTempAsignados = []; window.liquidacionData = [];
+        window.tempHabitaciones = []; // NUEVA VARIABLE GLOBAL PARA HABITACIONES
 
         function initRealTime() {
             try {
@@ -462,7 +503,6 @@
         function calcularFechaTour(fechaBase, diasSumar) { const parts = fechaBase.split('-'); const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0); date.setDate(date.getDate() + parseInt(diasSumar)); const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
         function cambiarVista(vista) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('vista' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); document.getElementById('tabBtn' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); if(vista === 'ops') { cargarSelectOps(); nuevaOperacion(); renderListaOps(); } if(vista === 'liquidacion') { cargarSelectLiquidacion(); } if(vista === 'gastos') { document.getElementById('g_fecha').value = new Date().toISOString().split('T')[0]; renderGastos(); } }
         
-        // MODIFICADO: Generar opciones de fecha dinámicamente
         function obtenerOpcionesFechas(selectedIdx = -1) {
             const f1 = document.getElementById('llegada').value;
             const f2 = document.getElementById('retorno').value;
@@ -524,14 +564,12 @@
             renderControl(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))));
         }
         
-        // MODIFICADO: FIX PARA LISTA REPETIDA - USA SET PARA EVITAR DUPLICADOS
         function renderLista(data) {
             const tbody = document.getElementById('tbodyLista');
-            tbody.innerHTML = ''; // Limpiar explícitamente
+            tbody.innerHTML = '';
             
             const renderedIds = new Set();
             const html = data.map(r => {
-                // Evitar duplicados por ID
                 if(renderedIds.has(r.id)) return '';
                 renderedIds.add(r.id);
 
@@ -541,7 +579,19 @@
                 let statusBadge = (s<=0 && v>0) ? `<span class="badge-paid">¡PAGADO!</span>` : (s>0 && a>0) ? `<span class="badge-debt" style="color:#b45309; border-color:#b45309;">Falta ${fmtMoneda(s)}</span>` : `<span class="badge-debt">Falta ${fmtMoneda(s)}</span>`;
                 const rowClass = (s<=0 && v>0) ? 'row-ok' : (s>0 && a>0) ? 'row-partial' : 'row-debt';
                 const obs = r.observaciones ? `<div class="obs-box">⚠️ ${r.observaciones}</div>` : '';
-                const habs = Array.isArray(r.habitaciones) ? r.habitaciones.join(', ') : r.habitaciones;
+                
+                // MANEJO COMPATIBILIDAD HABITACIONES (STRING O ARRAY OBJECTS)
+                let habsDisplay = '';
+                if(Array.isArray(r.habitaciones)) {
+                    if(r.habitaciones.length > 0 && typeof r.habitaciones[0] === 'object') {
+                         habsDisplay = r.habitaciones.map(h => `${h.habitacion} (${h.hotel})`).join(', ');
+                    } else {
+                        habsDisplay = r.habitaciones.join(', '); // Legacy
+                    }
+                } else {
+                    habsDisplay = r.habitaciones; // Legacy string
+                }
+
                 const liq = r.liquidado ? `<span class="badge-liq">Liq.</span>` : '';
                 
                 return `<tr class="${rowClass}">
@@ -552,7 +602,7 @@
                     </td>
                     <td>
                         <div style="font-weight:600;">🏨 ${r.hotelName}</div>
-                        <div style="font-size:0.8rem;color:#666;">🛏️ ${habs}</div>
+                        <div style="font-size:0.8rem;color:#666;">🛏️ ${habsDisplay}</div>
                         <div style="font-size:0.8rem;">🏢 ${r.agencia}</div>
                     </td>
                     <td>
@@ -580,15 +630,19 @@
             document.getElementById('tablaPases').innerHTML = h + '</tbody>';
         }
         
-        // MODIFICADO: Bloqueo de Notas (Sin Tour) + Observaciones Generales + Obs Ops en Calendario
         function renderExcel(data, mes, filtroTour) {
             const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
             let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
             for(let i=1; i<=days; i++) h += `<th class="day-header" onclick="abrirResumenDia(${i})">${i}</th>`;
             h+='</tr></thead><tbody>';
             data.forEach(r => {
-                const habs = Array.isArray(r.habitaciones) ? r.habitaciones.join(', ') : r.habitaciones;
-                // NUEVO: Agregar observaciones generales
+                // Compatibilidad display habitaciones
+                let habs = '';
+                if(Array.isArray(r.habitaciones)) {
+                     if(r.habitaciones.length > 0 && typeof r.habitaciones[0] === 'object') habs = r.habitaciones.map(x=>x.habitacion).join(', ');
+                     else habs = r.habitaciones.join(', ');
+                } else habs = r.habitaciones;
+
                 const obsGeneral = r.observaciones ? `<div class="obs-general-cal">⚠️ ${r.observaciones}</div>` : '';
 
                 h+=`<tr data-pax="${r.id}"><td class="col-sticky"><div class="pax-card"><div class="pax-header"><span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div>${obsGeneral}<div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
@@ -600,16 +654,13 @@
                     h+=`<td class="drop-zone ${bg}" data-dia="${d}" ondragover="window.allowDrop(event)" ondrop="window.dropTour(event)">
                         <div class="tour-stack">
                             ${ts.map(t=>{
-                                // CASO 1: NOTA (Sin Tour) -> BLOQUEADO (draggable=false)
                                 if(!t.nombre) {
                                     return `<div class="tour-item locked" draggable="false">
                                         <div class="tour-name" style="font-weight:normal; font-style:italic;">📌 ${t.obsDia}</div>
                                     </div>`;
                                 }
                                 
-                                // CASO 2: TOUR -> MOVIIBLE
                                 const obsDiaHtml = t.obsDia ? `<div class="tour-obs-cal">📅 ${t.obsDia}</div>` : '';
-                                // NUEVO: Mostrar obs de OPS en el calendario
                                 const obsTourHtml = (t.obsTour || t.obs) ? `<div class="tour-obs-ops">📝 ${t.obsTour || t.obs}</div>` : '';
 
                                 return `<div class="tour-item" title="${t.nombre} (Ops: ${t.obsTour||''})" draggable="true" ondragstart="window.dragStart(event,${r.id},${r.tours.indexOf(t)})">
@@ -641,7 +692,6 @@
             window.guardarRegistroEnNube(p);
         };
 
-        // --- DASHBOARD (SIMPLIFICADO) ---
         function renderControl(data) { 
             let html = '';
             let totalVenta = 0, totalGanancia = 0;
@@ -649,15 +699,35 @@
             let montoCobrar = 0;
 
             const processRecord = (r, type) => {
-                const habs = Array.isArray(r.habitaciones) ? r.habitaciones : [r.habitaciones];
                 const dur = Math.ceil((new Date(r.retorno)-new Date(r.llegada))/86400000);
                 
                 let costoHosp = 0;
+                let hotelDisplayName = r.hotelName;
+
                 if(type === 'db') {
-                    habs.forEach(ht => { 
-                        const hd = window.catalogo.hoteles.find(h=>h.nombre===r.hotelName && h.habitacion===ht); 
-                        costoHosp += (hd ? parseFloat(hd.precio) : 0) * (dur > 0 ? dur : 1); 
-                    });
+                    // Calculo Costo Hospedaje (Soporte nuevo formato Array Objetos vs Viejo Array Strings)
+                    if(Array.isArray(r.habitaciones)) {
+                        r.habitaciones.forEach(ht => { 
+                            if(typeof ht === 'object') {
+                                // Nuevo formato: tiene precio guardado
+                                costoHosp += (parseFloat(ht.precio) || 0) * (dur > 0 ? dur : 1);
+                            } else {
+                                // Viejo formato: Buscar en catalogo
+                                const hd = window.catalogo.hoteles.find(h=>h.nombre===r.hotelName && h.habitaciones.some(rom=>rom.habitacion===ht)); 
+                                let romPrice = 0;
+                                if(hd) {
+                                    const specificRoom = hd.habitaciones.find(rom=>rom.habitacion===ht);
+                                    if(specificRoom) romPrice = parseFloat(specificRoom.precio);
+                                }
+                                costoHosp += romPrice * (dur > 0 ? dur : 1); 
+                            }
+                        });
+                    } else {
+                        // String legacy
+                        // logica simplificada o 0
+                    }
+                } else {
+                    hotelDisplayName = r.hotel;
                 }
                 
                 let costoTours = 0;
@@ -688,7 +758,7 @@
 
                 html += `<tr>
                     <td><b>${r.nombre}</b><br><small>${r.cantidad} pax</small></td>
-                    <td>${type==='db' ? r.hotelName : r.hotel}<br>${r.agencia}</td>
+                    <td>${hotelDisplayName}<br>${r.agencia}</td>
                     <td class="money-cell">${fmtMoneda(venta)}</td>
                     <td class="money-cell">${fmtMoneda(adelanto)}</td>
                     <td class="money-cell" style="color:${saldo>0?'var(--danger)':'var(--success)'}">${fmtMoneda(saldo)}</td>
@@ -713,9 +783,6 @@
             document.getElementById('kpi_cobrar').innerText = fmtMoneda(montoCobrar);
         }
 
-        // ============================================
-        // LOGICA GASTOS ACTUALIZADA
-        // ============================================
         document.getElementById('formGasto').addEventListener('submit', e => { 
             e.preventDefault(); 
             const g = { 
@@ -737,11 +804,10 @@
             document.getElementById('g_monto').value = g.monto;
             document.getElementById('g_resp').value = g.resp;
             
-            // Visuales
             window.editGastoId = g.id;
             const btn = document.getElementById('btnGuardarGasto');
             btn.innerText = "Actualizar Gasto";
-            btn.style.background = "#d97706"; // Color Naranja
+            btn.style.background = "#d97706";
             document.getElementById('btnCancelGasto').style.display = 'block';
         };
 
@@ -751,7 +817,6 @@
             document.getElementById('g_monto').value = ''; 
             document.getElementById('g_resp').value = '';
             
-            // Visuales
             window.editGastoId = null;
             const btn = document.getElementById('btnGuardarGasto');
             btn.innerText = "+ Agregar";
@@ -784,21 +849,13 @@
             displayTotal.innerText = fmtMoneda(total); 
         }
 
-        // ============================================
-
-        // FUNCIONES DE CATALOGO (HOTEL / TOUR / AGENCIA)
-        // ============================================
-        
-        // RENDERIZAR CATALOGO
         window.renderizarCatalogos = function() {
             const txt = document.getElementById('buscadorCatalogo').value.toLowerCase();
             
-            // 1. Hoteles
             let htmlHoteles = '';
             const hoteles = window.catalogo.hoteles || [];
             hoteles.forEach(h => {
                 if(h.nombre.toLowerCase().includes(txt)) {
-                    // Mostrar habitaciones debajo
                     let sub = '';
                     if(h.habitaciones && h.habitaciones.length > 0) {
                         sub = `<div style="font-size:0.75rem; color:#666; margin-top:4px;">`;
@@ -819,7 +876,6 @@
             });
             document.getElementById('cat_hoteles').innerHTML = htmlHoteles;
 
-            // 2. Tours
             let htmlTours = '';
             const tours = window.catalogo.tours || [];
             tours.forEach(t => {
@@ -835,7 +891,6 @@
             });
             document.getElementById('cat_tours').innerHTML = htmlTours;
 
-            // 3. Agencias
             let htmlAgencias = '';
             const agencias = window.catalogo.agencias || [];
             agencias.forEach(a => {
@@ -852,21 +907,16 @@
             document.getElementById('cat_agencias').innerHTML = htmlAgencias;
         };
 
-        // CAMBIAR TIPO EN MODAL CATALOGO
         window.cambiarTipoCat = function(tipo) {
             document.getElementById('cat_tipo_actual').value = tipo;
-            
-            // Update UI buttons
             document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
             if(tipo === 'hotel') document.getElementById('typeBtnHotel').classList.add('active');
             if(tipo === 'tour') document.getElementById('typeBtnTour').classList.add('active');
             if(tipo === 'agencia') document.getElementById('typeBtnAgencia').classList.add('active');
 
-            // Show/Hide Fields
             document.getElementById('fields_hotel').style.display = (tipo === 'hotel') ? 'block' : 'none';
             document.getElementById('fields_tour').style.display = (tipo === 'tour') ? 'block' : 'none';
             
-            // Limpiar inputs
             if(!window.isEditingCat) {
                 document.getElementById('cat_edit_id').value = '';
                 document.getElementById('cat_edit_old_name').value = '';
@@ -876,7 +926,6 @@
             }
         };
 
-        // AGREGAR FILA HABITACION (DOM)
         window.agregarFilaHabitacion = function(nombre='', cap='', precio='') {
             const div = document.createElement('div');
             div.className = 'room-row';
@@ -889,25 +938,22 @@
             document.getElementById('room_list').appendChild(div);
         };
 
-        // ABRIR MODAL CATALOGO
         window.abrirModalCatalogo = function() {
             window.isEditingCat = false;
             document.getElementById('modalCatalogo').classList.add('active');
-            cambiarTipoCat('hotel'); // Default
+            cambiarTipoCat('hotel'); 
         }
 
-        // GUARDAR CATALOGO
         document.getElementById('formCatalogo').addEventListener('submit', (e) => {
             e.preventDefault();
             const tipo = document.getElementById('cat_tipo_actual').value;
             const nombre = document.getElementById('cat_nombre').value.trim();
-            const editId = document.getElementById('cat_edit_id').value; // Para tour/agencia
-            const oldName = document.getElementById('cat_edit_old_name').value; // Para hotel
+            const editId = document.getElementById('cat_edit_id').value; 
+            const oldName = document.getElementById('cat_edit_old_name').value; 
 
             if(!nombre) return alert("Ingrese un nombre");
 
             if(tipo === 'hotel') {
-                // Recolectar habitaciones
                 const habitaciones = [];
                 document.querySelectorAll('#room_list .room-row').forEach(row => {
                     habitaciones.push({
@@ -920,11 +966,9 @@
                 const newHotel = { nombre, habitaciones };
 
                 if(oldName) {
-                    // Editar existente: Encontrar y reemplazar
                     const idx = window.catalogo.hoteles.findIndex(h => h.nombre === oldName);
                     if(idx >= 0) window.catalogo.hoteles[idx] = newHotel;
                 } else {
-                    // Nuevo
                     window.catalogo.hoteles.push(newHotel);
                 }
 
@@ -955,8 +999,6 @@
             window.renderizarCatalogos();
         });
 
-        // ============================================
-
         function cargarSelectLiquidacion() { const s = document.getElementById('liq_agencia'); s.innerHTML = '<option value="">Seleccione Agencia...</option>' + catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join(''); }
         function generarLiquidacion() { const ag = document.getElementById('liq_agencia').value; const desde = document.getElementById('liq_desde').value; const hasta = document.getElementById('liq_hasta').value; window.liquidacionData = []; const estado = document.getElementById('liq_filtro_estado').value; const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; window.db.forEach(r => { if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); } }); window.dbPases.forEach(p => { if(p.agencia === ag && p.fecha >= desde && p.fecha <= hasta && applyFilter(p)) { window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: p.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${p.tour}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); } }); let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; let tV=0, tA=0, tS=0; window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); html+='</tbody></table>'; document.getElementById('tablaLiqContainer').innerHTML=html; document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); document.getElementById('resultadosLiquidacion').style.display = 'block'; }
         function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
@@ -964,7 +1006,6 @@
         function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
         function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 15; window.opsTempAsignados = []; cargarPendientesOps(); }
         
-        // MODIFICADO: Lógica Robusta para Cargar Pendientes (Con Obs + Notas)
         function cargarPendientesOps() { 
             const f = document.getElementById('ops_fecha').value; 
             const t = document.getElementById('ops_tour').value; 
@@ -990,7 +1031,6 @@
             let htmlPend = ''; 
             let countPend = 0; 
             
-            // Filtro robusto: Array.isArray + coincidencia
             const candidatosDB = window.db.filter(r => Array.isArray(r.tours) && r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
             const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
 
@@ -1002,10 +1042,8 @@
 
                 countPend += parseInt(pax); 
                 
-                // Mostrar un pequeño indicador visual si hay observaciones
                 const obsTag = fullObs ? `<span style="color:orange;font-size:0.7rem; display:block;">📝 ${fullObs.substring(0,30)}...</span>` : ''; 
                 
-                // Escapar caracteres para el onclick
                 const safeNombre = nombre.replace(/'/g, "").replace(/"/g, "");
                 const safeHotel = hotel.replace(/'/g, "").replace(/"/g, "");
                 const safeObs = fullObs.replace(/'/g, "").replace(/"/g, "");
@@ -1014,12 +1052,9 @@
             }; 
 
             candidatosDB.forEach(c => { 
-                // 1. Buscar el tour específico
                 const tr = c.tours.find(x => x.fecha === f && x.nombre === t); 
-                // 2. Buscar si hay NOTA del día (mismo día, sin nombre de tour)
                 const notaDia = c.tours.find(x => x.fecha === f && !x.nombre);
 
-                // 3. Construir String de Observaciones Completo
                 let obsParts = [];
                 if(c.observaciones) obsParts.push(`[Gen: ${c.observaciones}]`);
                 if(tr && (tr.obsTour || tr.obs)) obsParts.push(`[Tour: ${tr.obsTour || tr.obs}]`);
@@ -1040,7 +1075,6 @@
             renderizarAsignados(); 
         }
 
-        // MODIFICADO: Inclusión de Observaciones en Impresión
         window.imprimirManifiesto = function() {
             const fecha = document.getElementById('ops_fecha').value;
             const tour = document.getElementById('ops_tour').value;
@@ -1118,7 +1152,6 @@
 
         function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
         
-        // MODIFICADO: Aceptar obs en asignación
         function asignarPax(id, tipo, pax, nombre, hotel, celular, obs) { 
             const capMax = parseInt(document.getElementById('ops_capacidad').value); 
             const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); 
@@ -1132,26 +1165,97 @@
         function guardarOperacion() { const data = { id: document.getElementById('ops_id_actual').value || Date.now(), fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados }; window.guardarOperacionEnNube(data); }
         function renderListaOps() { const tbody = document.getElementById('tbodyOps'); tbody.innerHTML = window.dbOps.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(op => { const total = op.pasajeros.reduce((s,p)=>s+parseInt(p.pax),0); return `<tr><td>${op.fecha}</td><td>${op.tour}</td><td>${op.conductor}</td><td>${total}/${op.capacidad}</td><td>OK</td><td><button class="btn-icon btn-edit" onclick="cargarOp(${op.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('operaciones', '${op.firestoreId}')">🗑</button></td></tr>`; }).join(''); }
         function cargarOp(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
-        function cargarSelects() { const s = document.getElementById('selHotelName'); s.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h=>s.innerHTML+=`<option value="${h.nombre}">${h.nombre}</option>`); const sa = document.getElementById('selAgencia'); sa.innerHTML='<option value="">Seleccione...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); }
+        
+        function cargarSelects() { 
+            const s = document.getElementById('selHotelAdd'); 
+            s.innerHTML='<option value="">Seleccione Hotel...</option>'; 
+            if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h=>s.innerHTML+=`<option value="${h.nombre}">${h.nombre}</option>`); 
+            
+            const sa = document.getElementById('selAgencia'); 
+            sa.innerHTML='<option value="">Seleccione...</option>'; 
+            if(window.catalogo.agencias) window.catalogo.agencias.forEach(a=>sa.innerHTML+=`<option>${a.nombre}</option>`); 
+        }
+
+        // --- NUEVAS FUNCIONES PARA SELECCIONAR Y AGREGAR HABITACIONES ---
+        window.actualizarSelectRoom = function() {
+            const hName = document.getElementById('selHotelAdd').value;
+            const rSelect = document.getElementById('selRoomAdd');
+            rSelect.innerHTML = '';
+            
+            if(!hName) return;
+
+            const hotel = window.catalogo.hoteles.find(h => h.nombre === hName);
+            if(hotel && hotel.habitaciones) {
+                hotel.habitaciones.forEach(r => {
+                    const option = document.createElement('option');
+                    option.value = r.habitacion;
+                    option.text = `${r.habitacion} (Cap: ${r.capacidad}) - S/ ${r.precio}`;
+                    // Guardamos precio y capacidad como data attributes
+                    option.setAttribute('data-price', r.precio);
+                    option.setAttribute('data-cap', r.capacidad);
+                    rSelect.appendChild(option);
+                });
+            } else {
+                rSelect.innerHTML = '<option value="">Sin habitaciones</option>';
+            }
+        };
+
+        window.agregarHabitacion = function() {
+            const hName = document.getElementById('selHotelAdd').value;
+            const rSelect = document.getElementById('selRoomAdd');
+            const rName = rSelect.value;
+            
+            if(!hName || !rName) return alert("Seleccione Hotel y Habitación");
+
+            const selectedOption = rSelect.options[rSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            const cap = selectedOption.getAttribute('data-cap');
+
+            window.tempHabitaciones.push({
+                hotel: hName,
+                habitacion: rName,
+                precio: price,
+                capacidad: cap
+            });
+            
+            renderTempHabitaciones();
+        };
+
+        window.removerHabitacion = function(index) {
+            window.tempHabitaciones.splice(index, 1);
+            renderTempHabitaciones();
+        };
+
+        function renderTempHabitaciones() {
+            const container = document.getElementById('listaHabitacionesAgregadas');
+            container.innerHTML = '';
+            
+            if(window.tempHabitaciones.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#9ca3af; font-size:0.8rem; padding:10px;">Ninguna habitación agregada</div>';
+                return;
+            }
+
+            window.tempHabitaciones.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'added-room-item';
+                div.innerHTML = `
+                    <div class="added-room-info">
+                        <span class="added-room-hotel">${item.hotel}</span>
+                        <span>Hab: <b>${item.habitacion}</b> | Cap: ${item.capacidad} | S/ ${item.precio}</span>
+                    </div>
+                    <button type="button" onclick="removerHabitacion(${index})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">✕</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        // ------------------------------------------------------------------
         
         function cargarSelectsPase() {
             const sa = document.getElementById('p_agencia'); sa.innerHTML = '<option value="">Seleccione Agencia...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
             const st = document.getElementById('p_tour'); st.innerHTML = '<option value="">Seleccione Tour...</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
             const sh = document.getElementById('p_hotel'); sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>'; if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h => sh.innerHTML += `<option value="${h.nombre}">${h.nombre}</option>`);
         }
-
-        function cargarHabitacionesDeHotel(n, chk=[]) { const l=document.getElementById('listaCheckHabitaciones'); document.getElementById('containerHabitaciones').style.display = n ? 'block' : 'none'; 
-            const hotelObj = window.catalogo.hoteles.find(h=>h.nombre===n);
-            if(hotelObj && hotelObj.habitaciones) {
-                l.innerHTML = hotelObj.habitaciones.map(r=>`<label class="room-option"><input type="checkbox" value="${r.habitacion}" ${chk.includes(r.habitacion)?'checked':''}><div class="room-card"><span class="r-num">${r.habitacion}</span><span class="r-cap">${r.capacidad}</span></div></label>`).join(''); 
-            } else {
-                l.innerHTML = 'Sin habitaciones registradas.';
-            }
-        }
         
-        // ============================================
-        // NUEVA LÓGICA DE ITINERARIO (Tour vs Nota)
-        // ============================================
         function agregarLineaItinerario(tipo, valor='', diaVal=0, obs='') { 
             const d=document.createElement('div'); 
             d.className='tour-row-input'; 
@@ -1162,7 +1266,6 @@
             let html = '';
             
             if(tipo === 'tour') {
-                // MODO TOUR: Select Tour + Select Dia + Obs Tour
                 let opts = '<option value="">-- Seleccione Tour --</option>'; 
                 if(window.catalogo.tours) window.catalogo.tours.forEach(t=>{
                     opts+=`<option value="${t.nombre}" ${t.nombre===valor?'selected':''}>${t.nombre}</option>`;
@@ -1174,7 +1277,6 @@
                     <input type="text" class="sel-obs" placeholder="Obs Tour (Veggie, etc.)" value="${obs}" style="flex:1.5;">
                 `;
             } else {
-                // MODO NOTA: Input Texto + Select Dia
                 html = `
                     <input type="text" class="sel-nota-texto" placeholder="⚠️ Escriba la Nota (Ej. Día Libre, Vuelo Salida)" value="${valor}" style="flex:2.5; font-weight:bold; color:#d97706; background:#fffbeb;">
                     <select class="sel-dia" style="flex:1;">${dayOpts}</select>
@@ -1187,8 +1289,17 @@
             document.getElementById('listaToursInputs').appendChild(d); 
         }
 
-        function abrirModalRegistro() { window.editId = null; document.getElementById('reg_firestore_id').value = ''; document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; document.getElementById('formTour').reset(); document.getElementById('listaToursInputs').innerHTML=''; cargarSelects(); document.getElementById('containerHabitaciones').style.display='none'; 
-            // Por defecto agregamos una linea de tour vacía
+        function abrirModalRegistro() { 
+            window.editId = null; 
+            document.getElementById('reg_firestore_id').value = ''; 
+            document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; 
+            document.getElementById('formTour').reset(); 
+            document.getElementById('listaToursInputs').innerHTML=''; 
+            
+            window.tempHabitaciones = []; // Limpiar habitaciones temporales
+            renderTempHabitaciones();
+
+            cargarSelects(); 
             agregarLineaItinerario('tour'); 
             document.getElementById('modalRegistro').classList.add('active'); 
         }
@@ -1196,7 +1307,6 @@
         function cargarEdicion(id) { 
             const r = window.db.find(x => x.id === id); if(!r) return; 
             abrirModalRegistro(); 
-            // Limpiar lo que crea por defecto abrirModalRegistro
             document.getElementById('listaToursInputs').innerHTML = ''; 
 
             window.editId = id; 
@@ -1210,17 +1320,44 @@
             document.getElementById('llegada').value = r.llegada; 
             document.getElementById('retorno').value = r.retorno; 
             document.getElementById('observaciones').value = r.observaciones || ''; 
-            document.getElementById('selHotelName').value = r.hotelName; 
-            cargarHabitacionesDeHotel(r.hotelName, r.habitaciones); 
             
+            // CARGA DE HABITACIONES (COMPATIBILIDAD)
+            window.tempHabitaciones = [];
+            if(Array.isArray(r.habitaciones)) {
+                r.habitaciones.forEach(h => {
+                    if(typeof h === 'object') {
+                        // Nuevo formato
+                        window.tempHabitaciones.push(h);
+                    } else {
+                        // Viejo formato (String solo habitacion) - asumimos hotelName del registro
+                        window.tempHabitaciones.push({
+                            hotel: r.hotelName,
+                            habitacion: h,
+                            precio: 0, // No tenemos precio guardado en viejo formato
+                            capacidad: 0
+                        });
+                    }
+                });
+            } else {
+                 // Viejo formato string
+                 if(r.habitaciones) {
+                     window.tempHabitaciones.push({
+                         hotel: r.hotelName,
+                         habitacion: r.habitaciones,
+                         precio: 0,
+                         capacidad: 0
+                     });
+                 }
+            }
+            renderTempHabitaciones();
+
+            // Cargar selectores de fecha en itinerario correctamente
             if(r.tours && r.tours.length > 0) { 
                 r.tours.forEach(t => { 
                     const diff = Math.ceil((new Date(t.fecha) - new Date(r.llegada)) / 86400000); 
                     if(t.nombre) {
-                        // Es un Tour
                         agregarLineaItinerario('tour', t.nombre, diff, (t.obsTour || t.obs)); 
                     } else {
-                        // Es una Nota (obsDia se guarda en el campo de texto de nota)
                         agregarLineaItinerario('nota', t.obsDia, diff);
                     }
                 }); 
@@ -1271,13 +1408,17 @@
         document.getElementById('formTour').addEventListener('submit', async (e) => {
             e.preventDefault();
             const llegada = document.getElementById('llegada').value;
-            const habitaciones = [];
-            document.querySelectorAll('#listaCheckHabitaciones input:checked').forEach(chk => {
-                habitaciones.push(chk.value);
-            });
+            
+            // Recoger habitaciones desde window.tempHabitaciones
+            const habitaciones = window.tempHabitaciones;
+            
+            // Para mantener compatibilidad con la vista de tabla principal (que muestra hotelName)
+            // Tomamos el hotel de la primera habitación seleccionada, o vacio
+            let mainHotelName = '';
+            if(habitaciones.length > 0) mainHotelName = habitaciones[0].hotel;
+
             const tours = [];
             
-            // Recorrer filas de itinerario
             document.querySelectorAll('#listaToursInputs .tour-row-input').forEach(row => {
                 const tipo = row.getAttribute('data-tipo');
                 const tDiaIdx = parseInt(row.querySelector('.sel-dia').value);
@@ -1291,15 +1432,14 @@
                             nombre: tName, 
                             fecha: fechaTour, 
                             obsTour: tObs, 
-                            obsDia: '' // No es nota de día
+                            obsDia: '' 
                         });
                     }
                 } else {
-                    // Es Nota
                     const notaTexto = row.querySelector('.sel-nota-texto').value;
                     if(notaTexto) {
                         tours.push({ 
-                            nombre: '', // Vacio para identificar como nota
+                            nombre: '', 
                             fecha: fechaTour, 
                             obsTour: '', 
                             obsDia: notaTexto 
@@ -1314,10 +1454,10 @@
                 celular: document.getElementById('celular').value,
                 agencia: document.getElementById('selAgencia').value,
                 cantidad: document.getElementById('cantidad').value,
-                hotelName: document.getElementById('selHotelName').value,
+                hotelName: mainHotelName, // Guardamos el nombre del primer hotel para visualización rapida
                 llegada: llegada,
                 retorno: document.getElementById('retorno').value,
-                habitaciones: habitaciones,
+                habitaciones: habitaciones, // Guardamos el array completo de objetos
                 precioPaquete: parseFloat(document.getElementById('precioPaquete').value) || 0,
                 adelanto: parseFloat(document.getElementById('adelanto').value) || 0,
                 observaciones: document.getElementById('observaciones').value,
