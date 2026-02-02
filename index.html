@@ -635,6 +635,13 @@
         }
         
         function renderExcel(data, mes, filtroTour) {
+            // ORDENAMIENTO ESCALONADO POR FECHA DE LLEGADA
+            data.sort((a, b) => {
+                if (a.llegada < b.llegada) return -1;
+                if (a.llegada > b.llegada) return 1;
+                return 0;
+            });
+
             const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
             let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
             for(let i=1; i<=days; i++) h += `<th class="day-header" onclick="abrirResumenDia(${i})">${i}</th>`;
