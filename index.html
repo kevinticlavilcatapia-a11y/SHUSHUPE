@@ -58,6 +58,7 @@
         .day-header:hover { background-color: var(--primary-light); }
         .drop-zone.drag-over { background: #dcfce7 !important; border: 2px dashed var(--success); } 
         .cell-stay { background: #f0fdf4; }
+        .cell-pase { background: #f5f3ff; } /* Fondo ligeramante morado para pases */
         
         .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px;}
         .tour-obs-cal { font-size: 0.65rem; color: #2563eb; font-style: italic; line-height: 1; font-weight:bold; }
@@ -65,10 +66,14 @@
         
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
+        
+        .tour-item.pase-style { border-left-color: var(--pase-color); } /* Borde morado para tour de pases */
 
         .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
 
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
+        .pax-card.is-pase { border-left: 4px solid var(--pase-color); padding-left: 8px; } /* Indicador visual en tarjeta de pase */
+        
         .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); }
 
         /* OPERACIONES */
@@ -635,8 +640,40 @@
         }
         
         function renderExcel(data, mes, filtroTour) {
+            // UNIFICAR REGISTROS (DB) Y PASES (DBPASES) PARA EL CALENDARIO
+            let allItems = [...data]; // Copia de registros
+            
+            // Transformar Pases al formato de calendario y agregar
+            window.dbPases.forEach(p => {
+                if(p.fecha.startsWith(mes)) {
+                    // Verificar filtros de lista (opcional, pero consistente con vista)
+                    const txt = document.getElementById('buscadorLista').value.toLowerCase();
+                    if(p.nombre.toLowerCase().includes(txt)) {
+                        allItems.push({
+                            id: p.id,
+                            firestoreId: p.firestoreId,
+                            isPase: true, // Marcador para identificar
+                            nombre: p.nombre,
+                            llegada: p.fecha,
+                            retorno: p.fecha, // 1 dia
+                            cantidad: p.cantidad,
+                            celular: p.celular,
+                            hotelName: p.hotel, // Hotel es recojo
+                            agencia: p.agencia,
+                            observaciones: p.observacion,
+                            tours: [{
+                                nombre: p.tour,
+                                fecha: p.fecha,
+                                obsTour: p.observacion
+                            }],
+                            habitaciones: [] // Sin habitaciones
+                        });
+                    }
+                }
+            });
+
             // ORDENAMIENTO ESCALONADO POR FECHA DE LLEGADA
-            data.sort((a, b) => {
+            allItems.sort((a, b) => {
                 if (a.llegada < b.llegada) return -1;
                 if (a.llegada > b.llegada) return 1;
                 return 0;
@@ -646,7 +683,8 @@
             let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
             for(let i=1; i<=days; i++) h += `<th class="day-header" onclick="abrirResumenDia(${i})">${i}</th>`;
             h+='</tr></thead><tbody>';
-            data.forEach(r => {
+            
+            allItems.forEach(r => {
                 let habs = '';
                 if(Array.isArray(r.habitaciones)) {
                      if(r.habitaciones.length > 0 && typeof r.habitaciones[0] === 'object') habs = r.habitaciones.map(x=>x.habitacion).join(', ');
@@ -654,11 +692,19 @@
                 } else habs = r.habitaciones;
 
                 const obsGeneral = r.observaciones ? `<div class="obs-general-cal">⚠️ ${r.observaciones}</div>` : '';
+                
+                // Estilo diferente si es Pase
+                const paseClass = r.isPase ? 'is-pase' : '';
+                const paseBadge = r.isPase ? '<span style="background:var(--pase-color);color:white;padding:1px 4px;border-radius:4px;font-size:0.6rem;margin-right:4px;">[PASE]</span>' : '';
+                const editFunc = r.isPase ? `editarPase(${r.id})` : `cargarEdicion(${r.id})`; // Correct edit function
 
-                h+=`<tr data-pax="${r.id}"><td class="col-sticky"><div class="pax-card"><div class="pax-header"><span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div>${obsGeneral}<div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
+                h+=`<tr data-pax="${r.id}" data-type="${r.isPase?'pase':'db'}"><td class="col-sticky" ondblclick="${editFunc}"><div class="pax-card ${paseClass}"><div class="pax-header">${paseBadge}<span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div>${obsGeneral}<div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
+                
                 for(let d=1; d<=days; d++) {
                     const f = `${y}-${m}-${String(d).padStart(2,'0')}`;
-                    const bg = (f >= r.llegada && f <= r.retorno) ? 'cell-stay' : '';
+                    // Fondo solo si es registro completo (estadia)
+                    const bg = (!r.isPase && f >= r.llegada && f <= r.retorno) ? 'cell-stay' : (r.isPase && f === r.llegada) ? 'cell-pase' : '';
+                    
                     let ts = r.tours.filter(t=>t.fecha===f); if(filtroTour) ts = ts.filter(t=>t.nombre===filtroTour);
                     
                     h+=`<td class="drop-zone ${bg}" data-dia="${d}" ondragover="window.allowDrop(event)" ondrop="window.dropTour(event)">
@@ -672,8 +718,9 @@
                                 
                                 const obsDiaHtml = t.obsDia ? `<div class="tour-obs-cal">📅 ${t.obsDia}</div>` : '';
                                 const obsTourHtml = (t.obsTour || t.obs) ? `<div class="tour-obs-ops">📝 ${t.obsTour || t.obs}</div>` : '';
+                                const paseStyle = r.isPase ? 'pase-style' : '';
 
-                                return `<div class="tour-item" title="${t.nombre} (Ops: ${t.obsTour||''})" draggable="true" ondragstart="window.dragStart(event,${r.id},${r.tours.indexOf(t)})">
+                                return `<div class="tour-item ${paseStyle}" title="${t.nombre}" draggable="true" ondragstart="window.dragStart(event,${r.id},${r.tours.indexOf(t)})">
                                     <div class="tour-name">${t.nombre}</div>
                                     ${obsTourHtml}
                                     ${obsDiaHtml}
@@ -691,15 +738,34 @@
         window.allowDrop = (ev) => { ev.preventDefault(); ev.target.closest('td')?.classList.add('drag-over'); };
         document.addEventListener('dragleave',e=>e.target.closest('td')?.classList.remove('drag-over'));
         window.dropTour = (ev) => {
-            ev.preventDefault(); const c=ev.target.closest('td'); document.querySelectorAll('.drop-zone').forEach(x=>x.classList.remove('drag-over')); if(!c||!window.dragData)return;
-            const pid=parseInt(c.parentElement.getAttribute('data-pax')); const dia=parseInt(c.getAttribute('data-dia'));
+            ev.preventDefault(); 
+            const c=ev.target.closest('td'); 
+            document.querySelectorAll('.drop-zone').forEach(x=>x.classList.remove('drag-over')); 
+            if(!c||!window.dragData)return;
+            
+            const pid=parseInt(c.parentElement.getAttribute('data-pax')); 
+            const type=c.parentElement.getAttribute('data-type'); // 'db' or 'pase'
+            const dia=parseInt(c.getAttribute('data-dia'));
             const f=document.getElementById('filtroMes').value+'-'+String(dia).padStart(2,'0');
+            
             if(pid!==window.dragData.pid) return alert("Solo mover mismo pasajero");
-            const p = window.db.find(x=>x.id===pid);
-            if(f<p.llegada || f>p.retorno) return alert("Fecha fuera de estadía");
-            p.tours[window.dragData.tid].fecha=f;
-            document.getElementById('reg_firestore_id').value = p.firestoreId; 
-            window.guardarRegistroEnNube(p);
+            
+            if(type === 'pase') {
+                // LOGICA PARA MOVER PASE DE FECHA
+                const p = window.dbPases.find(x=>x.id===pid);
+                if(p) {
+                    p.fecha = f; // Actualizar fecha del pase
+                    document.getElementById('pase_firestore_id').value = p.firestoreId;
+                    window.guardarPaseEnNube(p);
+                }
+            } else {
+                // LOGICA PARA MOVER TOUR DE REGISTRO
+                const p = window.db.find(x=>x.id===pid);
+                if(f<p.llegada || f>p.retorno) return alert("Fecha fuera de estadía");
+                p.tours[window.dragData.tid].fecha=f;
+                document.getElementById('reg_firestore_id').value = p.firestoreId; 
+                window.guardarRegistroEnNube(p);
+            }
         };
 
         function renderControl(data) { 
