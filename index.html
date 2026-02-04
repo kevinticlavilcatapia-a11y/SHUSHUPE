@@ -58,7 +58,7 @@
         .day-header:hover { background-color: var(--primary-light); }
         .drop-zone.drag-over { background: #dcfce7 !important; border: 2px dashed var(--success); } 
         .cell-stay { background: #f0fdf4; }
-        .cell-pase { background: #f5f3ff; } /* Fondo ligeramante morado para pases */
+        .cell-pase { background: #f5f3ff; } 
         
         .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px;}
         .tour-obs-cal { font-size: 0.65rem; color: #2563eb; font-style: italic; line-height: 1; font-weight:bold; }
@@ -67,12 +67,12 @@
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
         
-        .tour-item.pase-style { border-left-color: var(--pase-color); } /* Borde morado para tour de pases */
+        .tour-item.pase-style { border-left-color: var(--pase-color); } 
 
         .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
 
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
-        .pax-card.is-pase { border-left: 4px solid var(--pase-color); padding-left: 8px; } /* Indicador visual en tarjeta de pase */
+        .pax-card.is-pase { border-left: 4px solid var(--pase-color); padding-left: 8px; } 
         
         .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); }
 
@@ -685,12 +685,6 @@
             h+='</tr></thead><tbody>';
             
             allItems.forEach(r => {
-                let habs = '';
-                if(Array.isArray(r.habitaciones)) {
-                     if(r.habitaciones.length > 0 && typeof r.habitaciones[0] === 'object') habs = r.habitaciones.map(x=>x.habitacion).join(', ');
-                     else habs = r.habitaciones.join(', ');
-                } else habs = r.habitaciones;
-
                 const obsGeneral = r.observaciones ? `<div class="obs-general-cal">⚠️ ${r.observaciones}</div>` : '';
                 
                 // Estilo diferente si es Pase
@@ -698,7 +692,22 @@
                 const paseBadge = r.isPase ? '<span style="background:var(--pase-color);color:white;padding:1px 4px;border-radius:4px;font-size:0.6rem;margin-right:4px;">[PASE]</span>' : '';
                 const editFunc = r.isPase ? `editarPase(${r.id})` : `cargarEdicion(${r.id})`; // Correct edit function
 
-                h+=`<tr data-pax="${r.id}" data-type="${r.isPase?'pase':'db'}"><td class="col-sticky" ondblclick="${editFunc}"><div class="pax-card ${paseClass}"><div class="pax-header">${paseBadge}<span>${r.nombre}</span><span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span></div><div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div><div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div><div style="font-size:0.7rem;color:var(--primary);">${habs}</div>${obsGeneral}<div class="pax-detail">🏢 ${r.agencia}</div></div></td>`;
+                h+=`<tr data-pax="${r.id}" data-type="${r.isPase?'pase':'db'}">
+                    <td class="col-sticky">
+                        <div class="pax-card ${paseClass}" style="position:relative; padding-right:25px;">
+                            <div style="position:absolute; top:5px; right:5px;">
+                                <button class="btn-icon btn-edit" style="width:22px; height:22px; font-size:0.8rem;" onclick="${editFunc}">✎</button>
+                            </div>
+                            <div class="pax-header">
+                                ${paseBadge}<span>${r.nombre}</span>
+                                <span style="background:#eee;padding:1px 5px;border-radius:4px;color:#333;font-size:0.7rem;">${r.cantidad}</span>
+                            </div>
+                            <div style="font-size:0.75rem;color:#666;">📱 ${r.celular}</div>
+                            <div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div>
+                            ${obsGeneral}
+                            <div class="pax-detail">🏢 ${r.agencia}</div>
+                        </div>
+                    </td>`;
                 
                 for(let d=1; d<=days; d++) {
                     const f = `${y}-${m}-${String(d).padStart(2,'0')}`;
@@ -1111,7 +1120,7 @@
             const candidatosDB = window.db.filter(r => Array.isArray(r.tours) && r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
             const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
 
-            const renderItem = (id, nombre, pax, hotel, tipo, fullObs, celular) => { 
+            const renderItem = (id, nombre, pax, hotel, tipo, fullObs, celular, agencia) => { 
                 const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); 
                 if (yaAsignadoAqui) return; 
 
@@ -1124,8 +1133,9 @@
                 const safeNombre = nombre.replace(/'/g, "").replace(/"/g, "");
                 const safeHotel = hotel.replace(/'/g, "").replace(/"/g, "");
                 const safeObs = fullObs.replace(/'/g, "").replace(/"/g, "");
+                const safeAgencia = agencia.replace(/'/g, "").replace(/"/g, "");
 
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${safeNombre}', '${safeHotel}', '${celular || ""}', '${safeObs}')">></button></div>`; 
+                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${safeNombre}', '${safeHotel}', '${celular || ""}', '${safeObs}', '${safeAgencia}')">></button></div>`; 
             }; 
 
             candidatosDB.forEach(c => { 
@@ -1139,11 +1149,11 @@
                 
                 const fullObs = obsParts.join(' ');
 
-                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', fullObs, c.celular); 
+                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', fullObs, c.celular, c.agencia); 
                 if(h) htmlPend+=h; 
             }); 
             candidatosPases.forEach(c => { 
-                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion || '', c.celular); 
+                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion || '', c.celular, c.agencia); 
                 if(h) htmlPend+=h; 
             }); 
 
@@ -1182,25 +1192,25 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th style="width:50px;">#</th>
+                            <th>AGENCIA</th>
+                            <th>HOTEL / RECOJO</th>
                             <th>PASAJERO</th>
                             <th>CELULAR</th>
                             <th style="width:50px;">PAX</th>
-                            <th>HOTEL / RECOJO</th>
                             <th>OBSERVACIONES</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
-            paxList.forEach((p, index) => {
+            paxList.forEach((p) => {
                 h += `
                     <tr>
-                        <td style="text-align:center;">${index + 1}</td>
+                        <td>${p.agencia || ''}</td>
+                        <td>${p.hotel}</td>
                         <td>${p.nombre}</td>
                         <td>${p.celular || '---'}</td>
                         <td style="text-align:center;">${p.pax}</td>
-                        <td>${p.hotel}</td>
                         <td style="font-size:0.8rem;">${p.obs || ''}</td> 
                     </tr>
                 `;
@@ -1210,9 +1220,9 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3" style="text-align:right; font-weight:bold; padding:10px;">TOTAL PASAJEROS:</td>
+                            <td colspan="4" style="text-align:right; font-weight:bold; padding:10px;">TOTAL PASAJEROS:</td>
                             <td style="text-align:center; font-weight:bold; padding:10px;">${totalPax}</td>
-                            <td colspan="2"></td>
+                            <td></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -1229,11 +1239,11 @@
 
         function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
         
-        function asignarPax(id, tipo, pax, nombre, hotel, celular, obs) { 
+        function asignarPax(id, tipo, pax, nombre, hotel, celular, obs, agencia) { 
             const capMax = parseInt(document.getElementById('ops_capacidad').value); 
             const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); 
             if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); 
-            window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel, celular, obs }); 
+            window.opsTempAsignados.push({ refId: id, tipo, pax, nombre, hotel, celular, obs, agencia }); 
             cargarPendientesOps(); 
         }
         
