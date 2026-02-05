@@ -15,10 +15,33 @@
             --pay-debt-bg: #fef2f2; --pay-part-bg: #fff7ed; --pay-ok-bg: #f0fdf4;
             --report-color: #be185d; --expense-color: #b91c1c;
         }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-app); color: var(--text-main); margin: 0; padding: 25px; }
+        
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            background: var(--bg-app); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 25px; 
+            display: block !important; 
+            height: auto !important;
+        }
         
         /* HEADER */
-        .header-container { background: var(--surface); padding: 10px 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .header-container { 
+            background: var(--surface); 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 10px;
+            position: relative; 
+            width: 100%;
+            box-sizing: border-box;
+        }
         .title-section h1 { margin: 0; font-size: 1.4rem; color: var(--primary); font-weight: 800; letter-spacing: -0.025em; }
         
         .main-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -49,24 +72,80 @@
         .obs-box { display: block; margin-top: 5px; font-size: 0.75rem; background: #fffbeb; color: #92400e; padding: 4px 8px; border-radius: 6px; border: 1px solid #fcd34d; width: fit-content; }
         .tag-tour { display: inline-block; background: var(--primary-light); color: var(--primary-dark); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin: 2px; border: 1px solid #c7d2fe; }
 
-        /* CALENDARIO & OPS */
-        .excel-wrapper { overflow-x: auto; background: var(--surface); border-radius: 12px; height: 75vh; border: 1px solid var(--border); }
-        .excel-table th, .excel-table td { border-right: 1px solid var(--border); }
-        .excel-table thead { position: sticky; top: 0; z-index: 50; background: #f9fafb; }
-        .col-sticky { position: sticky; left: 0; background: var(--surface); z-index: 20; border-right: 2px solid var(--border) !important; width: 300px; min-width: 300px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
-        .day-header { text-align: center; cursor: pointer; transition: background 0.2s; position: relative; color: var(--primary); padding: 10px; }
-        .day-header:hover { background-color: var(--primary-light); }
+        /* CALENDARIO & OPS REPARADO */
+        .excel-wrapper { 
+            overflow: auto; 
+            background: var(--surface); 
+            border-radius: 12px; 
+            height: 75vh; 
+            border: 1px solid var(--border); 
+            position: relative;
+        }
+        
+        .excel-table {
+            border-collapse: separate; /* Crucial para sticky */
+            border-spacing: 0;
+            min-width: 100%;
+        }
+
+        .excel-table th, .excel-table td { 
+            border-right: 1px solid #e5e7eb; 
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+        }
+
+        /* Cabecera Sticky (Días) */
+        .excel-table thead { 
+            position: sticky; 
+            top: 0; 
+            z-index: 50; 
+            background: #f9fafb; 
+        }
+        
+        .excel-table th {
+            background: #f9fafb; /* Asegura opacidad */
+            box-shadow: 0 1px 0 #e5e7eb; /* Borde inferior falso para sticky */
+        }
+
+        /* Primera Columna Sticky (Clientes) */
+        .col-sticky { 
+            position: sticky; 
+            left: 0; 
+            background: var(--surface); 
+            z-index: 20; 
+            border-right: 2px solid #d1d5db !important; 
+            width: 320px; 
+            min-width: 320px; 
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
+        }
+
+        /* Esquina Superior Izquierda (Intersección Sticky) */
+        .excel-table thead th.col-sticky {
+            z-index: 60; /* Mayor que el resto para tapar al scroll */
+            background: #f3f4f6;
+        }
+
+        .day-header { 
+            text-align: center; 
+            font-size: 0.8rem;
+            color: var(--primary); 
+            padding: 8px; 
+            min-width: 100px; /* Ancho mínimo para que no se aplaste */
+        }
+        
         .drop-zone.drag-over { background: #dcfce7 !important; border: 2px dashed var(--success); } 
         .cell-stay { background: #f0fdf4; }
         .cell-pase { background: #f5f3ff; } 
         
-        .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; margin-bottom: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px;}
+        .tour-stack { display: flex; flex-direction: column; gap: 2px; min-height: 30px; }
+
+        .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px; transition: transform 0.1s;}
+        .tour-item:hover { transform: scale(1.02); z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tour-obs-cal { font-size: 0.65rem; color: #2563eb; font-style: italic; line-height: 1; font-weight:bold; }
         .tour-obs-ops { font-size: 0.65rem; color: #d97706; font-style: italic; margin-top: 2px; border-top: 1px dashed #eee; padding-top: 2px; }
         
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
-        
         .tour-item.pase-style { border-left-color: var(--pase-color); } 
 
         .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
@@ -74,7 +153,7 @@
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
         .pax-card.is-pase { border-left: 4px solid var(--pase-color); padding-left: 8px; } 
         
-        .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); }
+        .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
 
         /* OPERACIONES */
         .ops-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
@@ -148,14 +227,18 @@
         .btn-main { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
         .btn-main:hover { background: var(--primary-dark); }
 
+        /* CLASE NUEVA PARA FECHA COMPACTA */
+        .input-date-short { width: 140px !important; flex-shrink: 0; }
+
         @media print {
-            @page { size: A4 portrait; margin: 1cm; }
-            body * { visibility: hidden; } #printableArea, #printableArea * { visibility: visible; }
+            @page { size: A4 portrait; margin: 10mm; } 
+            body * { visibility: hidden; } 
+            #printableArea, #printableArea * { visibility: visible; }
             #printableArea { position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; background: white; color: black; font-family: 'Arial', sans-serif; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11pt; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; vertical-align: middle; }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10pt; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: middle; }
             .print-table th { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; }
-            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; position:relative; }
             button, .no-print { display: none !important; }
         }
     </style>
@@ -165,148 +248,155 @@
     <div id="loadingOverlay" style="display:none;"></div>
     <div id="printableArea"></div>
 
-    <div class="header-container">
-        <div class="title-section"><h1>🚀 SALIDAS</h1></div>
-        <div class="main-controls">
-            <div class="control-group-right">
-                <input type="month" id="filtroMes" class="input-month-compact" onchange="actualizarTodo()">
-                <button class="btn-reg-compact" onclick="abrirModalRegistro()">+ Nuevo</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="tabs">
-        <button id="tabBtnLista" class="tab-btn active" onclick="cambiarVista('lista')">📋 Lista</button>
-        <button id="tabBtnExcel" class="tab-btn" onclick="cambiarVista('excel')">📅 Calendario</button>
-        <button id="tabBtnPases" class="tab-btn" onclick="cambiarVista('pases')" style="color:var(--pase-color);">🎫 Pases</button>
-        <button id="tabBtnOps" class="tab-btn" onclick="cambiarVista('ops')" style="color:var(--ops-color);">🚍 Operaciones</button>
-        <button id="tabBtnLiquidacion" class="tab-btn" onclick="cambiarVista('liquidacion')" style="color:var(--report-color);">📉 Liquidación</button>
-        <button id="tabBtnGastos" class="tab-btn" onclick="cambiarVista('gastos')" style="color:var(--expense-color);">💸 Gastos</button>
-        <button id="tabBtnCatalogo" class="tab-btn" onclick="cambiarVista('catalogo')">📚 Catálogo</button>
-        <button id="tabBtnControl" class="tab-btn" onclick="cambiarVista('control')">💰 Control</button>
-    </div>
-
-    <div id="vistaLista" class="view-section active">
-        <div style="margin-bottom:20px;"><input type="text" id="buscadorLista" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:300px;" placeholder="🔍 Buscar por nombre..." onkeyup="actualizarTodo()"></div>
-        <div class="card"><table style="width:100%"><thead><tr><th>Pasajero</th><th>Hotel / Agencia</th><th>Pagos</th><th>Itinerario</th><th style="text-align:right">Acciones</th></tr></thead><tbody id="tbodyLista"></tbody></table></div>
-    </div>
-
-    <div id="vistaExcel" class="view-section">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <select id="filtroTourCalendario" style="padding:8px;border-radius:6px;border:1px solid #ccc;" onchange="actualizarTodo()"><option value="">-- Todos los Tours --</option></select>
-            <div style="font-size:0.8rem; color:var(--text-sec);">Clic en día para ruta.</div>
-        </div>
-        <div class="excel-wrapper"><table class="excel-table" id="tablaExcel"></table></div>
-    </div>
-
-    <div id="vistaPases" class="view-section">
-        <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
-            <input type="text" id="buscadorPases" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:250px;" placeholder="🔍 Buscar pase..." onkeyup="actualizarTodo()">
-            <select id="filtroAgenciaPases" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:200px;" onchange="actualizarTodo()"><option value="">-- Todas las Agencias --</option></select>
-            <div style="flex:1;"></div>
-            <button class="btn-main" onclick="abrirModalPases()" style="background:var(--pase-color);">+ Nuevo Pase</button>
-        </div>
-        <div class="excel-wrapper"><table class="excel-table" id="tablaPases"></table></div>
-    </div>
-
-    <div id="vistaOps" class="view-section">
-        <div class="card" style="padding:20px; margin-bottom:20px; border-top: 4px solid var(--ops-color);">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h3 style="margin:0; color:var(--ops-color);">Gestión de Salidas (Despacho)</h3><button class="btn-sec" onclick="nuevaOperacion()">🔄 Limpiar Formulario</button></div>
-            <div class="form-grid" style="grid-template-columns:repeat(5, 1fr);">
-                <div><label class="input-label">Fecha Salida</label><input type="date" id="ops_fecha" onchange="cargarPendientesOps()"></div>
-                <div><label class="input-label">Tour</label><select id="ops_tour" onchange="cargarPendientesOps()"></select></div>
-                <div><label class="input-label">Conductor</label><input type="text" id="ops_conductor" placeholder="Nombre Cond."></div>
-                <div><label class="input-label">Guía</label><input type="text" id="ops_guia" placeholder="Nombre Guía"></div>
-                <div><label class="input-label">Capacidad Vehículo</label><input type="number" id="ops_capacidad" value="15" min="1" onchange="actualizarIndicadorCapacidad()"></div>
-            </div>
-            <input type="hidden" id="ops_id_actual"> <input type="hidden" id="ops_firestore_id">
-            <div id="indicadorCapacidad" class="capacidad-indicator">0 / 15 Pasajeros</div>
-            <div class="ops-container">
-                <div class="ops-box"><div class="ops-header"><span>👥 Pendientes (Sin Asignar)</span><small id="count_pendientes">0</small></div><div id="lista_ops_pendientes" style="flex:1;"></div></div>
-                <div class="ops-box" style="border-color:var(--ops-color); background:#f0f9ff;"><div class="ops-header"><span>🚍 En el Vehículo</span><small id="count_asignados">0</small></div><div id="lista_ops_asignados" style="flex:1;"></div></div>
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button class="btn-main" onclick="guardarOperacion()" style="background:var(--ops-color);">💾 Guardar Operación</button><button class="btn-main" onclick="imprimirManifiesto()" style="background:#333;">🖨️ Imprimir Manifiesto</button></div>
-        </div>
-        <h3 style="margin-top:30px;">Salidas Programadas</h3>
-        <div class="card"><table style="width:100%"><thead><tr><th>Fecha</th><th>Tour</th><th>Conductor / Guía</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbodyOps"></tbody></table></div>
-    </div>
-
-    <div id="vistaLiquidacion" class="view-section">
-        <div class="card" style="padding:20px; border-top: 4px solid var(--report-color);">
-            <h3 style="margin:0; margin-bottom:15px; color:var(--report-color);">Liquidación de Agencias</h3>
-            <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap; background:#fdf2f8; padding:15px; border-radius:10px; border:1px solid #fbcfe8;">
-                <div style="flex:1; min-width:200px;"><label class="input-label">Agencia</label><select id="liq_agencia" style="width:100%;"><option value="">Seleccione Agencia...</option></select></div>
-                <div><label class="input-label">Desde</label><input type="date" id="liq_desde"></div>
-                <div><label class="input-label">Hasta</label><input type="date" id="liq_hasta"></div>
-                <div><label class="input-label">Ver</label><select id="liq_filtro_estado"><option value="pendientes">Pendientes (Por Cobrar)</option><option value="todos">Todo el Historial</option><option value="liquidados">Solo Pagados</option></select></div>
-                <button class="btn-main" style="background:var(--report-color);" onclick="generarLiquidacion()">📊 Generar</button>
-            </div>
-            <div id="resultadosLiquidacion" style="margin-top:20px; display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><button class="btn-main" style="background:#059669;" onclick="liquidarRegistros()">✅ Marcar como Pagado</button><button class="btn-sec" onclick="imprimirLiquidacion()">🖨️ Imprimir Liquidación</button></div>
-                <div id="tablaLiqContainer"></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:20px;">
-                    <div style="padding:15px; background:#f3f4f6; border-radius:8px; text-align:center;"><small>Total Ventas</small><div id="liq_total_venta" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div></div>
-                    <div style="padding:15px; background:#ecfdf5; border-radius:8px; text-align:center; color:#047857;"><small>Total Adelantos</small><div id="liq_total_adelanto" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div></div>
-                    <div style="padding:15px; background:#fef2f2; border-radius:8px; text-align:center; color:#dc2626; border:2px solid #dc2626;"><small>Saldo a Pagar (Deuda)</small><div id="liq_total_deuda" style="font-weight:bold; font-size:1.5rem;">S/ 0.00</div></div>
+    <div class="app-layout">
+        <div class="header-container">
+            <div class="title-section"><h1>🚀 SALIDAS</h1></div>
+            <div class="main-controls">
+                <div class="control-group-right">
+                    <input type="month" id="filtroMes" class="input-month-compact" onchange="actualizarTodo()">
+                    <button class="btn-reg-compact" onclick="abrirModalRegistro()">+ Nuevo</button>
+                    <button class="btn-reg-compact" onclick="abrirModalPases()" style="background:var(--pase-color);">+ Pase</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="vistaGastos" class="view-section">
-        <div class="card" style="padding:20px; border-top: 4px solid var(--expense-color);">
-            <h3 style="margin:0; margin-bottom:15px; color:var(--expense-color);">Registro de Gastos Operativos</h3>
-            <form id="formGasto" style="display:flex; gap:10px; align-items:flex-end; background:#fff1f2; padding:15px; border-radius:10px; margin-bottom:20px; flex-wrap:wrap;">
-                <input type="hidden" id="g_firestore_id">
-                <div><label class="input-label">Fecha</label><input type="date" id="g_fecha" required></div>
-                <div style="flex:2;"><label class="input-label">Descripción</label><input type="text" id="g_desc" placeholder="Ej. Gasolina..." required></div>
-                <div><label class="input-label">Monto (S/)</label><input type="number" id="g_monto" placeholder="0.00" step="0.01" required></div>
-                <div style="flex:1;"><label class="input-label">Responsable</label><input type="text" id="g_resp" placeholder="Quién gastó"></div>
-                <button type="submit" id="btnGuardarGasto" class="btn-main" style="background:var(--expense-color);">+ Agregar</button>
-                <button type="button" id="btnCancelGasto" onclick="limpiarGastoForm()" style="display:none; background:#ccc; color:#333; padding:10px; border:none; border-radius:6px; cursor:pointer;">Cancelar</button>
-            </form>
-            <h4 style="margin-bottom:10px;">Gastos del Mes</h4>
-            <table style="width:100%"><thead><tr><th>Fecha</th><th>Descripción</th><th>Responsable</th><th>Monto</th><th>Acción</th></tr></thead><tbody id="tbodyGastos"></tbody><tfoot><tr style="background:#f9fafb; font-weight:bold;"><td colspan="3" style="text-align:right;">TOTAL GASTOS:</td><td id="totalGastosDisplay" style="color:var(--expense-color);">S/ 0.00</td><td></td></tr></tfoot></table>
+        <div class="tabs">
+            <button id="tabBtnLista" class="tab-btn active" onclick="cambiarVista('lista')">📋 Lista</button>
+            <button id="tabBtnExcel" class="tab-btn" onclick="cambiarVista('excel')">📅 Calendario</button>
+            <button id="tabBtnPases" class="tab-btn" onclick="cambiarVista('pases')" style="color:var(--pase-color);">🎫 Pases</button>
+            <button id="tabBtnOps" class="tab-btn" onclick="cambiarVista('ops')" style="color:var(--ops-color);">🚍 Operaciones</button>
+            <button id="tabBtnLiquidacion" class="tab-btn" onclick="cambiarVista('liquidacion')" style="color:var(--report-color);">📉 Liquidación</button>
+            <button id="tabBtnGastos" class="tab-btn" onclick="cambiarVista('gastos')" style="color:var(--expense-color);">💸 Gastos</button>
+            <button id="tabBtnCatalogo" class="tab-btn" onclick="cambiarVista('catalogo')">📚 Catálogo</button>
+            <button id="tabBtnControl" class="tab-btn" onclick="cambiarVista('control')">💰 Control</button>
         </div>
-    </div>
 
-    <div id="vistaCatalogo" class="view-section">
-        <div style="margin-bottom:20px; display:flex; gap:10px;">
-            <input type="text" id="buscadorCatalogo" style="padding:10px; border:1px solid var(--border); border-radius:8px; flex:1;" placeholder="🔍 Buscar..." onkeyup="renderizarCatalogos()">
-            <button class="btn-main" onclick="abrirModalCatalogo()">+ Nuevo Item</button>
+        <div id="vistaLista" class="view-section active">
+            <div style="margin-bottom:20px;"><input type="text" id="buscadorLista" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:300px;" placeholder="🔍 Buscar por nombre..." onkeyup="actualizarTodo()"></div>
+            <div class="card"><table style="width:100%"><thead><tr><th>Pasajero</th><th>Hotel / Agencia</th><th>Pagos</th><th>Itinerario</th><th style="text-align:right">Acciones</th></tr></thead><tbody id="tbodyLista"></tbody></table></div>
         </div>
-        <div class="catalog-grid">
-            <div class="catalog-col"><div style="font-weight:800;margin-bottom:10px;">🏨 HOTELES</div><div id="cat_hoteles" class="item-list"></div></div>
-            <div class="catalog-col"><div style="font-weight:800;margin-bottom:10px;">🗺️ TOURS</div><div id="cat_tours" class="item-list"></div></div>
-            <div class="catalog-col"><div style="font-weight:800;margin-bottom:10px;">🏢 AGENCIAS</div><div id="cat_agencias" class="item-list"></div></div>
-        </div>
-    </div>
 
-    <div id="vistaControl" class="view-section">
-        <div class="dashboard-grid">
-            <div class="kpi-card">
-                <span class="kpi-title">Ventas Totales</span>
-                <span id="kpi_ventas" class="kpi-value" style="color:var(--primary);">S/ 0.00</span>
+        <div id="vistaExcel" class="view-section">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; background:#f0f9ff; padding:8px; border-radius:8px; border:1px solid #bae6fd;">
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label style="font-size:0.8rem; font-weight:bold; color:#0369a1;">Desde:</label>
+                    <input type="date" id="cal_desde" style="padding:5px; border-radius:6px; border:1px solid #ccc; font-size:0.85rem;" onchange="actualizarTodo()">
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label style="font-size:0.8rem; font-weight:bold; color:#0369a1;">Hasta:</label>
+                    <input type="date" id="cal_hasta" style="padding:5px; border-radius:6px; border:1px solid #ccc; font-size:0.85rem;" onchange="actualizarTodo()">
+                </div>
             </div>
-            <div class="kpi-card">
-                <span class="kpi-title">Ganancia Estimada</span>
-                <span id="kpi_ganancia" class="kpi-value" style="color:var(--money);">S/ 0.00</span>
+            <div class="excel-wrapper"><table class="excel-table" id="tablaExcel"></table></div>
+        </div>
+
+        <div id="vistaPases" class="view-section">
+            <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="text" id="buscadorPases" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:250px;" placeholder="🔍 Buscar pase..." onkeyup="actualizarTodo()">
+                <select id="filtroAgenciaPases" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:200px;" onchange="actualizarTodo()"><option value="">-- Todas las Agencias --</option></select>
+                <div style="flex:1;"></div>
+                <button class="btn-main" onclick="abrirModalPases()" style="background:var(--pase-color);">+ Nuevo Pase</button>
             </div>
-            <div class="kpi-card">
-                <span class="kpi-title">Por Cobrar</span>
-                <span id="kpi_cobrar" class="kpi-value" style="color:var(--danger);">S/ 0.00</span>
+            <div class="excel-wrapper"><table class="excel-table" id="tablaPases"></table></div>
+        </div>
+
+        <div id="vistaOps" class="view-section">
+            <div class="card" style="padding:20px; margin-bottom:20px; border-top: 4px solid var(--ops-color);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h3 style="margin:0; color:var(--ops-color);">Gestión de Salidas (Despacho)</h3><button class="btn-sec" onclick="nuevaOperacion()">🔄 Limpiar Formulario</button></div>
+                <div class="form-grid" style="grid-template-columns:repeat(5, 1fr);">
+                    <div><label class="input-label">Fecha Salida</label><input type="date" id="ops_fecha" onchange="cargarPendientesOps()"></div>
+                    <div><label class="input-label">Tour</label><select id="ops_tour" onchange="cargarPendientesOps()"></select></div>
+                    <div><label class="input-label">Conductor</label><input type="text" id="ops_conductor" placeholder="Nombre Cond."></div>
+                    <div><label class="input-label">Guía</label><input type="text" id="ops_guia" placeholder="Nombre Guía"></div>
+                    <div><label class="input-label">Capacidad Vehículo</label><input type="number" id="ops_capacidad" value="16" min="1" onchange="actualizarIndicadorCapacidad()"></div>
+                </div>
+                <input type="hidden" id="ops_id_actual"> <input type="hidden" id="ops_firestore_id">
+                <div id="indicadorCapacidad" class="capacidad-indicator">0 / 16 Pasajeros</div>
+                <div class="ops-container">
+                    <div class="ops-box"><div class="ops-header"><span>👥 Pendientes (Sin Asignar)</span><small id="count_pendientes">0</small></div><div id="lista_ops_pendientes" style="flex:1;"></div></div>
+                    <div class="ops-box" style="border-color:var(--ops-color); background:#f0f9ff;"><div class="ops-header"><span>🚍 En el Vehículo</span><small id="count_asignados">0</small></div><div id="lista_ops_asignados" style="flex:1;"></div></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button class="btn-main" onclick="guardarOperacion()" style="background:var(--ops-color);">💾 Guardar Operación</button><button class="btn-main" onclick="imprimirManifiesto()" style="background:#333;">🖨️ Imprimir Manifiesto</button></div>
+            </div>
+            <h3 style="margin-top:30px;">Salidas Programadas</h3>
+            <div class="card"><table style="width:100%"><thead><tr><th>Fecha</th><th>Tour</th><th>Conductor / Guía</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbodyOps"></tbody></table></div>
+        </div>
+
+        <div id="vistaLiquidacion" class="view-section">
+            <div class="card" style="padding:20px; border-top: 4px solid var(--report-color);">
+                <h3 style="margin:0; margin-bottom:15px; color:var(--report-color);">Liquidación de Agencias</h3>
+                <div style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap; background:#fdf2f8; padding:15px; border-radius:10px; border:1px solid #fbcfe8;">
+                    <div style="flex:1; min-width:200px;"><label class="input-label">Agencia</label><select id="liq_agencia" style="width:100%;"><option value="">Seleccione Agencia...</option></select></div>
+                    <div><label class="input-label">Desde</label><input type="date" id="liq_desde"></div>
+                    <div><label class="input-label">Hasta</label><input type="date" id="liq_hasta"></div>
+                    <div><label class="input-label">Ver</label><select id="liq_filtro_estado"><option value="pendientes">Pendientes (Por Cobrar)</option><option value="todos">Todo el Historial</option><option value="liquidados">Solo Pagados</option></select></div>
+                    <button class="btn-main" style="background:var(--report-color);" onclick="generarLiquidacion()">📊 Generar</button>
+                </div>
+                <div id="resultadosLiquidacion" style="margin-top:20px; display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><button class="btn-main" style="background:#059669;" onclick="liquidarRegistros()">✅ Marcar como Pagado</button><button class="btn-sec" onclick="imprimirLiquidacion()">🖨️ Imprimir Liquidación</button></div>
+                    <div id="tablaLiqContainer"></div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:20px;">
+                        <div style="padding:15px; background:#f3f4f6; border-radius:8px; text-align:center;"><small>Total Ventas</small><div id="liq_total_venta" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div></div>
+                        <div style="padding:15px; background:#ecfdf5; border-radius:8px; text-align:center; color:#047857;"><small>Total Adelantos</small><div id="liq_total_adelanto" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div></div>
+                        <div style="padding:15px; background:#fef2f2; border-radius:8px; text-align:center; color:#dc2626; border:2px solid #dc2626;"><small>Saldo a Pagar (Deuda)</small><div id="liq_total_deuda" style="font-weight:bold; font-size:1.5rem;">S/ 0.00</div></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <table style="width:100%">
-                <thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Adelanto</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
-                <tbody id="tbodyControl"></tbody>
-            </table>
+        <div id="vistaGastos" class="view-section">
+            <div class="card" style="padding:20px; border-top: 4px solid var(--expense-color);">
+                <h3 style="margin:0; margin-bottom:15px; color:var(--expense-color);">Registro de Gastos Operativos</h3>
+                <form id="formGasto" style="display:flex; gap:10px; align-items:flex-end; background:#fff1f2; padding:15px; border-radius:10px; margin-bottom:20px; flex-wrap:wrap;">
+                    <input type="hidden" id="g_firestore_id">
+                    <div><label class="input-label">Fecha</label><input type="date" id="g_fecha" required></div>
+                    <div style="flex:2;"><label class="input-label">Descripción</label><input type="text" id="g_desc" placeholder="Ej. Gasolina..." required></div>
+                    <div><label class="input-label">Monto (S/)</label><input type="number" id="g_monto" placeholder="0.00" step="0.01" required></div>
+                    <div style="flex:1;"><label class="input-label">Responsable</label><input type="text" id="g_resp" placeholder="Quién gastó"></div>
+                    <button type="submit" id="btnGuardarGasto" class="btn-main" style="background:var(--expense-color);">+ Agregar</button>
+                    <button type="button" id="btnCancelGasto" onclick="limpiarGastoForm()" style="display:none; background:#ccc; color:#333; padding:10px; border:none; border-radius:6px; cursor:pointer;">Cancelar</button>
+                </form>
+                <h4 style="margin-bottom:10px;">Gastos del Mes</h4>
+                <table style="width:100%"><thead><tr><th>Fecha</th><th>Descripción</th><th>Responsable</th><th>Monto</th><th>Acción</th></tr></thead><tbody id="tbodyGastos"></tbody><tfoot><tr style="background:#f9fafb; font-weight:bold;"><td colspan="3" style="text-align:right;">TOTAL GASTOS:</td><td id="totalGastosDisplay" style="color:var(--expense-color);">S/ 0.00</td><td></td></tr></tfoot></table>
+            </div>
         </div>
-    </div>
 
-    <div class="modal" id="modalRegistro">
+        <div id="vistaCatalogo" class="view-section">
+            <div style="margin-bottom:20px; display:flex; gap:10px;">
+                <input type="text" id="buscadorCatalogo" style="padding:10px; border:1px solid var(--border); border-radius:8px; flex:1;" placeholder="🔍 Buscar..." onkeyup="renderizarCatalogos()">
+                <button class="btn-main" onclick="abrirModalCatalogo()">+ Nuevo Item</button>
+            </div>
+            <div class="catalog-grid">
+                <div class="catalog-col"><div style="font-weight:800;margin-bottom:10px;">🏨 HOTELES</div><div id="cat_hoteles" class="item-list"></div></div>
+                <div class="catalog-col"><div style="font-weight:800;margin-bottom:10px;">🗺️ TOURS</div><div id="cat_tours" class="item-list"></div></div>
+                <div class="catalog-col"><div style="font-weight:800;margin-bottom:10px;">🏢 AGENCIAS</div><div id="cat_agencias" class="item-list"></div></div>
+            </div>
+        </div>
+
+        <div id="vistaControl" class="view-section">
+            <div class="dashboard-grid">
+                <div class="kpi-card">
+                    <span class="kpi-title">Ventas Totales</span>
+                    <span id="kpi_ventas" class="kpi-value" style="color:var(--primary);">S/ 0.00</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-title">Ganancia Estimada</span>
+                    <span id="kpi_ganancia" class="kpi-value" style="color:var(--money);">S/ 0.00</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-title">Por Cobrar</span>
+                    <span id="kpi_cobrar" class="kpi-value" style="color:var(--danger);">S/ 0.00</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <table style="width:100%">
+                    <thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Adelanto</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="tbodyControl"></tbody>
+                </table>
+            </div>
+        </div>
+    </div> <div class="modal" id="modalRegistro">
         <div class="modal-content">
             <div class="modal-header"><h2 id="modalRegTitulo" style="margin:0;color:var(--primary);">📝 Registro</h2><button onclick="cerrarModal('modalRegistro')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div>
             <div class="modal-body">
@@ -380,15 +470,35 @@
     </div>
 
     <div class="modal" id="modalPases">
-        <div class="modal-content" style="max-width:650px;">
-            <div class="modal-header"><h2 id="modalPasesTitulo" style="margin:0;color:var(--pase-color);">🎫 Nuevo Pase</h2><button onclick="cerrarModal('modalPases')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div>
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header"><h2 id="modalPasesTitulo" style="margin:0;color:var(--pase-color);">🎫 Nuevo Pase (Multi-Tours)</h2><button onclick="cerrarModal('modalPases')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div>
             <div class="modal-body">
                 <form id="formPase">
                     <input type="hidden" id="pase_firestore_id">
-                    <div class="pro-section"><div class="pro-section-title">Datos del Pasajero</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr;"><div class="input-group"><label class="input-label">Nombres</label><input type="text" id="p_nombre" required></div><div class="input-group"><label class="input-label">Celular</label><input type="tel" id="p_celular" required></div><div class="input-group"><label class="input-label">Agencia</label><select id="p_agencia" required></select></div></div></div>
-                    <div class="pro-section"><div class="pro-section-title">Servicio</div><div class="form-grid" style="grid-template-columns:1fr 1.5fr 0.5fr;"><div class="input-group"><label class="input-label">Fecha</label><input type="date" id="p_fecha" required></div><div class="input-group"><label class="input-label">Tour</label><select id="p_tour" required onchange="calcPaseAuto()"></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required onchange="calcPaseAuto()"></div></div><div class="input-group" style="margin-top:10px;"><label class="input-label">Recojo</label><select id="p_hotel" required></select></div><div class="input-group" style="margin-top:10px;"><label class="input-label">Observaciones</label><input type="text" id="p_obs"></div></div>
+                    <div class="pro-section">
+                        <div class="pro-section-title">Datos del Pasajero</div>
+                        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr;">
+                            <div class="input-group"><label class="input-label">Nombres</label><input type="text" id="p_nombre" required></div>
+                            <div class="input-group"><label class="input-label">Celular</label><input type="tel" id="p_celular" required></div>
+                            <div class="input-group"><label class="input-label">Agencia</label><select id="p_agencia" required></select></div>
+                        </div>
+                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:10px;">
+                             <div class="input-group"><label class="input-label">Recojo/Hotel</label><select id="p_hotel" required></select></div>
+                             <div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required></div>
+                        </div>
+                        <div class="input-group" style="margin-top:10px;"><label class="input-label">Observaciones Generales</label><input type="text" id="p_obs"></div>
+                    </div>
+
+                    <div class="pro-section" style="background:#f5f3ff; border:1px solid #ddd6fe;">
+                        <div class="pro-section-title" style="color:var(--pase-color); justify-content:space-between;">
+                            <span>🗺️ Tours del Pase</span>
+                            <button type="button" onclick="agregarFilaTourPase()" class="btn-main" style="padding:4px 10px; height:auto; background:var(--pase-color); font-size:0.8rem;">+ Agregar Tour</button>
+                        </div>
+                        <div id="listaToursPases"></div>
+                    </div>
+
                     <div class="pro-section"><div class="pro-section-title">Pago</div><div class="pay-toggle-container"><div class="pay-toggle-opt active" id="opt_adelanto" onclick="setPasePagoMode('adelanto')">A Cuenta</div><div class="pay-toggle-opt" id="opt_pagado" onclick="setPasePagoMode('pagado')">Pagado</div></div><input type="hidden" id="p_modo_pago" value="adelanto"><div class="form-grid" style="grid-template-columns: 1fr 1fr;"><div class="input-group"><label class="input-label">Total</label><input type="number" id="p_precio" required step="0.01" onchange="syncPasePago()"></div><div class="input-group"><label class="input-label">Abonado</label><input type="number" id="p_adelanto" required step="0.01"></div></div></div>
-                    <button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:12px;">Guardar Pase</button>
+                    <button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:12px;">💾 Guardar Pase</button>
                 </form>
             </div>
         </div>
@@ -499,11 +609,7 @@
 
         // Global functions to be accessible from HTML
         window.cerrarModal = (id) => document.getElementById(id).classList.remove('active');
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
-            }
-        }
+        
     </script>
 
     <script>
@@ -563,20 +669,50 @@
             });
         }
 
+        // --- FUNCIONES NORMALIZACIÓN DE PASES (Backwards Compatibility) ---
+        function getToursFromPase(p) {
+            if(Array.isArray(p.tours) && p.tours.length > 0) {
+                return p.tours;
+            } else {
+                // Compatibility for old single-tour format
+                return [{
+                    fecha: p.fecha,
+                    nombre: p.tour,
+                    obs: p.observacion
+                }];
+            }
+        }
+
         function actualizarTodo() {
             const txt = document.getElementById('buscadorLista').value.toLowerCase(); const mes = document.getElementById('filtroMes').value;
             renderLista(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt))));
             renderPases(mes); renderGastos(); renderListaOps();
-            const ft = document.getElementById('filtroTourCalendario'); if(ft.options.length<=1 && window.catalogo.tours) ft.innerHTML='<option value="">-- Todos --</option>'+[...new Set(window.catalogo.tours.map(t=>t.nombre))].map(t=>`<option value="${t}">${t}</option>`).join('');
+            
+            // REMOVIDO: FILTRO TOUR
+            
             const fa = document.getElementById('filtroAgenciaPases'); if(fa.options.length<=1 && window.catalogo.agencias) fa.innerHTML = '<option value="">-- Todas --</option>' + window.catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-            renderExcel(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))), mes, ft.value);
+            
+            // --- LOGICA CALENDARIO ---
+            const calDesde = document.getElementById('cal_desde').value;
+            const calHasta = document.getElementById('cal_hasta').value;
+            const isCalendar = document.getElementById('vistaExcel').classList.contains('active');
+
+            if(isCalendar && calDesde && calHasta) {
+                // Rango personalizado
+                const dataRange = window.db.filter(r => r.retorno >= calDesde && r.llegada <= calHasta);
+                renderExcel(dataRange, null, null, calDesde, calHasta); // Pasamos null como filtroTour
+            } else {
+                // Mes completo por defecto
+                renderExcel(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))), mes, null); // Pasamos null como filtroTour
+            }
+
             renderControl(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))));
         }
         
         function renderLista(data) {
+            data.sort((a, b) => a.llegada.localeCompare(b.llegada));
             const tbody = document.getElementById('tbodyLista');
             tbody.innerHTML = '';
-            
             const renderedIds = new Set();
             const html = data.map(r => {
                 if(renderedIds.has(r.id)) return '';
@@ -592,7 +728,6 @@
                 let habsDisplay = '';
                 if(Array.isArray(r.habitaciones)) {
                     if(r.habitaciones.length > 0 && typeof r.habitaciones[0] === 'object') {
-                         // Mostrar noches en la lista
                          habsDisplay = r.habitaciones.map(h => `${h.habitacion} (${h.hotel}) - ${h.noches || 1}N`).join(', ');
                     } else {
                         habsDisplay = r.habitaciones.join(', '); 
@@ -628,69 +763,145 @@
                     </td>
                 </tr>`;
             }).join('');
-            
             tbody.innerHTML = html;
         }
 
         function renderPases(mes) {
-            const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate(); let h = '<thead><tr><th class="col-sticky">Detalle Pase</th>'; for(let i=1; i<=days; i++) h += `<th style="text-align:center;">${i}</th>`; h+='</tr></thead><tbody>';
-            let pasesMes = window.dbPases.filter(p => p.fecha.startsWith(mes)); const txt = document.getElementById('buscadorPases').value.toLowerCase(); const fAgencia = document.getElementById('filtroAgenciaPases').value; pasesMes = pasesMes.filter(p => p.nombre.toLowerCase().includes(txt) && (fAgencia==="" || p.agencia===fAgencia));
-            pasesMes.forEach(p => { const v = parseFloat(p.precio)||0; const a = parseFloat(p.adelanto)||0; const s = v-a; let statusBadge = (s<=0 && v>0) ? `<br><span class="badge-paid">¡PAGADO!</span>` : `<br><span class="badge-debt">Falta ${fmtMoneda(s)}</span>`; const liq = p.liquidado ? `<span class="badge-liq">Liq.</span>` : ''; const obsDisplay = p.observacion ? `<div style="font-size:0.7rem;color:#d97706;background:#fff7ed;padding:2px;">⚠️ ${p.observacion}</div>` : ''; h += `<tr><td class="col-sticky"><div class="pax-card"><div style="color:var(--pase-color);font-weight:bold;">${p.nombre} ${liq}</div><div>📱 ${p.celular} (${p.cantidad} Pax)</div><div>🏨 ${p.hotel}</div><div>🏢 ${p.agencia}</div>${statusBadge}${obsDisplay}<div style="margin-top:5px;"><button class="btn-icon btn-edit" onclick="editarPase(${p.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('pases', '${p.firestoreId}')">🗑</button></div></div></td>`; for(let d=1; d<=days; d++) { const f = `${y}-${m}-${String(d).padStart(2,'0')}`; h += (p.fecha === f) ? `<td><div class="pase-item">${p.tour}</div></td>` : `<td></td>`; } h += '</tr>'; });
+            const [y,m] = mes.split('-'); 
+            const days = new Date(y, m, 0).getDate(); 
+            let h = '<thead><tr><th class="col-sticky">Detalle Pase</th>'; 
+            for(let i=1; i<=days; i++) h += `<th style="text-align:center;">${i}</th>`; 
+            h+='</tr></thead><tbody>';
+            
+            let pasesMes = window.dbPases.filter(p => {
+                // Verificar si alguno de los tours del pase cae en este mes
+                const tours = getToursFromPase(p);
+                return tours.some(t => t.fecha.startsWith(mes));
+            });
+            
+            const txt = document.getElementById('buscadorPases').value.toLowerCase(); 
+            const fAgencia = document.getElementById('filtroAgenciaPases').value; 
+            
+            pasesMes = pasesMes.filter(p => p.nombre.toLowerCase().includes(txt) && (fAgencia==="" || p.agencia===fAgencia));
+            
+            pasesMes.forEach(p => { 
+                const tours = getToursFromPase(p);
+                const v = parseFloat(p.precio)||0; 
+                const a = parseFloat(p.adelanto)||0; 
+                const s = v-a; 
+                let statusBadge = (s<=0 && v>0) ? `<br><span class="badge-paid">¡PAGADO!</span>` : `<br><span class="badge-debt">Falta ${fmtMoneda(s)}</span>`; 
+                const liq = p.liquidado ? `<span class="badge-liq">Liq.</span>` : ''; 
+                const obsDisplay = p.observacion ? `<div style="font-size:0.7rem;color:#d97706;background:#fff7ed;padding:2px;">⚠️ ${p.observacion}</div>` : ''; 
+                
+                h += `<tr><td class="col-sticky"><div class="pax-card"><div style="color:var(--pase-color);font-weight:bold;">${p.nombre} ${liq}</div><div>📱 ${p.celular} (${p.cantidad} Pax)</div><div>🏨 ${p.hotel}</div><div>🏢 ${p.agencia}</div>${statusBadge}${obsDisplay}<div style="margin-top:5px;"><button class="btn-icon btn-edit" onclick="editarPase(${p.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('pases', '${p.firestoreId}')">🗑</button></div></div></td>`; 
+                
+                for(let d=1; d<=days; d++) { 
+                    const f = `${y}-${m}-${String(d).padStart(2,'0')}`; 
+                    // Buscar si hay tour este dia
+                    const tFound = tours.find(t => t.fecha === f);
+                    if(tFound) {
+                        h += `<td><div class="pase-item" title="${tFound.obs||''}">${tFound.nombre}</div></td>`;
+                    } else {
+                        h += `<td></td>`; 
+                    }
+                } 
+                h += '</tr>'; 
+            });
             document.getElementById('tablaPases').innerHTML = h + '</tbody>';
         }
         
-        function renderExcel(data, mes, filtroTour) {
-            // UNIFICAR REGISTROS (DB) Y PASES (DBPASES) PARA EL CALENDARIO
-            let allItems = [...data]; // Copia de registros
+        function renderExcel(data, mes, filtroTour, startStr=null, endStr=null) {
+            let allItems = [...data];
             
-            // Transformar Pases al formato de calendario y agregar
+            let startDate, endDate;
+            if(startStr && endStr) {
+                const sParts = startStr.split('-');
+                const eParts = endStr.split('-');
+                startDate = new Date(sParts[0], sParts[1]-1, sParts[2]);
+                endDate = new Date(eParts[0], eParts[1]-1, eParts[2]);
+            } else {
+                if(!mes) return; 
+                const [y,m] = mes.split('-');
+                startDate = new Date(y, m-1, 1);
+                endDate = new Date(y, m, 0);
+            }
+
+            // Agregar Pases que caigan en el rango
             window.dbPases.forEach(p => {
-                if(p.fecha.startsWith(mes)) {
-                    // Verificar filtros de lista (opcional, pero consistente con vista)
+                const tours = getToursFromPase(p);
+                const inRange = tours.some(t => {
+                    if(startStr && endStr) return t.fecha >= startStr && t.fecha <= endStr;
+                    return t.fecha.startsWith(mes);
+                });
+
+                if(inRange) {
                     const txt = document.getElementById('buscadorLista').value.toLowerCase();
                     if(p.nombre.toLowerCase().includes(txt)) {
                         allItems.push({
                             id: p.id,
                             firestoreId: p.firestoreId,
-                            isPase: true, // Marcador para identificar
+                            isPase: true,
                             nombre: p.nombre,
-                            llegada: p.fecha,
-                            retorno: p.fecha, // 1 dia
+                            llegada: tours[0].fecha, 
+                            retorno: tours[tours.length-1].fecha,
                             cantidad: p.cantidad,
                             celular: p.celular,
-                            hotelName: p.hotel, // Hotel es recojo
+                            hotelName: p.hotel,
                             agencia: p.agencia,
                             observaciones: p.observacion,
-                            tours: [{
-                                nombre: p.tour,
-                                fecha: p.fecha,
-                                obsTour: p.observacion
-                            }],
-                            habitaciones: [] // Sin habitaciones
+                            precio: p.precio,
+                            adelanto: p.adelanto,
+                            tours: tours.map(t => ({
+                                nombre: t.nombre,
+                                fecha: t.fecha,
+                                obsTour: t.obs || t.observacion
+                            })),
+                            habitaciones: []
                         });
                     }
                 }
             });
 
-            // ORDENAMIENTO ESCALONADO POR FECHA DE LLEGADA
             allItems.sort((a, b) => {
                 if (a.llegada < b.llegada) return -1;
                 if (a.llegada > b.llegada) return 1;
                 return 0;
             });
 
-            const [y,m] = mes.split('-'); const days = new Date(y, m, 0).getDate();
             let h = '<thead><tr><th class="col-sticky">Detalle Cliente</th>';
-            for(let i=1; i<=days; i++) h += `<th class="day-header" onclick="abrirResumenDia(${i})">${i}</th>`;
+            let loopDate = new Date(startDate);
+            const dateList = [];
+            while(loopDate <= endDate) {
+                const d = loopDate.getDate();
+                const m = loopDate.getMonth() + 1;
+                const y = loopDate.getFullYear();
+                const str = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                dateList.push({ str, dayNum: d });
+                h += `<th class="day-header">${d}/${m}</th>`;
+                loopDate.setDate(loopDate.getDate() + 1);
+            }
             h+='</tr></thead><tbody>';
             
             allItems.forEach(r => {
                 const obsGeneral = r.observaciones ? `<div class="obs-general-cal">⚠️ ${r.observaciones}</div>` : '';
-                
-                // Estilo diferente si es Pase
                 const paseClass = r.isPase ? 'is-pase' : '';
                 const paseBadge = r.isPase ? '<span style="background:var(--pase-color);color:white;padding:1px 4px;border-radius:4px;font-size:0.6rem;margin-right:4px;">[PASE]</span>' : '';
-                const editFunc = r.isPase ? `editarPase(${r.id})` : `cargarEdicion(${r.id})`; // Correct edit function
+                const editFunc = r.isPase ? `editarPase(${r.id})` : `cargarEdicion(${r.id})`; 
+
+                const venta = parseFloat(r.isPase ? (r.precio||0) : (r.precioPaquete||0));
+                const adelanto = parseFloat(r.adelanto) || 0;
+                const saldo = venta - adelanto;
+                
+                let moneyHtml = '';
+                if(venta > 0) {
+                    if(saldo <= 0) {
+                        moneyHtml = `<div style="margin-top:4px; font-weight:bold; color:var(--success); font-size:0.75rem; border:1px solid var(--success); border-radius:4px; padding:2px 4px; display:inline-block; background:#f0fdf4;">¡PAGADO! (S/ ${fmtMoneda(venta)})</div>`;
+                    } else {
+                        const color = adelanto > 0 ? '#d97706' : 'var(--danger)'; 
+                        const bg = adelanto > 0 ? '#fff7ed' : '#fef2f2';
+                        moneyHtml = `<div style="margin-top:4px; font-weight:bold; color:${color}; font-size:0.75rem; border:1px solid ${color}; border-radius:4px; padding:2px 4px; display:inline-block; background:${bg};">Falta: ${fmtMoneda(saldo)} <span style="color:#666; font-weight:normal;">(Tot: ${fmtMoneda(venta)})</span></div>`;
+                    }
+                }
 
                 h+=`<tr data-pax="${r.id}" data-type="${r.isPase?'pase':'db'}">
                     <td class="col-sticky">
@@ -706,17 +917,18 @@
                             <div style="font-size:0.75rem;color:#666;">🏨 ${r.hotelName}</div>
                             ${obsGeneral}
                             <div class="pax-detail">🏢 ${r.agencia}</div>
+                            ${moneyHtml} 
                         </div>
                     </td>`;
                 
-                for(let d=1; d<=days; d++) {
-                    const f = `${y}-${m}-${String(d).padStart(2,'0')}`;
-                    // Fondo solo si es registro completo (estadia)
-                    const bg = (!r.isPase && f >= r.llegada && f <= r.retorno) ? 'cell-stay' : (r.isPase && f === r.llegada) ? 'cell-pase' : '';
+                dateList.forEach(obj => {
+                    const f = obj.str;
+                    const d = obj.dayNum;
                     
+                    const bg = (!r.isPase && f >= r.llegada && f <= r.retorno) ? 'cell-stay' : '';
                     let ts = r.tours.filter(t=>t.fecha===f); if(filtroTour) ts = ts.filter(t=>t.nombre===filtroTour);
                     
-                    h+=`<td class="drop-zone ${bg}" data-dia="${d}" ondragover="window.allowDrop(event)" ondrop="window.dropTour(event)">
+                    h+=`<td class="drop-zone ${bg}" data-dia="${d}" data-fecha="${f}" ondragover="window.allowDrop(event)" ondrop="window.dropTour(event)">
                         <div class="tour-stack">
                             ${ts.map(t=>{
                                 if(!t.nombre) {
@@ -724,7 +936,6 @@
                                         <div class="tour-name" style="font-weight:normal; font-style:italic;">📌 ${t.obsDia}</div>
                                     </div>`;
                                 }
-                                
                                 const obsDiaHtml = t.obsDia ? `<div class="tour-obs-cal">📅 ${t.obsDia}</div>` : '';
                                 const obsTourHtml = (t.obsTour || t.obs) ? `<div class="tour-obs-ops">📝 ${t.obsTour || t.obs}</div>` : '';
                                 const paseStyle = r.isPase ? 'pase-style' : '';
@@ -737,7 +948,7 @@
                             }).join('')}
                         </div>
                     </td>`;
-                }
+                });
                 h+='</tr>';
             });
             document.getElementById('tablaExcel').innerHTML = h+'</tbody>';
@@ -754,21 +965,27 @@
             
             const pid=parseInt(c.parentElement.getAttribute('data-pax')); 
             const type=c.parentElement.getAttribute('data-type'); // 'db' or 'pase'
-            const dia=parseInt(c.getAttribute('data-dia'));
-            const f=document.getElementById('filtroMes').value+'-'+String(dia).padStart(2,'0');
+            
+            // FIX: Usar la fecha exacta de la celda donde se soltó
+            const f = c.getAttribute('data-fecha');
+            if(!f) return;
             
             if(pid!==window.dragData.pid) return alert("Solo mover mismo pasajero");
             
             if(type === 'pase') {
-                // LOGICA PARA MOVER PASE DE FECHA
                 const p = window.dbPases.find(x=>x.id===pid);
                 if(p) {
-                    p.fecha = f; // Actualizar fecha del pase
+                    const tours = getToursFromPase(p);
+                    tours[window.dragData.tid].fecha = f;
+                    p.tours = tours;
+                    // Limpieza campos antiguos si existen
+                    delete p.fecha;
+                    delete p.tour; 
+                    
                     document.getElementById('pase_firestore_id').value = p.firestoreId;
                     window.guardarPaseEnNube(p);
                 }
             } else {
-                // LOGICA PARA MOVER TOUR DE REGISTRO
                 const p = window.db.find(x=>x.id===pid);
                 if(f<p.llegada || f>p.retorno) return alert("Fecha fuera de estadía");
                 p.tours[window.dragData.tid].fecha=f;
@@ -777,15 +994,27 @@
             }
         };
 
+        // Resto de funciones sin cambios...
         function renderControl(data) { 
             let html = '';
             let totalVenta = 0, totalGanancia = 0;
             let countPagado = 0, countPendiente = 0;
             let montoCobrar = 0;
 
+            let listaUnificada = [];
+            data.forEach(r => { listaUnificada.push({ data: r, type: 'db', fechaSort: r.llegada }); });
+            
+            const mes = document.getElementById('filtroMes').value;
+            const pasesMes = window.dbPases.filter(p => {
+                const tours = getToursFromPase(p);
+                return tours.some(t => t.fecha.startsWith(mes));
+            });
+            pasesMes.forEach(p => { listaUnificada.push({ data: p, type: 'pase', fechaSort: (getToursFromPase(p)[0] || {}).fecha || '' }); });
+
+            listaUnificada.sort((a, b) => a.fechaSort.localeCompare(b.fechaSort));
+
             const processRecord = (r, type) => {
                 const dur = Math.ceil((new Date(r.retorno)-new Date(r.llegada))/86400000);
-                
                 let costoHosp = 0;
                 let hotelDisplayName = r.hotelName;
 
@@ -793,15 +1022,12 @@
                     if(Array.isArray(r.habitaciones)) {
                         r.habitaciones.forEach(ht => { 
                             if(typeof ht === 'object') {
-                                // NUEVA LOGICA DE COSTOS: PRECIO * NOCHES
                                 if(ht.noches) {
                                     costoHosp += (parseFloat(ht.precio) || 0) * parseInt(ht.noches);
                                 } else {
-                                    // Fallback si no tiene noches (registros antiguos)
                                     costoHosp += (parseFloat(ht.precio) || 0) * (dur > 0 ? dur : 1);
                                 }
                             } else {
-                                // Viejo formato
                                 const hd = window.catalogo.hoteles.find(h=>h.nombre===r.hotelName && h.habitaciones.some(rom=>rom.habitacion===ht)); 
                                 let romPrice = 0;
                                 if(hd) {
@@ -823,8 +1049,12 @@
                         costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad; 
                     });
                 } else {
-                    const td = window.catalogo.tours.find(x=>x.nombre===r.tour); 
-                    costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad;
+                    // Pases Multi-tour
+                    const tours = getToursFromPase(r);
+                    tours.forEach(t => {
+                        const td = window.catalogo.tours.find(x=>x.nombre===t.nombre); 
+                        costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad;
+                    });
                 }
 
                 const costoOp = costoHosp + costoTours;
@@ -858,10 +1088,7 @@
                 </tr>`;
             };
 
-            data.forEach(r => processRecord(r, 'db'));
-            const mes = document.getElementById('filtroMes').value;
-            const pasesMes = window.dbPases.filter(p => p.fecha.startsWith(mes));
-            pasesMes.forEach(p => processRecord(p, 'pase'));
+            listaUnificada.forEach(item => processRecord(item.data, item.type));
 
             document.getElementById('tbodyControl').innerHTML = html;
             document.getElementById('kpi_ventas').innerText = fmtMoneda(totalVenta);
@@ -1086,11 +1313,44 @@
         });
 
         function cargarSelectLiquidacion() { const s = document.getElementById('liq_agencia'); s.innerHTML = '<option value="">Seleccione Agencia...</option>' + catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join(''); }
-        function generarLiquidacion() { const ag = document.getElementById('liq_agencia').value; const desde = document.getElementById('liq_desde').value; const hasta = document.getElementById('liq_hasta').value; window.liquidacionData = []; const estado = document.getElementById('liq_filtro_estado').value; const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; window.db.forEach(r => { if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); } }); window.dbPases.forEach(p => { if(p.agencia === ag && p.fecha >= desde && p.fecha <= hasta && applyFilter(p)) { window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: p.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${p.tour}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); } }); let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; let tV=0, tA=0, tS=0; window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); html+='</tbody></table>'; document.getElementById('tablaLiqContainer').innerHTML=html; document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); document.getElementById('resultadosLiquidacion').style.display = 'block'; }
+        function generarLiquidacion() { 
+            const ag = document.getElementById('liq_agencia').value; 
+            const desde = document.getElementById('liq_desde').value; 
+            const hasta = document.getElementById('liq_hasta').value; 
+            window.liquidacionData = []; 
+            const estado = document.getElementById('liq_filtro_estado').value; 
+            const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; 
+            
+            window.db.forEach(r => { 
+                if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { 
+                    window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); 
+                } 
+            }); 
+            
+            window.dbPases.forEach(p => { 
+                const tours = getToursFromPase(p);
+                const firstDate = tours.length > 0 ? tours[0].fecha : p.fecha; // Fallback
+                const tourNames = tours.map(t => t.nombre).join(', ');
+
+                if(p.agencia === ag && firstDate >= desde && firstDate <= hasta && applyFilter(p)) { 
+                    window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: firstDate, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${tourNames}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); 
+                } 
+            }); 
+            
+            let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; 
+            let tV=0, tA=0, tS=0; 
+            window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); 
+            html+='</tbody></table>'; 
+            document.getElementById('tablaLiqContainer').innerHTML=html; 
+            document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); 
+            document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); 
+            document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); 
+            document.getElementById('resultadosLiquidacion').style.display = 'block'; 
+        }
         function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
         function imprimirLiquidacion() { const ag = document.getElementById('liq_agencia').value; const d1 = document.getElementById('liq_desde').value; const d2 = document.getElementById('liq_hasta').value; const tv = document.getElementById('liq_total_venta').innerText; const ta = document.getElementById('liq_total_adelanto').innerText; const td = document.getElementById('liq_total_deuda').innerText; let h = `<div class="print-header"><h1>LIQUIDACIÓN DE AGENCIA</h1><h2>${ag}</h2><p>Periodo: ${d1} al ${d2}</p></div><table class="print-table"><thead><tr><th>FECHA</th><th>PASAJERO</th><th>SERVICIO</th><th>IMPORTE</th><th>A CUENTA</th><th>SALDO</th></tr></thead><tbody>`; window.liquidacionData.forEach(r => { h += `<tr><td>${r.fecha}</td><td>${r.nombre} (${r.pax})</td><td>${r.desc}</td><td>${fmtMoneda(r.v)}</td><td>${fmtMoneda(r.a)}</td><td>${fmtMoneda(r.s)}</td></tr>`; }); h += `</tbody></table><div style="margin-top:20px; display:flex; justify-content:flex-end;"><table style="width:300px; border:1px solid #000; border-collapse:collapse;"><tr><td style="padding:5px; border:1px solid #000;">Total Venta:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${tv}</td></tr><tr><td style="padding:5px; border:1px solid #000;">Total Pagado:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${ta}</td></tr><tr><td style="padding:5px; border:1px solid #000; font-weight:bold;">A PAGAR:</td><td style="padding:5px; border:1px solid #000; text-align:right; font-weight:bold;">${td}</td></tr></table></div><div style="margin-top:40px; text-align:center;">__________________________<br>Firma Conforme</div>`; document.getElementById('printableArea').innerHTML = h; window.print(); document.getElementById('printableArea').innerHTML = ''; }
         function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
-        function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 15; window.opsTempAsignados = []; cargarPendientesOps(); }
+        function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 16; window.opsTempAsignados = []; cargarPendientesOps(); }
         
         function cargarPendientesOps() { 
             const f = document.getElementById('ops_fecha').value; 
@@ -1117,9 +1377,6 @@
             let htmlPend = ''; 
             let countPend = 0; 
             
-            const candidatosDB = window.db.filter(r => Array.isArray(r.tours) && r.tours.some(tour => tour.fecha === f && tour.nombre === t)); 
-            const candidatosPases = window.dbPases.filter(p => p.fecha === f && p.tour === t); 
-
             const renderItem = (id, nombre, pax, hotel, tipo, fullObs, celular, agencia) => { 
                 const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); 
                 if (yaAsignadoAqui) return; 
@@ -1138,24 +1395,36 @@
                 return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${safeNombre}', '${safeHotel}', '${celular || ""}', '${safeObs}', '${safeAgencia}')">></button></div>`; 
             }; 
 
-            candidatosDB.forEach(c => { 
-                const tr = c.tours.find(x => x.fecha === f && x.nombre === t); 
-                const notaDia = c.tours.find(x => x.fecha === f && !x.nombre);
+            // Candidatos DB
+            window.db.forEach(c => {
+                if(Array.isArray(c.tours)) {
+                    const tr = c.tours.find(x => x.fecha === f && x.nombre === t);
+                    if(tr) {
+                        const notaDia = c.tours.find(x => x.fecha === f && !x.nombre);
+                        let obsParts = [];
+                        if(c.observaciones) obsParts.push(`[Gen: ${c.observaciones}]`);
+                        if(tr.obsTour || tr.obs) obsParts.push(`[Tour: ${tr.obsTour || tr.obs}]`);
+                        if(notaDia && notaDia.obsDia) obsParts.push(`[Nota: ${notaDia.obsDia}]`);
+                        const fullObs = obsParts.join(' ');
+                        const h = renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', fullObs, c.celular, c.agencia);
+                        if(h) htmlPend+=h;
+                    }
+                }
+            });
 
-                let obsParts = [];
-                if(c.observaciones) obsParts.push(`[Gen: ${c.observaciones}]`);
-                if(tr && (tr.obsTour || tr.obs)) obsParts.push(`[Tour: ${tr.obsTour || tr.obs}]`);
-                if(notaDia && notaDia.obsDia) obsParts.push(`[Nota: ${notaDia.obsDia}]`);
-                
-                const fullObs = obsParts.join(' ');
-
-                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', fullObs, c.celular, c.agencia); 
-                if(h) htmlPend+=h; 
-            }); 
-            candidatosPases.forEach(c => { 
-                const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', c.observacion || '', c.celular, c.agencia); 
-                if(h) htmlPend+=h; 
-            }); 
+            // Candidatos Pases (Multi-tour logic)
+            window.dbPases.forEach(c => {
+                const tours = getToursFromPase(c);
+                const tr = tours.find(x => x.fecha === f && x.nombre === t);
+                if(tr) {
+                    let obsParts = [];
+                    if(c.observacion) obsParts.push(`[Gen: ${c.observacion}]`);
+                    if(tr.obs) obsParts.push(`[Tour: ${tr.obs}]`);
+                    const fullObs = obsParts.join(' ');
+                    const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', fullObs, c.celular, c.agencia);
+                    if(h) htmlPend+=h;
+                }
+            });
 
             divPend.innerHTML = htmlPend || '<div style="padding:10px; color:gray;">No hay clientes pendientes.</div>'; 
             document.getElementById('count_pendientes').innerText = countPend; 
@@ -1163,6 +1432,9 @@
         }
 
         window.imprimirManifiesto = function() {
+            const originalTitle = document.title; 
+            document.title = " "; 
+
             const fecha = document.getElementById('ops_fecha').value;
             const tour = document.getElementById('ops_tour').value;
             const conductor = document.getElementById('ops_conductor').value || "---";
@@ -1170,11 +1442,17 @@
             const capacidad = document.getElementById('ops_capacidad').value;
             const paxList = window.opsTempAsignados;
 
-            if (paxList.length === 0) return alert("No hay pasajeros asignados para imprimir.");
+            if (paxList.length === 0) {
+                document.title = originalTitle; 
+                return alert("No hay pasajeros asignados para imprimir.");
+            }
 
             let totalPax = paxList.reduce((sum, p) => sum + parseInt(p.pax), 0);
 
             let h = `
+                <div style="position:fixed; top:10px; right:20px; font-size:0.7rem; color:#666;">
+                    Impreso: ${new Date().toLocaleString()}
+                </div>
                 <div class="print-header">
                     <h1>MANIFIESTO DE PASAJEROS</h1>
                     <h2>${tour}</h2>
@@ -1234,6 +1512,8 @@
 
             document.getElementById('printableArea').innerHTML = h;
             window.print();
+            
+            document.title = originalTitle; 
             document.getElementById('printableArea').innerHTML = '';
         };
 
@@ -1339,7 +1619,7 @@
         
         function cargarSelectsPase() {
             const sa = document.getElementById('p_agencia'); sa.innerHTML = '<option value="">Seleccione Agencia...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
-            const st = document.getElementById('p_tour'); st.innerHTML = '<option value="">Seleccione Tour...</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
+            //const st = document.getElementById('p_tour'); st.innerHTML = '<option value="">Seleccione Tour...</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
             const sh = document.getElementById('p_hotel'); sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>'; if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h => sh.innerHTML += `<option value="${h.nombre}">${h.nombre}</option>`);
         }
         
@@ -1374,6 +1654,27 @@
             
             d.innerHTML = html;
             document.getElementById('listaToursInputs').appendChild(d); 
+        }
+
+        // --- NUEVA FUNCION PARA AGREGAR FILA DE TOUR EN MODAL PASES ---
+        window.agregarFilaTourPase = function(nombre='', fecha='', obs='') {
+            const container = document.getElementById('listaToursPases');
+            const div = document.createElement('div');
+            div.className = 'tour-row-input';
+            
+            let tourOpts = '<option value="">-- Seleccione Tour --</option>';
+            if(window.catalogo.tours) window.catalogo.tours.forEach(t=>{
+                tourOpts += `<option value="${t.nombre}" ${t.nombre===nombre?'selected':''}>${t.nombre}</option>`;
+            });
+
+            // MODIFICADO: APLICANDO CLASE input-date-short
+            div.innerHTML = `
+                <input type="date" class="p-tour-fecha input-date-short" value="${fecha}" required>
+                <select class="p-tour-nombre" style="flex:1.5;" required>${tourOpts}</select>
+                <input type="text" class="p-tour-obs" placeholder="Obs. Específica" value="${obs}" style="flex:1;">
+                <button type="button" onclick="this.parentElement.remove(); syncPasePago();" style="color:red;border:none;cursor:pointer;font-weight:bold;margin-left:5px;">🗑</button>
+            `;
+            container.appendChild(div);
         }
 
         function abrirModalRegistro() { 
@@ -1454,12 +1755,92 @@
             } 
         }
 
-        function abrirModalPases() { window.editId = null; document.getElementById('pase_firestore_id').value = ''; document.getElementById('formPase').reset(); setPasePagoMode('adelanto'); cargarSelectsPase(); document.getElementById('modalPases').classList.add('active'); }
+        function abrirModalPases() { 
+            window.editId = null; 
+            document.getElementById('pase_firestore_id').value = ''; 
+            document.getElementById('formPase').reset(); 
+            document.getElementById('listaToursPases').innerHTML = ''; // Limpiar lista
+            setPasePagoMode('adelanto'); 
+            cargarSelectsPase(); 
+            // Agregar una linea vacia por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            agregarFilaTourPase('', hoy, '');
+            document.getElementById('modalPases').classList.add('active'); 
+        }
+        
         function setPasePagoMode(mode) { document.getElementById('p_modo_pago').value = mode; if (mode === 'pagado') { document.getElementById('opt_pagado').classList.add('active-green'); document.getElementById('opt_adelanto').classList.remove('active'); syncPasePago(); } else { document.getElementById('opt_adelanto').classList.add('active'); document.getElementById('opt_pagado').classList.remove('active-green'); document.getElementById('p_adelanto').readOnly = false; } }
         function syncPasePago() { if (document.getElementById('p_modo_pago').value === 'pagado') { document.getElementById('p_adelanto').value = document.getElementById('p_precio').value; document.getElementById('p_adelanto').readOnly = true; } }
-        function calcPaseAuto() { const tName = document.getElementById('p_tour').value; const qty = parseFloat(document.getElementById('p_cantidad').value) || 0; const tourData = window.catalogo.tours.find(t => t.nombre === tName); if(tourData && qty > 0) { const total = parseFloat(tourData.precio) * qty; document.getElementById('p_precio').value = total.toFixed(2); syncPasePago(); } }
-        document.getElementById('formPase').addEventListener('submit', e => { e.preventDefault(); const precio = parseFloat(document.getElementById('p_precio').value) || 0; const adelanto = parseFloat(document.getElementById('p_adelanto').value) || 0; const modo = document.getElementById('p_modo_pago').value; const data = { id: window.editId || Date.now(), nombre: document.getElementById('p_nombre').value, celular: document.getElementById('p_celular').value, agencia: document.getElementById('p_agencia').value, cantidad: document.getElementById('p_cantidad').value, hotel: document.getElementById('p_hotel').value, fecha: document.getElementById('p_fecha').value, tour: document.getElementById('p_tour').value, observacion: document.getElementById('p_obs').value, precio: precio, adelanto: adelanto, liquidado: (modo === 'pagado' || (precio > 0 && adelanto >= precio)) }; window.guardarPaseEnNube(data); });
-        function editarPase(id) { const p = window.dbPases.find(x => x.id === id); if(!p) return; abrirModalPases(); window.editId = id; document.getElementById('pase_firestore_id').value = p.firestoreId; document.getElementById('p_nombre').value = p.nombre; document.getElementById('p_celular').value = p.celular; document.getElementById('p_agencia').value = p.agencia; document.getElementById('p_cantidad').value = p.cantidad; document.getElementById('p_hotel').value = p.hotel; document.getElementById('p_fecha').value = p.fecha; document.getElementById('p_tour').value = p.tour; document.getElementById('p_obs').value = p.observacion || ''; document.getElementById('p_precio').value = p.precio; document.getElementById('p_adelanto').value = p.adelanto; if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto'); }
+        
+        // Esta función ahora suma los precios de tours del catálogo si se quisiera automatico, 
+        // pero como los pases son negociables, dejamos que el usuario ponga el total manual o sume mentalmente.
+        // Se deja como trigger manual si se quisiera implementar logica extra.
+        function calcPaseAuto() { } 
+
+        document.getElementById('formPase').addEventListener('submit', e => { 
+            e.preventDefault(); 
+            const precio = parseFloat(document.getElementById('p_precio').value) || 0; 
+            const adelanto = parseFloat(document.getElementById('p_adelanto').value) || 0; 
+            const modo = document.getElementById('p_modo_pago').value; 
+            
+            const tours = [];
+            document.querySelectorAll('#listaToursPases .tour-row-input').forEach(row => {
+                tours.push({
+                    fecha: row.querySelector('.p-tour-fecha').value,
+                    nombre: row.querySelector('.p-tour-nombre').value,
+                    obs: row.querySelector('.p-tour-obs').value
+                });
+            });
+
+            if(tours.length === 0) return alert("Agregue al menos un tour");
+
+            const data = { 
+                id: window.editId || Date.now(), 
+                nombre: document.getElementById('p_nombre').value, 
+                celular: document.getElementById('p_celular').value, 
+                agencia: document.getElementById('p_agencia').value, 
+                cantidad: document.getElementById('p_cantidad').value, 
+                hotel: document.getElementById('p_hotel').value, 
+                observacion: document.getElementById('p_obs').value, 
+                
+                // Campos Legacy para compatibilidad, tomamos el primero
+                fecha: tours[0].fecha, 
+                tour: tours[0].nombre, 
+
+                // Campo Nuevo
+                tours: tours,
+
+                precio: precio, 
+                adelanto: adelanto, 
+                liquidado: (modo === 'pagado' || (precio > 0 && adelanto >= precio)) 
+            }; 
+            window.guardarPaseEnNube(data); 
+        });
+
+        function editarPase(id) { 
+            const p = window.dbPases.find(x => x.id === id); 
+            if(!p) return; 
+            abrirModalPases(); 
+            document.getElementById('listaToursPases').innerHTML = ''; // Limpiar vacio default
+
+            window.editId = id; 
+            document.getElementById('pase_firestore_id').value = p.firestoreId; 
+            document.getElementById('p_nombre').value = p.nombre; 
+            document.getElementById('p_celular').value = p.celular; 
+            document.getElementById('p_agencia').value = p.agencia; 
+            document.getElementById('p_cantidad').value = p.cantidad; 
+            document.getElementById('p_hotel').value = p.hotel; 
+            document.getElementById('p_obs').value = p.observacion || ''; 
+            document.getElementById('p_precio').value = p.precio; 
+            document.getElementById('p_adelanto').value = p.adelanto; 
+            
+            // Cargar Tours
+            const tours = getToursFromPase(p);
+            tours.forEach(t => {
+                agregarFilaTourPase(t.nombre, t.fecha, t.obs || '');
+            });
+
+            if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto'); 
+        }
         
         function editarCat(tipo, idOrName) { 
             window.isEditingCat = true;
