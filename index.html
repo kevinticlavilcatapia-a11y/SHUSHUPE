@@ -83,7 +83,7 @@
         }
         
         .excel-table {
-            border-collapse: separate; /* Crucial para sticky */
+            border-collapse: separate;
             border-spacing: 0;
             min-width: 100%;
         }
@@ -94,7 +94,6 @@
             vertical-align: top;
         }
 
-        /* Cabecera Sticky (Días) */
         .excel-table thead { 
             position: sticky; 
             top: 0; 
@@ -103,11 +102,10 @@
         }
         
         .excel-table th {
-            background: #f9fafb; /* Asegura opacidad */
-            box-shadow: 0 1px 0 #e5e7eb; /* Borde inferior falso para sticky */
+            background: #f9fafb; 
+            box-shadow: 0 1px 0 #e5e7eb; 
         }
 
-        /* Primera Columna Sticky (Clientes) */
         .col-sticky { 
             position: sticky; 
             left: 0; 
@@ -119,9 +117,8 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
         }
 
-        /* Esquina Superior Izquierda (Intersección Sticky) */
         .excel-table thead th.col-sticky {
-            z-index: 60; /* Mayor que el resto para tapar al scroll */
+            z-index: 60; 
             background: #f3f4f6;
         }
 
@@ -130,7 +127,7 @@
             font-size: 0.8rem;
             color: var(--primary); 
             padding: 8px; 
-            min-width: 100px; /* Ancho mínimo para que no se aplaste */
+            min-width: 100px; 
         }
         
         .drop-zone.drag-over { background: #dcfce7 !important; border: 2px dashed var(--success); } 
@@ -484,7 +481,7 @@
                         </div>
                         <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:10px;">
                              <div class="input-group"><label class="input-label">Recojo/Hotel</label><select id="p_hotel" required></select></div>
-                             <div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required></div>
+                             <div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required oninput="calcPaseAuto()"></div>
                         </div>
                         <div class="input-group" style="margin-top:10px;"><label class="input-label">Observaciones Generales</label><input type="text" id="p_obs"></div>
                     </div>
@@ -687,8 +684,6 @@
             const txt = document.getElementById('buscadorLista').value.toLowerCase(); const mes = document.getElementById('filtroMes').value;
             renderLista(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt))));
             renderPases(mes); renderGastos(); renderListaOps();
-            
-            // REMOVIDO: FILTRO TOUR
             
             const fa = document.getElementById('filtroAgenciaPases'); if(fa.options.length<=1 && window.catalogo.agencias) fa.innerHTML = '<option value="">-- Todas --</option>' + window.catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
             
@@ -1670,11 +1665,35 @@
             // MODIFICADO: APLICANDO CLASE input-date-short
             div.innerHTML = `
                 <input type="date" class="p-tour-fecha input-date-short" value="${fecha}" required>
-                <select class="p-tour-nombre" style="flex:1.5;" required>${tourOpts}</select>
+                <select class="p-tour-nombre" style="flex:1.5;" onchange="calcPaseAuto()" required>${tourOpts}</select>
                 <input type="text" class="p-tour-obs" placeholder="Obs. Específica" value="${obs}" style="flex:1;">
-                <button type="button" onclick="this.parentElement.remove(); syncPasePago();" style="color:red;border:none;cursor:pointer;font-weight:bold;margin-left:5px;">🗑</button>
+                <button type="button" onclick="this.parentElement.remove(); calcPaseAuto();" style="color:red;border:none;cursor:pointer;font-weight:bold;margin-left:5px;">🗑</button>
             `;
             container.appendChild(div);
+        }
+
+        // --- CALCULO AUTOMATICO DE PASE ---
+        window.calcPaseAuto = function() {
+            const qty = parseFloat(document.getElementById('p_cantidad').value) || 0;
+            let total = 0;
+
+            // Iterate rows
+            document.querySelectorAll('#listaToursPases .tour-row-input').forEach(row => {
+                const select = row.querySelector('.p-tour-nombre');
+                const tourName = select.value;
+                // Find price in catalog
+                const tourData = window.catalogo.tours.find(t => t.nombre === tourName);
+                if(tourData) {
+                    total += (parseFloat(tourData.precio) || 0);
+                }
+            });
+
+            // Multiply by pax
+            total = total * qty;
+
+            // Update UI
+            document.getElementById('p_precio').value = total.toFixed(2);
+            syncPasePago();
         }
 
         function abrirModalRegistro() { 
@@ -1774,7 +1793,28 @@
         // Esta función ahora suma los precios de tours del catálogo si se quisiera automatico, 
         // pero como los pases son negociables, dejamos que el usuario ponga el total manual o sume mentalmente.
         // Se deja como trigger manual si se quisiera implementar logica extra.
-        function calcPaseAuto() { } 
+        function calcPaseAuto() {
+            const qty = parseFloat(document.getElementById('p_cantidad').value) || 0;
+            let total = 0;
+
+            // Iterate rows
+            document.querySelectorAll('#listaToursPases .tour-row-input').forEach(row => {
+                const select = row.querySelector('.p-tour-nombre');
+                const tourName = select.value;
+                // Find price in catalog
+                const tourData = window.catalogo.tours.find(t => t.nombre === tourName);
+                if(tourData) {
+                    total += (parseFloat(tourData.precio) || 0);
+                }
+            });
+
+            // Multiply by pax
+            total = total * qty;
+
+            // Update UI
+            document.getElementById('p_precio').value = total.toFixed(2);
+            syncPasePago();
+        }
 
         document.getElementById('formPase').addEventListener('submit', e => { 
             e.preventDefault(); 
