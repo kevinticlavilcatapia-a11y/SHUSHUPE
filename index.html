@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema SALIDAS - Dashboard</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         /* ESTILOS GENERALES Y PRO */
         :root {
@@ -44,13 +47,17 @@
         }
         .title-section h1 { margin: 0; font-size: 1.4rem; color: var(--primary); font-weight: 800; letter-spacing: -0.025em; }
         
-        .main-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .main-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1; justify-content: flex-end;}
         .control-group-right { display: flex; align-items: center; gap: 5px; background: #f8fafc; padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
         .input-month-compact { border: none; background: transparent; font-family: inherit; font-size: 0.9rem; color: var(--text-main); padding: 5px; outline: none; cursor: pointer; }
         .btn-reg-compact { background: var(--primary); color: white; border: none; padding: 6px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .btn-reg-compact:hover { background: var(--primary-dark); }
         .btn-sec { background: var(--surface); border: 1px solid var(--border); color: var(--text-sec); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
         .btn-sec:hover { background: #f9fafb; color: var(--primary); border-color: var(--primary); }
+
+        /* BUSCADOR GLOBAL */
+        .search-global { padding:10px 15px; border:1px solid var(--border); border-radius:8px; width:100%; max-width: 300px; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s; }
+        .search-global:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 
         /* TABS */
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); overflow-x: auto; scrollbar-width: none; }
@@ -72,95 +79,39 @@
         .obs-box { display: block; margin-top: 5px; font-size: 0.75rem; background: #fffbeb; color: #92400e; padding: 4px 8px; border-radius: 6px; border: 1px solid #fcd34d; width: fit-content; }
         .tag-tour { display: inline-block; background: var(--primary-light); color: var(--primary-dark); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin: 2px; border: 1px solid #c7d2fe; }
 
-        /* CALENDARIO & OPS REPARADO */
-        .excel-wrapper { 
-            overflow: auto; 
-            background: var(--surface); 
-            border-radius: 12px; 
-            height: 75vh; 
-            border: 1px solid var(--border); 
-            position: relative;
-        }
-        
-        .excel-table {
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: 100%;
-        }
-
-        .excel-table th, .excel-table td { 
-            border-right: 1px solid #e5e7eb; 
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
-        }
-
-        .excel-table thead { 
-            position: sticky; 
-            top: 0; 
-            z-index: 50; 
-            background: #f9fafb; 
-        }
-        
-        .excel-table th {
-            background: #f9fafb; 
-            box-shadow: 0 1px 0 #e5e7eb; 
-        }
-
-        .col-sticky { 
-            position: sticky; 
-            left: 0; 
-            background: var(--surface); 
-            z-index: 20; 
-            border-right: 2px solid #d1d5db !important; 
-            width: 320px; 
-            min-width: 320px; 
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
-        }
-
-        .excel-table thead th.col-sticky {
-            z-index: 60; 
-            background: #f3f4f6;
-        }
-
-        .day-header { 
-            text-align: center; 
-            font-size: 0.8rem;
-            color: var(--primary); 
-            padding: 8px; 
-            min-width: 100px; 
-        }
-        
+        /* CALENDARIO */
+        .excel-wrapper { overflow: auto; background: var(--surface); border-radius: 12px; height: 75vh; border: 1px solid var(--border); position: relative; }
+        .excel-table { border-collapse: separate; border-spacing: 0; min-width: 100%; }
+        .excel-table th, .excel-table td { border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        .excel-table thead { position: sticky; top: 0; z-index: 50; background: #f9fafb; }
+        .excel-table th { background: #f9fafb; box-shadow: 0 1px 0 #e5e7eb; }
+        .col-sticky { position: sticky; left: 0; background: var(--surface); z-index: 20; border-right: 2px solid #d1d5db !important; width: 320px; min-width: 320px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+        .excel-table thead th.col-sticky { z-index: 60; background: #f3f4f6; }
+        .day-header { text-align: center; font-size: 0.8rem; color: var(--primary); padding: 8px; min-width: 100px; }
         .drop-zone.drag-over { background: #dcfce7 !important; border: 2px dashed var(--success); } 
         .cell-stay { background: #f0fdf4; }
         .cell-pase { background: #f5f3ff; } 
-        
         .tour-stack { display: flex; flex-direction: column; gap: 2px; min-height: 30px; }
-
         .tour-item { background: white; border-left: 4px solid var(--primary); padding: 4px; font-size: 0.7rem; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 500; white-space: normal; overflow: hidden; z-index: 5; display:flex; flex-direction:column; gap:1px; transition: transform 0.1s;}
         .tour-item:hover { transform: scale(1.02); z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tour-obs-cal { font-size: 0.65rem; color: #2563eb; font-style: italic; line-height: 1; font-weight:bold; }
         .tour-obs-ops { font-size: 0.65rem; color: #d97706; font-style: italic; margin-top: 2px; border-top: 1px dashed #eee; padding-top: 2px; }
-        
         .tour-item.locked { border-left-color: #f59e0b; background-color: #fffbeb; cursor: default; color: #92400e; box-shadow: none; border-left-width: 4px; }
         .tour-item.locked:hover { transform: none; box-shadow: none; }
         .tour-item.pase-style { border-left-color: var(--pase-color); } 
-
         .obs-general-cal { margin-top: 5px; font-size: 0.7rem; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-style: italic; }
-
         .pax-card { font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
         .pax-card.is-pase { border-left: 4px solid var(--pase-color); padding-left: 8px; } 
-        
         .pase-item { background: white; border-left: 4px solid var(--pase-color); padding: 4px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
 
-        /* OPERACIONES */
-        .ops-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        /* OPERACIONES RESPONSIVE 3 COLUMNAS */
+        .ops-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
         .ops-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 15px; height: 60vh; overflow-y: auto; display: flex; flex-direction: column; }
         .ops-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
         .ops-header { font-weight: 800; color: var(--ops-color); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-add-ops { background: var(--success); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; }
         .btn-remove-ops { background: var(--danger); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; }
         .capacidad-indicator { font-size: 1.2rem; font-weight: bold; text-align: center; margin: 10px 0; padding: 10px; background: #e0f2fe; border-radius: 8px; color: #0369a1; }
-        .capacidad-error { background: #fee2e2; color: #991b1b; }
 
         /* UTILIDADES */
         .money-cell { font-family: 'Courier New', monospace; font-weight: 700; color: var(--text-main); }
@@ -184,13 +135,13 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; transition: 0.2s; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         
-        .btn-icon { width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; margin-left: 5px; }
+        .btn-icon { width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; margin-left: 5px; transition: 0.1s; }
+        .btn-icon:hover { opacity: 0.8; transform: scale(1.05); }
         .btn-edit { background: #fff7ed; color: #d97706; } .btn-del { background: #fef2f2; color: #dc2626; }
         
         .catalog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .catalog-col { background: var(--surface); border-radius: 12px; padding: 15px; border: 1px solid var(--border); max-height: 70vh; display: flex; flex-direction: column; }
         .item-list { overflow-y: auto; flex: 1; }
-        /* NUEVO ESTILO ITEM CATALOGO */
         .cat-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; background:white; margin-bottom:5px; border-radius:8px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:flex-start;}
         .room-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 30px; gap: 8px; margin-bottom: 8px; align-items: center; }
         .type-selector { display: flex; background: #e0e7ff; padding: 5px; border-radius: 10px; margin-bottom: 20px; }
@@ -198,13 +149,11 @@
         .type-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .room-list-container { background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 250px; overflow-y: auto; }
         
-        /* ESTILOS PARA LA NUEVA LISTA DE HABITACIONES */
         .added-room-item { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
         .added-room-info { display: flex; flex-direction: column; }
         .added-room-hotel { font-weight: 700; color: var(--primary); font-size: 0.75rem; text-transform: uppercase; }
         
         .tour-row-input { margin-bottom: 5px; background: white; padding: 5px; border-radius: 6px; border: 1px solid #eee; display: flex; gap: 5px; align-items: center;}
-        
         .pro-section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .pro-section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
         .input-group { margin-bottom: 0; }
@@ -224,7 +173,6 @@
         .btn-main { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
         .btn-main:hover { background: var(--primary-dark); }
 
-        /* CLASE NUEVA PARA FECHA COMPACTA */
         .input-date-short { width: 140px !important; flex-shrink: 0; }
 
         @media print {
@@ -246,9 +194,11 @@
     <div id="printableArea"></div>
 
     <div class="app-layout">
+        
         <div class="header-container">
             <div class="title-section"><h1>🚀 SALIDAS</h1></div>
             <div class="main-controls">
+                <input type="text" id="buscadorGlobal" class="search-global" placeholder="🔍 Buscar Pasajero o Agencia..." onkeyup="actualizarTodo()">
                 <div class="control-group-right">
                     <input type="month" id="filtroMes" class="input-month-compact" onchange="actualizarTodo()">
                     <button class="btn-reg-compact" onclick="abrirModalRegistro()">+ Nuevo</button>
@@ -269,7 +219,6 @@
         </div>
 
         <div id="vistaLista" class="view-section active">
-            <div style="margin-bottom:20px;"><input type="text" id="buscadorLista" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:300px;" placeholder="🔍 Buscar por nombre..." onkeyup="actualizarTodo()"></div>
             <div class="card"><table style="width:100%"><thead><tr><th>Pasajero</th><th>Hotel / Agencia</th><th>Pagos</th><th>Itinerario</th><th style="text-align:right">Acciones</th></tr></thead><tbody id="tbodyLista"></tbody></table></div>
         </div>
 
@@ -283,16 +232,22 @@
                     <label style="font-size:0.8rem; font-weight:bold; color:#0369a1;">Hasta:</label>
                     <input type="date" id="cal_hasta" style="padding:5px; border-radius:6px; border:1px solid #ccc; font-size:0.85rem;" onchange="actualizarTodo()">
                 </div>
+                <div style="display:flex; align-items:center; gap:5px; margin-left: 10px; border-left: 1px solid #bae6fd; padding-left: 10px;">
+                    <label style="font-size:0.8rem; font-weight:bold; color:#0369a1;">Mostrar:</label>
+                    <select id="cal_tipo_filtro" style="padding:5px; border-radius:6px; border:1px solid #ccc; font-size:0.85rem;" onchange="actualizarTodo()">
+                        <option value="todos">Todo (Paquetes y Pases)</option>
+                        <option value="paquetes">Solo Paquetes</option>
+                        <option value="pases">Solo Pases</option>
+                    </select>
+                </div>
             </div>
             <div class="excel-wrapper"><table class="excel-table" id="tablaExcel"></table></div>
         </div>
 
         <div id="vistaPases" class="view-section">
             <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
-                <input type="text" id="buscadorPases" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:250px;" placeholder="🔍 Buscar pase..." onkeyup="actualizarTodo()">
                 <select id="filtroAgenciaPases" style="padding:10px; border:1px solid var(--border); border-radius:8px; width:200px;" onchange="actualizarTodo()"><option value="">-- Todas las Agencias --</option></select>
                 <div style="flex:1;"></div>
-                <button class="btn-main" onclick="abrirModalPases()" style="background:var(--pase-color);">+ Nuevo Pase</button>
             </div>
             <div class="excel-wrapper"><table class="excel-table" id="tablaPases"></table></div>
         </div>
@@ -309,11 +264,18 @@
                 </div>
                 <input type="hidden" id="ops_id_actual"> <input type="hidden" id="ops_firestore_id">
                 <div id="indicadorCapacidad" class="capacidad-indicator">0 / 16 Pasajeros</div>
+                
                 <div class="ops-container">
-                    <div class="ops-box"><div class="ops-header"><span>👥 Pendientes (Sin Asignar)</span><small id="count_pendientes">0</small></div><div id="lista_ops_pendientes" style="flex:1;"></div></div>
+                    <div class="ops-box"><div class="ops-header"><span>👥 Pendientes</span><small id="count_pendientes">0</small></div><div id="lista_ops_pendientes" style="flex:1;"></div></div>
                     <div class="ops-box" style="border-color:var(--ops-color); background:#f0f9ff;"><div class="ops-header"><span>🚍 En el Vehículo</span><small id="count_asignados">0</small></div><div id="lista_ops_asignados" style="flex:1;"></div></div>
+                    <div class="ops-box" style="border-color:var(--pase-color); background:#fdfcff;"><div class="ops-header"><span style="color:var(--pase-color);">🏢 Tercerizados</span><small id="count_tercerizados">0</small></div><div id="lista_ops_tercerizados" style="flex:1;"></div></div>
                 </div>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button class="btn-main" onclick="guardarOperacion()" style="background:var(--ops-color);">💾 Guardar Operación</button><button class="btn-main" onclick="imprimirManifiesto()" style="background:#333;">🖨️ Imprimir Manifiesto</button></div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button class="btn-main" onclick="guardarOperacion()" style="background:var(--ops-color);">💾 Guardar Operación</button>
+                    <button class="btn-main" onclick="imprimirManifiesto()" style="background:#333;">🖨️ Imprimir PDF</button>
+                    <button class="btn-main" onclick="exportarManifiestoImagen()" style="background:#2563eb;">🖼️ Exportar Imagen</button>
+                </div>
             </div>
             <h3 style="margin-top:30px;">Salidas Programadas</h3>
             <div class="card"><table style="width:100%"><thead><tr><th>Fecha</th><th>Tour</th><th>Conductor / Guía</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbodyOps"></tbody></table></div>
@@ -326,16 +288,35 @@
                     <div style="flex:1; min-width:200px;"><label class="input-label">Agencia</label><select id="liq_agencia" style="width:100%;"><option value="">Seleccione Agencia...</option></select></div>
                     <div><label class="input-label">Desde</label><input type="date" id="liq_desde"></div>
                     <div><label class="input-label">Hasta</label><input type="date" id="liq_hasta"></div>
-                    <div><label class="input-label">Ver</label><select id="liq_filtro_estado"><option value="pendientes">Pendientes (Por Cobrar)</option><option value="todos">Todo el Historial</option><option value="liquidados">Solo Pagados</option></select></div>
+                    <div><label class="input-label">Ver</label><select id="liq_filtro_estado"><option value="pendientes">Pendientes (Por Cobrar / Pagar)</option><option value="todos">Todo el Historial</option><option value="liquidados">Solo Pagados</option></select></div>
                     <button class="btn-main" style="background:var(--report-color);" onclick="generarLiquidacion()">📊 Generar</button>
                 </div>
+                
                 <div id="resultadosLiquidacion" style="margin-top:20px; display:none;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><button class="btn-main" style="background:#059669;" onclick="liquidarRegistros()">✅ Marcar como Pagado</button><button class="btn-sec" onclick="imprimirLiquidacion()">🖨️ Imprimir Liquidación</button></div>
-                    <div id="tablaLiqContainer"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <button class="btn-main" style="background:#059669;" onclick="liquidarTodo()">✅ Marcar TODO como Pagado/Liquidado</button>
+                        <button class="btn-sec" onclick="imprimirLiquidacion()">🖨️ Imprimir Liquidación</button>
+                    </div>
+                    
+                    <h4 style="color:var(--primary); border-bottom:2px solid var(--primary); padding-bottom:5px;">A COBRAR (Servicios que operamos nosotros)</h4>
+                    <div id="tablaLiqCobrarContainer"></div>
+                    
+                    <h4 style="color:var(--danger); border-bottom:2px solid var(--danger); padding-bottom:5px; margin-top:20px;">A PAGAR (Pases que enviamos a la agencia)</h4>
+                    <div id="tablaLiqPagarContainer"></div>
+
                     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:20px;">
-                        <div style="padding:15px; background:#f3f4f6; border-radius:8px; text-align:center;"><small>Total Ventas</small><div id="liq_total_venta" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div></div>
-                        <div style="padding:15px; background:#ecfdf5; border-radius:8px; text-align:center; color:#047857;"><small>Total Adelantos</small><div id="liq_total_adelanto" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div></div>
-                        <div style="padding:15px; background:#fef2f2; border-radius:8px; text-align:center; color:#dc2626; border:2px solid #dc2626;"><small>Saldo a Pagar (Deuda)</small><div id="liq_total_deuda" style="font-weight:bold; font-size:1.5rem;">S/ 0.00</div></div>
+                        <div style="padding:15px; background:#ecfdf5; border-radius:8px; text-align:center; color:#047857; border:1px solid #a7f3d0;">
+                            <small>Total A COBRAR (Deuda a favor)</small>
+                            <div id="liq_total_cobrar" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div>
+                        </div>
+                        <div style="padding:15px; background:#fef2f2; border-radius:8px; text-align:center; color:#dc2626; border:1px solid #fecaca;">
+                            <small>Total A PAGAR (Pases enviados)</small>
+                            <div id="liq_total_pagar" style="font-weight:bold; font-size:1.2rem;">S/ 0.00</div>
+                        </div>
+                        <div style="padding:15px; background:#eff6ff; border-radius:8px; text-align:center; border:2px solid #3b82f6; color:#1d4ed8;">
+                            <small>SALDO NETO FINAL</small>
+                            <div id="liq_saldo_neto" style="font-weight:bold; font-size:1.5rem;">S/ 0.00</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -388,118 +369,41 @@
 
             <div class="card">
                 <table style="width:100%">
-                    <thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Adelanto</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Abonado</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody id="tbodyControl"></tbody>
                 </table>
             </div>
         </div>
-    </div> <div class="modal" id="modalRegistro">
-        <div class="modal-content">
-            <div class="modal-header"><h2 id="modalRegTitulo" style="margin:0;color:var(--primary);">📝 Registro</h2><button onclick="cerrarModal('modalRegistro')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div>
+    </div>
+
+    <div class="modal" id="modalTercerizar">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <h2 style="margin:0;color:var(--pase-color);">🔄 Enviar Pase</h2>
+                <button onclick="cerrarModal('modalTercerizar')" style="border:none;background:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
             <div class="modal-body">
-                <form id="formTour">
-                    <input type="hidden" id="reg_firestore_id">
-                    
-                    <div class="pro-section">
-                        <div class="pro-section-title">👤 Datos del Cliente</div>
-                        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;">
-                            <div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div>
-                            <div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div>
-                            <div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div>
-                            <div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div>
-                        </div>
-                        
-                        <div style="margin-top:10px;">
-                            <label class="input-label">Fechas de Estadía</label>
-                            <div class="date-range-container">
-                                <div style="flex:1;">
-                                    <label style="font-size:0.7rem;">LLEGADA</label>
-                                    <input type="date" id="llegada" required onchange="validarFechas()" style="border:none; background:transparent;">
-                                </div>
-                                <div class="date-separator">➝</div>
-                                <div style="flex:1; text-align:right;">
-                                    <label style="font-size:0.7rem;">SALIDA</label>
-                                    <input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right; background:transparent;">
-                                </div>
-                            </div>
-                        </div>
+                <form id="formTercerizar">
+                    <input type="hidden" id="terc_id">
+                    <input type="hidden" id="terc_tipo">
+                    <input type="hidden" id="terc_idx">
+                    <div class="input-group">
+                        <label class="input-label">Agencia Operadora</label>
+                        <select id="terc_agencia" required></select>
                     </div>
-
-                    <div class="pro-section">
-                        <div class="pro-section-title">🏨 Alojamiento (Habitaciones)</div>
-                        <div style="background: #f0f9ff; padding: 10px; border-radius: 8px; border: 1px dashed #bae6fd; margin-bottom: 10px;">
-                            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap: wrap;">
-                                <div style="flex:1.5; min-width: 200px;">
-                                    <label class="input-label">1. Seleccionar Hotel</label>
-                                    <select id="selHotelAdd" onchange="actualizarSelectRoom()"></select>
-                                </div>
-                                <div style="flex:1; min-width: 150px;">
-                                    <label class="input-label">2. Habitación</label>
-                                    <select id="selRoomAdd"></select>
-                                </div>
-                                <div style="width: 80px;">
-                                    <label class="input-label">3. Noches</label>
-                                    <input type="number" id="txtNochesAdd" value="1" min="1" style="text-align:center;">
-                                </div>
-                                <button type="button" class="btn-main" onclick="agregarHabitacion()" style="padding: 10px 15px;">+ Agregar</button>
-                            </div>
-                        </div>
-                        <div id="listaHabitacionesAgregadas"></div>
+                    <div class="input-group" style="margin-top:15px;">
+                        <label class="input-label">Costo TOTAL a pagarles (S/)</label>
+                        <input type="number" id="terc_costo" step="0.01" placeholder="Ej. 100.00" required>
                     </div>
-
-                    <div class="pro-section"><div class="pro-section-title">💰 Detalles</div><div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;"><div class="input-group"><label class="input-label">Precio Total</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="precioPaquete" required class="with-icon" style="font-weight:bold;"></div></div><div class="input-group"><label class="input-label">Adelanto</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="adelanto" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Observaciones</label><input type="text" id="observaciones" style="width:100%;"></div></div></div>
-                    
-                    <div class="pro-section" style="background:#f8fafc;">
-                        <div class="pro-section-title" style="justify-content:space-between;">
-                            <span>🗺️ Itinerario</span>
-                            <div style="display:flex; gap:5px;">
-                                <button type="button" onclick="agregarLineaItinerario('tour')" class="btn-main" style="padding:4px 10px; height:auto; background:var(--primary);">+ Tour</button>
-                                <button type="button" onclick="agregarLineaItinerario('nota')" class="btn-main" style="padding:4px 10px; height:auto; background:#f59e0b;">+ Nota</button>
-                            </div>
-                        </div>
-                        <div id="listaToursInputs"></div>
-                    </div>
-                    
-                    <button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:15px; margin-top:10px;">💾 Guardar Registro</button>
+                    <button type="submit" class="btn-main" style="width:100%; justify-content:center; margin-top:20px; background:var(--pase-color);">Confirmar Envío</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="modalPases">
-        <div class="modal-content" style="max-width:700px;">
-            <div class="modal-header"><h2 id="modalPasesTitulo" style="margin:0;color:var(--pase-color);">🎫 Nuevo Pase (Multi-Tours)</h2><button onclick="cerrarModal('modalPases')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div>
-            <div class="modal-body">
-                <form id="formPase">
-                    <input type="hidden" id="pase_firestore_id">
-                    <div class="pro-section">
-                        <div class="pro-section-title">Datos del Pasajero</div>
-                        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr;">
-                            <div class="input-group"><label class="input-label">Nombres</label><input type="text" id="p_nombre" required></div>
-                            <div class="input-group"><label class="input-label">Celular</label><input type="tel" id="p_celular" required></div>
-                            <div class="input-group"><label class="input-label">Agencia</label><select id="p_agencia" required></select></div>
-                        </div>
-                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:10px;">
-                             <div class="input-group"><label class="input-label">Recojo/Hotel</label><select id="p_hotel" required></select></div>
-                             <div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required oninput="calcPaseAuto()"></div>
-                        </div>
-                        <div class="input-group" style="margin-top:10px;"><label class="input-label">Observaciones Generales</label><input type="text" id="p_obs"></div>
-                    </div>
+    <div class="modal" id="modalRegistro"><div class="modal-content"><div class="modal-header"><h2 id="modalRegTitulo" style="margin:0;color:var(--primary);">📝 Registro</h2><button onclick="cerrarModal('modalRegistro')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div><div class="modal-body"><form id="formTour"><input type="hidden" id="reg_firestore_id"><div class="pro-section"><div class="pro-section-title">👤 Datos del Cliente</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;"><div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div></div><div style="margin-top:10px;"><label class="input-label">Fechas de Estadía</label><div class="date-range-container"><div style="flex:1;"><label style="font-size:0.7rem;">LLEGADA</label><input type="date" id="llegada" required onchange="validarFechas()" style="border:none; background:transparent;"></div><div class="date-separator">➝</div><div style="flex:1; text-align:right;"><label style="font-size:0.7rem;">SALIDA</label><input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right; background:transparent;"></div></div></div></div><div class="pro-section"><div class="pro-section-title">🏨 Alojamiento (Habitaciones)</div><div style="background: #f0f9ff; padding: 10px; border-radius: 8px; border: 1px dashed #bae6fd; margin-bottom: 10px;"><div style="display:flex; gap:10px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1.5; min-width: 200px;"><label class="input-label">1. Seleccionar Hotel</label><select id="selHotelAdd" onchange="actualizarSelectRoom()"></select></div><div style="flex:1; min-width: 150px;"><label class="input-label">2. Habitación</label><select id="selRoomAdd"></select></div><div style="width: 110px;"><label class="input-label">3. Check-In</label><input type="date" id="txtCheckinAdd" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:0.8rem; width:100%; box-sizing:border-box;"></div><div style="width: 110px;"><label class="input-label">4. Check-Out</label><input type="date" id="txtCheckoutAdd" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:0.8rem; width:100%; box-sizing:border-box;"></div><button type="button" class="btn-main" onclick="agregarHabitacion()" style="padding: 10px 15px;">+ Agregar</button></div></div><div id="listaHabitacionesAgregadas"></div></div><div class="pro-section"><div class="pro-section-title">💰 Detalles</div><div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;"><div class="input-group"><label class="input-label">Precio Total</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="precioPaquete" required class="with-icon" style="font-weight:bold;"></div></div><div class="input-group"><label class="input-label">Adelanto</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="adelanto" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Observaciones</label><input type="text" id="observaciones" style="width:100%;"></div></div></div><div class="pro-section" style="background:#f8fafc;"><div class="pro-section-title" style="justify-content:space-between;"><span>🗺️ Itinerario</span><div style="display:flex; gap:5px;"><button type="button" onclick="agregarLineaItinerario('tour')" class="btn-main" style="padding:4px 10px; height:auto; background:var(--primary);">+ Tour</button><button type="button" onclick="agregarLineaItinerario('nota')" class="btn-main" style="padding:4px 10px; height:auto; background:#f59e0b;">+ Nota</button></div></div><div id="listaToursInputs"></div></div><button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:15px; margin-top:10px;">💾 Guardar Registro</button></form></div></div></div>
 
-                    <div class="pro-section" style="background:#f5f3ff; border:1px solid #ddd6fe;">
-                        <div class="pro-section-title" style="color:var(--pase-color); justify-content:space-between;">
-                            <span>🗺️ Tours del Pase</span>
-                            <button type="button" onclick="agregarFilaTourPase()" class="btn-main" style="padding:4px 10px; height:auto; background:var(--pase-color); font-size:0.8rem;">+ Agregar Tour</button>
-                        </div>
-                        <div id="listaToursPases"></div>
-                    </div>
-
-                    <div class="pro-section"><div class="pro-section-title">Pago</div><div class="pay-toggle-container"><div class="pay-toggle-opt active" id="opt_adelanto" onclick="setPasePagoMode('adelanto')">A Cuenta</div><div class="pay-toggle-opt" id="opt_pagado" onclick="setPasePagoMode('pagado')">Pagado</div></div><input type="hidden" id="p_modo_pago" value="adelanto"><div class="form-grid" style="grid-template-columns: 1fr 1fr;"><div class="input-group"><label class="input-label">Total</label><input type="number" id="p_precio" required step="0.01" onchange="syncPasePago()"></div><div class="input-group"><label class="input-label">Abonado</label><input type="number" id="p_adelanto" required step="0.01"></div></div></div>
-                    <button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:12px;">💾 Guardar Pase</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <div class="modal" id="modalPases"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h2 id="modalPasesTitulo" style="margin:0;color:var(--pase-color);">🎫 Nuevo Pase (Multi-Tours)</h2><button onclick="cerrarModal('modalPases')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div><div class="modal-body"><form id="formPase"><input type="hidden" id="pase_firestore_id"><div class="pro-section"><div class="pro-section-title">Datos del Pasajero</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr;"><div class="input-group"><label class="input-label">Nombres</label><input type="text" id="p_nombre" required></div><div class="input-group"><label class="input-label">Celular</label><input type="tel" id="p_celular" required></div><div class="input-group"><label class="input-label">Agencia</label><select id="p_agencia" required></select></div></div><div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:10px;"><div class="input-group"><label class="input-label">Recojo/Hotel</label><select id="p_hotel" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required oninput="calcPaseAuto()"></div></div><div class="input-group" style="margin-top:10px;"><label class="input-label">Observaciones Generales</label><input type="text" id="p_obs"></div></div><div class="pro-section" style="background:#f5f3ff; border:1px solid #ddd6fe;"><div class="pro-section-title" style="color:var(--pase-color); justify-content:space-between;"><span>🗺️ Tours del Pase</span><button type="button" onclick="agregarFilaTourPase()" class="btn-main" style="padding:4px 10px; height:auto; background:var(--pase-color); font-size:0.8rem;">+ Agregar Tour</button></div><div id="listaToursPases"></div></div><div class="pro-section"><div class="pro-section-title">Pago</div><div class="pay-toggle-container"><div class="pay-toggle-opt active" id="opt_adelanto" onclick="setPasePagoMode('adelanto')">A Cuenta</div><div class="pay-toggle-opt" id="opt_pagado" onclick="setPasePagoMode('pagado')">Pagado</div></div><input type="hidden" id="p_modo_pago" value="adelanto"><div class="form-grid" style="grid-template-columns: 1fr 1fr;"><div class="input-group"><label class="input-label">Total</label><input type="number" id="p_precio" required step="0.01" onchange="syncPasePago()"></div><div class="input-group"><label class="input-label">Abonado</label><input type="number" id="p_adelanto" required step="0.01"></div></div></div><button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:12px;">💾 Guardar Pase</button></form></div></div></div>
 
     <div class="modal" id="modalCatalogo"><div class="modal-content" style="max-width:600px;"><div class="modal-header"><h2 style="margin:0;color:var(--primary);">📚 Catálogo</h2><button onclick="cerrarModal('modalCatalogo')" style="border:none;background:none;font-size:1.5rem;">&times;</button></div><div class="modal-body"><div class="type-selector"><button id="typeBtnHotel" class="type-btn active" onclick="cambiarTipoCat('hotel')">🏨 Hotel</button><button id="typeBtnTour" class="type-btn" onclick="cambiarTipoCat('tour')">🗺️ Tour</button><button id="typeBtnAgencia" class="type-btn" onclick="cambiarTipoCat('agencia')">🏢 Agencia</button></div><form id="formCatalogo"><input type="hidden" id="cat_edit_id"><input type="hidden" id="cat_edit_old_name"><input type="hidden" id="cat_tipo_actual" value="hotel"><div class="pro-section"><div class="input-group"><label class="input-label">Nombre</label><input type="text" id="cat_nombre" required style="font-weight:bold; font-size:1rem;"></div></div><div id="fields_tour" style="display:none;" class="pro-section"><div class="input-group"><label class="input-label">Precio Costo</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="cat_precio_tour" class="with-icon"></div></div></div><div id="fields_hotel" class="pro-section"><div class="pro-section-title" style="justify-content:space-between;"><span>🛏️ Habitaciones</span><button type="button" onclick="agregarFilaHabitacion()" style="font-size:0.8rem;color:var(--primary);background:none;border:none;cursor:pointer;">+ Agregar</button></div><div class="room-list-container"><div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 30px;gap:8px;padding:5px;font-size:0.75rem;font-weight:bold;"><span>Nombre</span><span>Cap</span><span>Precio</span><span></span></div><div id="room_list"></div></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;"><button type="submit" class="btn-main">Guardar</button></div></form></div></div></div>
 
@@ -555,65 +459,132 @@
                     window.actualizarTodo();
                     window.renderizarCatalogos();
                 });
-            } catch(e) {
-                console.error(e);
-            }
+            } catch(e) { console.error(e); }
         }
 
         initRealTime();
 
-        window.guardarRegistroEnNube = async (data) => {
-            const fid = document.getElementById('reg_firestore_id').value;
-            try { if (fid) await updateDoc(doc(dbFirestore, "registros", fid), data); else await addDoc(collection(dbFirestore, "registros"), data); window.cerrarModal('modalRegistro'); } catch (e) { alert("Error: " + e.message); }
-        };
-        window.guardarPaseEnNube = async (data) => {
-            const fid = document.getElementById('pase_firestore_id').value;
-            try { if (fid) await updateDoc(doc(dbFirestore, "pases", fid), data); else await addDoc(collection(dbFirestore, "pases"), data); window.cerrarModal('modalPases'); } catch (e) { alert("Error: " + e.message); }
-        };
-        window.guardarOperacionEnNube = async (data) => {
-            const fid = document.getElementById('ops_firestore_id').value;
-            try { if (fid) await updateDoc(doc(dbFirestore, "operaciones", fid), data); else await addDoc(collection(dbFirestore, "operaciones"), data); window.nuevaOperacion(); window.cambiarVista('ops'); } catch (e) { alert("Error: " + e.message); }
-        };
-        
-        window.guardarGastoEnNube = async (data) => { 
-            const fid = document.getElementById('g_firestore_id').value;
-            try { 
-                if(fid) {
-                    await updateDoc(doc(dbFirestore, "gastos", fid), data); 
-                } else {
-                    await addDoc(collection(dbFirestore, "gastos"), data); 
-                }
-                window.limpiarGastoForm();
-            } catch(e){ alert(e); } 
-        };
-        
+        window.guardarRegistroEnNube = async (data) => { const fid = document.getElementById('reg_firestore_id').value; try { if (fid) await updateDoc(doc(dbFirestore, "registros", fid), data); else await addDoc(collection(dbFirestore, "registros"), data); window.cerrarModal('modalRegistro'); } catch (e) { alert("Error: " + e.message); } };
+        window.guardarPaseEnNube = async (data) => { const fid = document.getElementById('pase_firestore_id').value; try { if (fid) await updateDoc(doc(dbFirestore, "pases", fid), data); else await addDoc(collection(dbFirestore, "pases"), data); window.cerrarModal('modalPases'); } catch (e) { alert("Error: " + e.message); } };
+        window.guardarOperacionEnNube = async (data) => { const fid = document.getElementById('ops_firestore_id').value; try { if (fid) await updateDoc(doc(dbFirestore, "operaciones", fid), data); else await addDoc(collection(dbFirestore, "operaciones"), data); window.nuevaOperacion(); window.cambiarVista('ops'); } catch (e) { alert("Error: " + e.message); } };
+        window.guardarGastoEnNube = async (data) => { const fid = document.getElementById('g_firestore_id').value; try { if(fid) { await updateDoc(doc(dbFirestore, "gastos", fid), data); } else { await addDoc(collection(dbFirestore, "gastos"), data); } window.limpiarGastoForm(); } catch(e){ alert(e); } };
         window.eliminarDocEnNube = async (coll, fid) => { if(confirm("¿Borrar?")) try { await deleteDoc(doc(dbFirestore, coll, fid)); } catch(e){ alert(e); } };
         window.guardarCatalogoEnNube = async () => { try { await setDoc(doc(dbFirestore, "config", "catalogo"), window.catalogo); } catch(e){ alert(e); } };
-        window.liquidarEnNube = async (listaData) => {
-            if(!confirm("¿Marcar PAGADOS?")) return;
+        
+        window.liquidarTodo = async function() {
+            if(!confirm("¿Marcar TODO lo listado (Cobrar y Pagar) como LIQUIDADO?")) return;
             const promesas = [];
-            listaData.forEach(row => {
+            
+            window.liquidacionDataCobrar.forEach(row => {
                 if(!row.liq) {
-                    if(row.tipo === 'db') { const item = window.db.find(x => x.id === row.id); if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "registros", item.firestoreId), { liquidado: true })); }
-                    else { const item = window.dbPases.find(x => x.id === row.id); if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "pases", item.firestoreId), { liquidado: true })); }
+                    if(row.tipo === 'db') { 
+                        const item = window.db.find(x => x.id === row.id); 
+                        if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "registros", item.firestoreId), { liquidado: true })); 
+                    } else { 
+                        const item = window.dbPases.find(x => x.id === row.id); 
+                        if(item && item.firestoreId) promesas.push(updateDoc(doc(dbFirestore, "pases", item.firestoreId), { liquidado: true })); 
+                    }
                 }
             });
-            if(promesas.length > 0) { await Promise.all(promesas); alert("Actualizado."); window.generarLiquidacion(); } else { alert("Nada pendiente."); }
-        };
-        window.toggleLiquidadoEnNube = async (fid, collectionName, currentState) => {
-            try { await updateDoc(doc(dbFirestore, collectionName, fid), { liquidado: !currentState }); } catch(e) { alert("Error al cambiar estado"); }
+
+            window.liquidacionDataPagar.forEach(row => {
+                if(!row.liq) {
+                    if(row.tipo === 'db') {
+                        const item = window.db.find(x => x.id === row.id);
+                        if(item && item.firestoreId) {
+                            item.tours[row.tourIdx].pasePagado = true;
+                            promesas.push(updateDoc(doc(dbFirestore, "registros", item.firestoreId), { tours: item.tours }));
+                        }
+                    } else {
+                        const item = window.dbPases.find(x => x.id === row.id);
+                        if(item && item.firestoreId) {
+                            let tours = getToursFromPase(item);
+                            tours[row.tourIdx].pasePagado = true;
+                            promesas.push(updateDoc(doc(dbFirestore, "pases", item.firestoreId), { tours: tours }));
+                        }
+                    }
+                }
+            });
+
+            if(promesas.length > 0) { 
+                await Promise.all(promesas); 
+                alert("Liquidación actualizada exitosamente."); 
+                window.generarLiquidacion(); 
+            } else { 
+                alert("No hay nada pendiente para liquidar en la vista actual."); 
+            }
         }
 
-        // Global functions to be accessible from HTML
+        window.toggleLiquidadoEnNube = async (fid, collectionName, currentState) => { try { await updateDoc(doc(dbFirestore, collectionName, fid), { liquidado: !currentState }); } catch(e) { alert("Error al cambiar estado"); } }
         window.cerrarModal = (id) => document.getElementById(id).classList.remove('active');
         
+        window.guardarTercerizacion = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('terc_id').value;
+            const tipo = document.getElementById('terc_tipo').value;
+            const idx = parseInt(document.getElementById('terc_idx').value);
+            const agencia = document.getElementById('terc_agencia').value;
+            const costo = parseFloat(document.getElementById('terc_costo').value);
+
+            try {
+                if(tipo === 'db') {
+                    let item = window.db.find(x => x.id == id);
+                    if(!item) return;
+                    item.tours[idx].tercerizado = true;
+                    item.tours[idx].agenciaOperadora = agencia;
+                    item.tours[idx].costoPase = costo;
+                    item.tours[idx].pasePagado = false;
+                    await updateDoc(doc(dbFirestore, "registros", item.firestoreId), { tours: item.tours });
+                } else {
+                    let item = window.dbPases.find(x => x.id == id);
+                    if(!item) return;
+                    let tours = getToursFromPase(item);
+                    tours[idx].tercerizado = true;
+                    tours[idx].agenciaOperadora = agencia;
+                    tours[idx].costoPase = costo;
+                    tours[idx].pasePagado = false;
+                    await updateDoc(doc(dbFirestore, "pases", item.firestoreId), { tours: tours });
+                }
+                window.cerrarModal('modalTercerizar');
+                window.cargarPendientesOps(); 
+            } catch(error) { alert("Error al enviar pase: " + error.message); }
+        };
+        
+        window.revertirTercerizado = async function(id, tipo, idx) {
+            if(!confirm("¿Deshacer el pase enviado y regresarlo a pendientes?")) return;
+            try {
+                if(tipo === 'db') {
+                    let item = window.db.find(x => x.id == id);
+                    item.tours[idx].tercerizado = false;
+                    await updateDoc(doc(dbFirestore, "registros", item.firestoreId), { tours: item.tours });
+                } else {
+                    let item = window.dbPases.find(x => x.id == id);
+                    let tours = getToursFromPase(item);
+                    tours[idx].tercerizado = false;
+                    await updateDoc(doc(dbFirestore, "pases", item.firestoreId), { tours: tours });
+                }
+                window.cargarPendientesOps();
+            } catch(e) { alert(e); }
+        };
+        
+        document.getElementById('formTercerizar').addEventListener('submit', window.guardarTercerizacion);
     </script>
 
     <script>
         window.onload = () => { document.getElementById('filtroMes').value = new Date().toISOString().slice(0, 7); cambiarVista('lista'); };
         const fmtMoneda = (v) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
         function calcularFechaTour(fechaBase, diasSumar) { const parts = fechaBase.split('-'); const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0); date.setDate(date.getDate() + parseInt(diasSumar)); const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
-        function cambiarVista(vista) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('vista' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); document.getElementById('tabBtn' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); if(vista === 'ops') { cargarSelectOps(); nuevaOperacion(); renderListaOps(); } if(vista === 'liquidacion') { cargarSelectLiquidacion(); } if(vista === 'gastos') { document.getElementById('g_fecha').value = new Date().toISOString().split('T')[0]; renderGastos(); } }
+        
+        function cambiarVista(vista) { 
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); 
+            document.getElementById('vista' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); 
+            document.getElementById('tabBtn' + vista.charAt(0).toUpperCase() + vista.slice(1)).classList.add('active'); 
+            
+            if(vista === 'ops') { cargarSelectOps(); nuevaOperacion(); renderListaOps(); } 
+            if(vista === 'liquidacion') { cargarSelectLiquidacion(); } 
+            if(vista === 'gastos') { document.getElementById('g_fecha').value = new Date().toISOString().split('T')[0]; renderGastos(); } 
+        }
         
         function obtenerOpcionesFechas(selectedIdx = -1) {
             const f1 = document.getElementById('llegada').value;
@@ -656,6 +627,8 @@
                 document.getElementById('retorno').value = '';
                 return;
             }
+            if(l) document.getElementById('txtCheckinAdd').value = l;
+            if(r) document.getElementById('txtCheckoutAdd').value = r;
             actualizarSelectoresItinerario();
         }
 
@@ -666,12 +639,10 @@
             });
         }
 
-        // --- FUNCIONES NORMALIZACIÓN DE PASES (Backwards Compatibility) ---
         function getToursFromPase(p) {
             if(Array.isArray(p.tours) && p.tours.length > 0) {
                 return p.tours;
             } else {
-                // Compatibility for old single-tour format
                 return [{
                     fecha: p.fecha,
                     nombre: p.tour,
@@ -681,27 +652,37 @@
         }
 
         function actualizarTodo() {
-            const txt = document.getElementById('buscadorLista').value.toLowerCase(); const mes = document.getElementById('filtroMes').value;
-            renderLista(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt))));
-            renderPases(mes); renderGastos(); renderListaOps();
+            const txt = document.getElementById('buscadorGlobal').value.toLowerCase(); 
+            const mes = document.getElementById('filtroMes').value;
             
+            // LISTA (Paquetes)
+            renderLista(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt) || r.agencia.toLowerCase().includes(txt))));
+            
+            // PASES
+            renderPases(mes, txt); 
+            
+            // GASTOS & OPS
+            renderGastos(); 
+            renderListaOps();
+            
+            // FILTROS EXTRAS PASES
             const fa = document.getElementById('filtroAgenciaPases'); if(fa.options.length<=1 && window.catalogo.agencias) fa.innerHTML = '<option value="">-- Todas --</option>' + window.catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
             
-            // --- LOGICA CALENDARIO ---
+            // CALENDARIO
             const calDesde = document.getElementById('cal_desde').value;
             const calHasta = document.getElementById('cal_hasta').value;
             const isCalendar = document.getElementById('vistaExcel').classList.contains('active');
 
             if(isCalendar && calDesde && calHasta) {
-                // Rango personalizado
-                const dataRange = window.db.filter(r => r.retorno >= calDesde && r.llegada <= calHasta);
-                renderExcel(dataRange, null, null, calDesde, calHasta); // Pasamos null como filtroTour
+                const dataRange = window.db.filter(r => (r.retorno >= calDesde && r.llegada <= calHasta) && (r.nombre.toLowerCase().includes(txt) || r.agencia.toLowerCase().includes(txt)));
+                renderExcel(dataRange, mes, null, calDesde, calHasta, txt); 
             } else {
-                // Mes completo por defecto
-                renderExcel(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))), mes, null); // Pasamos null como filtroTour
+                const dataRange = window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt) || r.agencia.toLowerCase().includes(txt)));
+                renderExcel(dataRange, mes, null, null, null, txt); 
             }
 
-            renderControl(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes))));
+            // CONTROL
+            renderControl(window.db.filter(r => (r.llegada.startsWith(mes)||r.retorno.startsWith(mes)) && (r.nombre.toLowerCase().includes(txt) || r.agencia.toLowerCase().includes(txt))), txt);
         }
         
         function renderLista(data) {
@@ -716,8 +697,10 @@
                 const v = parseFloat(r.precioPaquete)||0;
                 const a = parseFloat(r.adelanto)||0;
                 const s = v-a;
-                let statusBadge = (s<=0 && v>0) ? `<span class="badge-paid">¡PAGADO!</span>` : (s>0 && a>0) ? `<span class="badge-debt" style="color:#b45309; border-color:#b45309;">Falta ${fmtMoneda(s)}</span>` : `<span class="badge-debt">Falta ${fmtMoneda(s)}</span>`;
-                const rowClass = (s<=0 && v>0) ? 'row-ok' : (s>0 && a>0) ? 'row-partial' : 'row-debt';
+                
+                const isPaid = r.liquidado || (s <= 0 && v > 0);
+                let statusBadge = isPaid ? `<span class="badge-paid">¡PAGADO!</span>` : (s>0 && a>0) ? `<span class="badge-debt" style="color:#b45309; border-color:#b45309;">Falta S/ ${fmtMoneda(s).replace('S/','')}</span>` : `<span class="badge-debt">Falta S/ ${fmtMoneda(s).replace('S/','')}</span>`;
+                const rowClass = isPaid ? 'row-ok' : (s>0 && a>0) ? 'row-partial' : 'row-debt';
                 const obs = r.observaciones ? `<div class="obs-box">⚠️ ${r.observaciones}</div>` : '';
                 
                 let habsDisplay = '';
@@ -761,7 +744,7 @@
             tbody.innerHTML = html;
         }
 
-        function renderPases(mes) {
+        function renderPases(mes, txt = "") {
             const [y,m] = mes.split('-'); 
             const days = new Date(y, m, 0).getDate(); 
             let h = '<thead><tr><th class="col-sticky">Detalle Pase</th>'; 
@@ -769,22 +752,22 @@
             h+='</tr></thead><tbody>';
             
             let pasesMes = window.dbPases.filter(p => {
-                // Verificar si alguno de los tours del pase cae en este mes
                 const tours = getToursFromPase(p);
                 return tours.some(t => t.fecha.startsWith(mes));
             });
             
-            const txt = document.getElementById('buscadorPases').value.toLowerCase(); 
             const fAgencia = document.getElementById('filtroAgenciaPases').value; 
             
-            pasesMes = pasesMes.filter(p => p.nombre.toLowerCase().includes(txt) && (fAgencia==="" || p.agencia===fAgencia));
+            pasesMes = pasesMes.filter(p => (p.nombre.toLowerCase().includes(txt) || p.agencia.toLowerCase().includes(txt)) && (fAgencia==="" || p.agencia===fAgencia));
             
             pasesMes.forEach(p => { 
                 const tours = getToursFromPase(p);
                 const v = parseFloat(p.precio)||0; 
                 const a = parseFloat(p.adelanto)||0; 
                 const s = v-a; 
-                let statusBadge = (s<=0 && v>0) ? `<br><span class="badge-paid">¡PAGADO!</span>` : `<br><span class="badge-debt">Falta ${fmtMoneda(s)}</span>`; 
+                
+                const isPaid = p.liquidado || (s <= 0 && v > 0);
+                let statusBadge = isPaid ? `<br><span class="badge-paid">¡PAGADO!</span>` : `<br><span class="badge-debt">Falta S/ ${fmtMoneda(s).replace('S/','')}</span>`; 
                 const liq = p.liquidado ? `<span class="badge-liq">Liq.</span>` : ''; 
                 const obsDisplay = p.observacion ? `<div style="font-size:0.7rem;color:#d97706;background:#fff7ed;padding:2px;">⚠️ ${p.observacion}</div>` : ''; 
                 
@@ -792,7 +775,6 @@
                 
                 for(let d=1; d<=days; d++) { 
                     const f = `${y}-${m}-${String(d).padStart(2,'0')}`; 
-                    // Buscar si hay tour este dia
                     const tFound = tours.find(t => t.fecha === f);
                     if(tFound) {
                         h += `<td><div class="pase-item" title="${tFound.obs||''}">${tFound.nombre}</div></td>`;
@@ -805,8 +787,14 @@
             document.getElementById('tablaPases').innerHTML = h + '</tbody>';
         }
         
-        function renderExcel(data, mes, filtroTour, startStr=null, endStr=null) {
-            let allItems = [...data];
+        function renderExcel(data, mes, filtroTour, startStr=null, endStr=null, txt = "") {
+            const tipoFiltro = document.getElementById('cal_tipo_filtro') ? document.getElementById('cal_tipo_filtro').value : 'todos';
+            
+            let allItems = [];
+            
+            if (tipoFiltro !== 'pases') {
+                allItems = [...data];
+            }
             
             let startDate, endDate;
             if(startStr && endStr) {
@@ -821,41 +809,44 @@
                 endDate = new Date(y, m, 0);
             }
 
-            // Agregar Pases que caigan en el rango
-            window.dbPases.forEach(p => {
-                const tours = getToursFromPase(p);
-                const inRange = tours.some(t => {
-                    if(startStr && endStr) return t.fecha >= startStr && t.fecha <= endStr;
-                    return t.fecha.startsWith(mes);
-                });
+            if (tipoFiltro !== 'paquetes') {
+                window.dbPases.forEach(p => {
+                    const tours = getToursFromPase(p);
+                    if(tours.length === 0) return;
+                    
+                    const inRange = tours.some(t => {
+                        if(startStr && endStr) return t.fecha >= startStr && t.fecha <= endStr;
+                        return t.fecha.startsWith(mes);
+                    });
 
-                if(inRange) {
-                    const txt = document.getElementById('buscadorLista').value.toLowerCase();
-                    if(p.nombre.toLowerCase().includes(txt)) {
-                        allItems.push({
-                            id: p.id,
-                            firestoreId: p.firestoreId,
-                            isPase: true,
-                            nombre: p.nombre,
-                            llegada: tours[0].fecha, 
-                            retorno: tours[tours.length-1].fecha,
-                            cantidad: p.cantidad,
-                            celular: p.celular,
-                            hotelName: p.hotel,
-                            agencia: p.agencia,
-                            observaciones: p.observacion,
-                            precio: p.precio,
-                            adelanto: p.adelanto,
-                            tours: tours.map(t => ({
-                                nombre: t.nombre,
-                                fecha: t.fecha,
-                                obsTour: t.obs || t.observacion
-                            })),
-                            habitaciones: []
-                        });
+                    if(inRange) {
+                        if(p.nombre.toLowerCase().includes(txt) || p.agencia.toLowerCase().includes(txt)) {
+                            allItems.push({
+                                id: p.id,
+                                firestoreId: p.firestoreId,
+                                isPase: true,
+                                nombre: p.nombre,
+                                llegada: tours[0].fecha, 
+                                retorno: tours[tours.length-1].fecha,
+                                cantidad: p.cantidad,
+                                celular: p.celular,
+                                hotelName: p.hotel,
+                                agencia: p.agencia,
+                                observaciones: p.observacion,
+                                precio: p.precio,
+                                adelanto: p.adelanto,
+                                liquidado: p.liquidado,
+                                tours: tours.map(t => ({
+                                    nombre: t.nombre,
+                                    fecha: t.fecha,
+                                    obsTour: t.obs || t.observacion
+                                })),
+                                habitaciones: []
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
 
             allItems.sort((a, b) => {
                 if (a.llegada < b.llegada) return -1;
@@ -887,22 +878,31 @@
                 const adelanto = parseFloat(r.adelanto) || 0;
                 const saldo = venta - adelanto;
                 
+                const isPaid = r.liquidado || (venta > 0 && saldo <= 0);
+                
                 let moneyHtml = '';
                 if(venta > 0) {
-                    if(saldo <= 0) {
-                        moneyHtml = `<div style="margin-top:4px; font-weight:bold; color:var(--success); font-size:0.75rem; border:1px solid var(--success); border-radius:4px; padding:2px 4px; display:inline-block; background:#f0fdf4;">¡PAGADO! (S/ ${fmtMoneda(venta)})</div>`;
+                    if(isPaid) {
+                        moneyHtml = `<div style="margin-top:4px; font-weight:bold; color:var(--success); font-size:0.75rem; border:1px solid var(--success); border-radius:4px; padding:2px 4px; display:inline-block; background:#f0fdf4;">¡PAGADO! (Tot: S/ ${fmtMoneda(venta).replace('S/','')})</div>`;
                     } else {
                         const color = adelanto > 0 ? '#d97706' : 'var(--danger)'; 
                         const bg = adelanto > 0 ? '#fff7ed' : '#fef2f2';
-                        moneyHtml = `<div style="margin-top:4px; font-weight:bold; color:${color}; font-size:0.75rem; border:1px solid ${color}; border-radius:4px; padding:2px 4px; display:inline-block; background:${bg};">Falta: ${fmtMoneda(saldo)} <span style="color:#666; font-weight:normal;">(Tot: ${fmtMoneda(venta)})</span></div>`;
+                        moneyHtml = `<div style="margin-top:4px; font-weight:bold; color:${color}; font-size:0.75rem; border:1px solid ${color}; border-radius:4px; padding:2px 4px; display:inline-block; background:${bg};">Falta: S/ ${fmtMoneda(saldo).replace('S/','')} <span style="color:#666; font-weight:normal;">(Tot: S/ ${fmtMoneda(venta).replace('S/','')})</span></div>`;
                     }
                 }
 
+                const toggleFunc = `window.toggleLiquidadoEnNube('${r.firestoreId}', '${r.isPase?'pases':'registros'}', ${r.liquidado || false})`;
+                const checkBtnColor = isPaid ? '#10b981' : '#9ca3af';
+                const checkBtnBg = isPaid ? '#dcfce7' : '#f3f4f6';
+                const checkBorder = isPaid ? '#10b981' : '#d1d5db';
+                const checkTitle = isPaid ? 'Desmarcar Pagado' : 'Marcar como Pagado';
+
                 h+=`<tr data-pax="${r.id}" data-type="${r.isPase?'pase':'db'}">
                     <td class="col-sticky">
-                        <div class="pax-card ${paseClass}" style="position:relative; padding-right:25px;">
-                            <div style="position:absolute; top:5px; right:5px;">
-                                <button class="btn-icon btn-edit" style="width:22px; height:22px; font-size:0.8rem;" onclick="${editFunc}">✎</button>
+                        <div class="pax-card ${paseClass}" style="position:relative; padding-right:60px;">
+                            <div style="position:absolute; top:5px; right:5px; display:flex; gap:4px;">
+                                <button class="btn-icon" style="width:24px; height:24px; font-size:0.8rem; background:${checkBtnBg}; color:${checkBtnColor}; border:1px solid ${checkBorder};" onclick="${toggleFunc}" title="${checkTitle}">✔</button>
+                                <button class="btn-icon btn-edit" style="width:24px; height:24px; font-size:0.8rem;" onclick="${editFunc}" title="Editar">✎</button>
                             </div>
                             <div class="pax-header">
                                 ${paseBadge}<span>${r.nombre}</span>
@@ -959,9 +959,7 @@
             if(!c||!window.dragData)return;
             
             const pid=parseInt(c.parentElement.getAttribute('data-pax')); 
-            const type=c.parentElement.getAttribute('data-type'); // 'db' or 'pase'
-            
-            // FIX: Usar la fecha exacta de la celda donde se soltó
+            const type=c.parentElement.getAttribute('data-type'); 
             const f = c.getAttribute('data-fecha');
             if(!f) return;
             
@@ -973,7 +971,6 @@
                     const tours = getToursFromPase(p);
                     tours[window.dragData.tid].fecha = f;
                     p.tours = tours;
-                    // Limpieza campos antiguos si existen
                     delete p.fecha;
                     delete p.tour; 
                     
@@ -982,15 +979,16 @@
                 }
             } else {
                 const p = window.db.find(x=>x.id===pid);
-                if(f<p.llegada || f>p.retorno) return alert("Fecha fuera de estadía");
+                if(f<p.llegada || f>p.retorno) {
+                    if(!confirm("La fecha está fuera del rango de la estadía original del paquete. ¿Deseas mover el tour a esta fecha de todas formas?")) return;
+                }
                 p.tours[window.dragData.tid].fecha=f;
                 document.getElementById('reg_firestore_id').value = p.firestoreId; 
                 window.guardarRegistroEnNube(p);
             }
         };
 
-        // Resto de funciones sin cambios...
-        function renderControl(data) { 
+        function renderControl(data, txt = "") { 
             let html = '';
             let totalVenta = 0, totalGanancia = 0;
             let countPagado = 0, countPendiente = 0;
@@ -1002,7 +1000,7 @@
             const mes = document.getElementById('filtroMes').value;
             const pasesMes = window.dbPases.filter(p => {
                 const tours = getToursFromPase(p);
-                return tours.some(t => t.fecha.startsWith(mes));
+                return tours.some(t => t.fecha.startsWith(mes)) && (p.nombre.toLowerCase().includes(txt) || p.agencia.toLowerCase().includes(txt));
             });
             pasesMes.forEach(p => { listaUnificada.push({ data: p, type: 'pase', fechaSort: (getToursFromPase(p)[0] || {}).fecha || '' }); });
 
@@ -1040,15 +1038,22 @@
                 let costoTours = 0;
                 if (type === 'db') {
                     r.tours.forEach(t => { 
-                        const td = window.catalogo.tours.find(x=>x.nombre===t.nombre); 
-                        costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad; 
+                        if(t.tercerizado && t.costoPase) {
+                            costoTours += parseFloat(t.costoPase);
+                        } else {
+                            const td = window.catalogo.tours.find(x=>x.nombre===t.nombre); 
+                            costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad; 
+                        }
                     });
                 } else {
-                    // Pases Multi-tour
                     const tours = getToursFromPase(r);
                     tours.forEach(t => {
-                        const td = window.catalogo.tours.find(x=>x.nombre===t.nombre); 
-                        costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad;
+                        if(t.tercerizado && t.costoPase) {
+                            costoTours += parseFloat(t.costoPase);
+                        } else {
+                            const td = window.catalogo.tours.find(x=>x.nombre===t.nombre); 
+                            costoTours += (td ? parseFloat(td.precio) : 0) * r.cantidad;
+                        }
                     });
                 }
 
@@ -1060,19 +1065,24 @@
 
                 totalVenta += venta;
                 totalGanancia += ganancia;
-                if(r.liquidado) countPagado++; else { countPendiente++; montoCobrar += saldo; }
+                
+                const isPaid = r.liquidado || (venta > 0 && saldo <= 0);
 
-                const badge = r.liquidado ? '<span class="badge-paid">PAGADO</span>' : '<span class="badge-debt">PENDIENTE</span>';
+                if(isPaid) countPagado++; else { countPendiente++; montoCobrar += saldo; }
+
+                const badge = isPaid ? '<span class="badge-paid">PAGADO</span>' : '<span class="badge-debt">PENDIENTE</span>';
+                const moneySaldoHtml = isPaid ? fmtMoneda(0) : fmtMoneda(saldo);
+                const moneyAdelantoHtml = isPaid ? fmtMoneda(venta) : fmtMoneda(adelanto);
                 
                 const editFunc = type === 'db' ? `cargarEdicion(${r.id})` : `editarPase(${r.id})`;
-                const toggleFunc = `window.toggleLiquidadoEnNube('${r.firestoreId}', '${type==='db'?'registros':'pases'}', ${r.liquidado})`;
+                const toggleFunc = `window.toggleLiquidadoEnNube('${r.firestoreId}', '${type==='db'?'registros':'pases'}', ${r.liquidado || false})`;
 
                 html += `<tr>
                     <td><b>${r.nombre}</b><br><small>${r.cantidad} pax</small></td>
                     <td>${hotelDisplayName}<br>${r.agencia}</td>
                     <td class="money-cell">${fmtMoneda(venta)}</td>
-                    <td class="money-cell">${fmtMoneda(adelanto)}</td>
-                    <td class="money-cell" style="color:${saldo>0?'var(--danger)':'var(--success)'}">${fmtMoneda(saldo)}</td>
+                    <td class="money-cell">${moneyAdelantoHtml}</td>
+                    <td class="money-cell" style="color:${!isPaid && saldo>0?'var(--danger)':'var(--success)'}">${moneySaldoHtml}</td>
                     <td class="money-cell">${fmtMoneda(costoOp)}</td>
                     <td class="money-cell" style="font-weight:bold; color:${ganancia>=0?'var(--money)':'red'}">${fmtMoneda(ganancia)}</td>
                     <td>${badge}</td>
@@ -1308,54 +1318,205 @@
         });
 
         function cargarSelectLiquidacion() { const s = document.getElementById('liq_agencia'); s.innerHTML = '<option value="">Seleccione Agencia...</option>' + catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join(''); }
-        function generarLiquidacion() { 
+        
+        window.generarLiquidacion = function() { 
             const ag = document.getElementById('liq_agencia').value; 
             const desde = document.getElementById('liq_desde').value; 
             const hasta = document.getElementById('liq_hasta').value; 
-            window.liquidacionData = []; 
+            window.liquidacionDataCobrar = []; 
+            window.liquidacionDataPagar = [];
             const estado = document.getElementById('liq_filtro_estado').value; 
-            const applyFilter = (r) => { const isLiq = !!r.liquidado; if(estado === 'pendientes' && isLiq) return false; if(estado === 'liquidados' && !isLiq) return false; return true; }; 
-            
+
+            // ================= LÓGICA A COBRAR (Nos deben) =================
             window.db.forEach(r => { 
-                if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && applyFilter(r)) { 
-                    window.liquidacionData.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: parseFloat(r.precioPaquete)||0, a: parseFloat(r.adelanto)||0, s: (parseFloat(r.precioPaquete)||0)-(parseFloat(r.adelanto)||0), liq: r.liquidado }); 
+                const v = parseFloat(r.precioPaquete)||0; 
+                const a = parseFloat(r.adelanto)||0; 
+                const isPaid = r.liquidado || (v > 0 && (v - a) <= 0);
+                
+                let pasaFiltro = true;
+                if(estado === 'pendientes' && isPaid) pasaFiltro = false;
+                if(estado === 'liquidados' && !isPaid) pasaFiltro = false;
+
+                if(r.agencia === ag && r.llegada >= desde && r.llegada <= hasta && pasaFiltro) { 
+                    const s = isPaid ? 0 : (v - a);
+                    window.liquidacionDataCobrar.push({ id: r.id, tipo: 'db', fecha: r.llegada, nombre: r.nombre, pax: r.cantidad, desc: `Paquete`, v: v, a: a, s: s, liq: isPaid }); 
                 } 
             }); 
             
             window.dbPases.forEach(p => { 
                 const tours = getToursFromPase(p);
-                const firstDate = tours.length > 0 ? tours[0].fecha : p.fecha; // Fallback
+                const firstDate = tours.length > 0 ? tours[0].fecha : p.fecha; 
                 const tourNames = tours.map(t => t.nombre).join(', ');
 
-                if(p.agencia === ag && firstDate >= desde && firstDate <= hasta && applyFilter(p)) { 
-                    window.liquidacionData.push({ id: p.id, tipo: 'pase', fecha: firstDate, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${tourNames}`, v: parseFloat(p.precio)||0, a: parseFloat(p.adelanto)||0, s: (parseFloat(p.precio)||0)-(parseFloat(p.adelanto)||0), liq: p.liquidado }); 
+                const v = parseFloat(p.precio)||0; 
+                const a = parseFloat(p.adelanto)||0; 
+                const isPaid = p.liquidado || (v > 0 && (v - a) <= 0);
+
+                let pasaFiltro = true;
+                if(estado === 'pendientes' && isPaid) pasaFiltro = false;
+                if(estado === 'liquidados' && !isPaid) pasaFiltro = false;
+
+                if(p.agencia === ag && firstDate >= desde && firstDate <= hasta && pasaFiltro) { 
+                    const s = isPaid ? 0 : (v - a);
+                    window.liquidacionDataCobrar.push({ id: p.id, tipo: 'pase', fecha: firstDate, nombre: p.nombre, pax: p.cantidad, desc: `Pase: ${tourNames}`, v: v, a: a, s: s, liq: isPaid }); 
                 } 
             }); 
             
-            let html = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Adelanto</th><th>Saldo</th></tr></thead><tbody>'; 
-            let tV=0, tA=0, tS=0; 
-            window.liquidacionData.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ tV+=d.v; tA+=d.a; tS+=d.s; const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; html+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(d.a)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; }); 
-            html+='</tbody></table>'; 
-            document.getElementById('tablaLiqContainer').innerHTML=html; 
-            document.getElementById('liq_total_venta').innerText=fmtMoneda(tV); 
-            document.getElementById('liq_total_adelanto').innerText=fmtMoneda(tA); 
-            document.getElementById('liq_total_deuda').innerText=fmtMoneda(tS); 
+            // ================= LÓGICA A PAGAR (Nosotros debemos - Tercerizados) =================
+            window.db.forEach(r => {
+                if(Array.isArray(r.tours)) {
+                    r.tours.forEach((t, i) => {
+                        if(t.tercerizado && t.agenciaOperadora === ag && t.fecha >= desde && t.fecha <= hasta) {
+                            let isPaid = !!t.pasePagado;
+                            let pasaFiltro = true;
+                            if(estado === 'pendientes' && isPaid) pasaFiltro = false;
+                            if(estado === 'liquidados' && !isPaid) pasaFiltro = false;
+                            
+                            if(pasaFiltro) {
+                                const costo = parseFloat(t.costoPase) || 0;
+                                window.liquidacionDataPagar.push({
+                                    id: r.id, tipo: 'db', tourIdx: i,
+                                    fecha: t.fecha, nombre: r.nombre, pax: r.cantidad, desc: `Pase Enviado: ${t.nombre}`,
+                                    costo: costo, liq: isPaid
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+            window.dbPases.forEach(p => {
+                const tours = getToursFromPase(p);
+                tours.forEach((t, i) => {
+                    if(t.tercerizado && t.agenciaOperadora === ag && t.fecha >= desde && t.fecha <= hasta) {
+                        let isPaid = !!t.pasePagado;
+                        let pasaFiltro = true;
+                        if(estado === 'pendientes' && isPaid) pasaFiltro = false;
+                        if(estado === 'liquidados' && !isPaid) pasaFiltro = false;
+                        
+                        if(pasaFiltro) {
+                            const costo = parseFloat(t.costoPase) || 0;
+                            window.liquidacionDataPagar.push({
+                                id: p.id, tipo: 'pase', tourIdx: i,
+                                fecha: t.fecha, nombre: p.nombre, pax: p.cantidad, desc: `Pase Enviado: ${t.nombre}`,
+                                costo: costo, liq: isPaid
+                            });
+                        }
+                    }
+                });
+            });
+
+            // ================= RENDERIZADO =================
+            // Tabla Cobrar
+            let htmlCobrar = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Venta</th><th>Abonado</th><th>Saldo</th></tr></thead><tbody>'; 
+            let tVC=0, tAC=0, tSC=0; 
+            window.liquidacionDataCobrar.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ 
+                const pagadoAbonado = d.liq ? d.v : d.a;
+                tVC+=d.v; tAC+=pagadoAbonado; tSC+=d.s; 
+                const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">PENDIENTE</span>'; 
+                htmlCobrar+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.desc}</td><td>${fmtMoneda(d.v)}</td><td>${fmtMoneda(pagadoAbonado)}</td><td style="color:${d.s>0?'red':'green'}">${fmtMoneda(d.s)}</td></tr>`; 
+            }); 
+            htmlCobrar+='</tbody></table>'; 
+            if(window.liquidacionDataCobrar.length === 0) htmlCobrar = '<p style="color:gray;">No hay registros a cobrar.</p>';
+            
+            // Tabla Pagar
+            let htmlPagar = '<table class="excel-table"><thead><tr><th>Estado</th><th>Fecha</th><th>Pasajero</th><th>Tour Enviado</th><th>Costo a Pagar</th></tr></thead><tbody>'; 
+            let tSP=0; // Total a pagar
+            window.liquidacionDataPagar.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(d=>{ 
+                if(!d.liq) tSP+=d.costo; // Si no esta pagado, suma a la deuda
+                const badge = d.liq ? '<span class="badge-liq">PAGADO</span>' : '<span style="color:red;font-weight:bold;">DEBEMOS</span>'; 
+                htmlPagar+=`<tr><td>${badge}</td><td>${d.fecha}</td><td>${d.nombre} (${d.pax} pax)</td><td>${d.desc}</td><td style="color:${!d.liq?'red':'green'}">${fmtMoneda(d.costo)}</td></tr>`; 
+            }); 
+            htmlPagar+='</tbody></table>'; 
+            if(window.liquidacionDataPagar.length === 0) htmlPagar = '<p style="color:gray;">No hay pases enviados a esta agencia.</p>';
+
+            // Update DOM
+            document.getElementById('tablaLiqCobrarContainer').innerHTML = htmlCobrar; 
+            document.getElementById('tablaLiqPagarContainer').innerHTML = htmlPagar; 
+            
+            document.getElementById('liq_total_cobrar').innerText = fmtMoneda(tSC); 
+            document.getElementById('liq_total_pagar').innerText = fmtMoneda(tSP); 
+            
+            const neto = tSC - tSP;
+            const netoEl = document.getElementById('liq_saldo_neto');
+            netoEl.innerText = fmtMoneda(neto);
+            netoEl.style.color = neto < 0 ? '#dc2626' : (neto > 0 ? '#047857' : '#1d4ed8');
+
             document.getElementById('resultadosLiquidacion').style.display = 'block'; 
         }
-        function liquidarRegistros() { window.liquidarEnNube(window.liquidacionData); }
-        function imprimirLiquidacion() { const ag = document.getElementById('liq_agencia').value; const d1 = document.getElementById('liq_desde').value; const d2 = document.getElementById('liq_hasta').value; const tv = document.getElementById('liq_total_venta').innerText; const ta = document.getElementById('liq_total_adelanto').innerText; const td = document.getElementById('liq_total_deuda').innerText; let h = `<div class="print-header"><h1>LIQUIDACIÓN DE AGENCIA</h1><h2>${ag}</h2><p>Periodo: ${d1} al ${d2}</p></div><table class="print-table"><thead><tr><th>FECHA</th><th>PASAJERO</th><th>SERVICIO</th><th>IMPORTE</th><th>A CUENTA</th><th>SALDO</th></tr></thead><tbody>`; window.liquidacionData.forEach(r => { h += `<tr><td>${r.fecha}</td><td>${r.nombre} (${r.pax})</td><td>${r.desc}</td><td>${fmtMoneda(r.v)}</td><td>${fmtMoneda(r.a)}</td><td>${fmtMoneda(r.s)}</td></tr>`; }); h += `</tbody></table><div style="margin-top:20px; display:flex; justify-content:flex-end;"><table style="width:300px; border:1px solid #000; border-collapse:collapse;"><tr><td style="padding:5px; border:1px solid #000;">Total Venta:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${tv}</td></tr><tr><td style="padding:5px; border:1px solid #000;">Total Pagado:</td><td style="padding:5px; border:1px solid #000; text-align:right;">${ta}</td></tr><tr><td style="padding:5px; border:1px solid #000; font-weight:bold;">A PAGAR:</td><td style="padding:5px; border:1px solid #000; text-align:right; font-weight:bold;">${td}</td></tr></table></div><div style="margin-top:40px; text-align:center;">__________________________<br>Firma Conforme</div>`; document.getElementById('printableArea').innerHTML = h; window.print(); document.getElementById('printableArea').innerHTML = ''; }
+
+        window.imprimirLiquidacion = function() { 
+            const ag = document.getElementById('liq_agencia').value; 
+            const d1 = document.getElementById('liq_desde').value; 
+            const d2 = document.getElementById('liq_hasta').value; 
+            
+            const tSC = document.getElementById('liq_total_cobrar').innerText; 
+            const tSP = document.getElementById('liq_total_pagar').innerText; 
+            const neto = document.getElementById('liq_saldo_neto').innerText; 
+            
+            let h = `<div class="print-header"><h1>LIQUIDACIÓN DE AGENCIA</h1><h2>${ag}</h2><p>Periodo: ${d1} al ${d2}</p></div>`;
+            
+            if(window.liquidacionDataCobrar.length > 0) {
+                h += `<h3>A COBRAR (Nos Deben)</h3><table class="print-table" style="margin-bottom:20px;"><thead><tr><th>FECHA</th><th>PASAJERO</th><th>SERVICIO</th><th>IMPORTE</th><th>ABONADO</th><th>SALDO</th></tr></thead><tbody>`; 
+                window.liquidacionDataCobrar.forEach(r => { 
+                    const pagadoAbonado = r.liq ? r.v : r.a;
+                    h += `<tr><td>${r.fecha}</td><td>${r.nombre} (${r.pax})</td><td>${r.desc}</td><td>${fmtMoneda(r.v)}</td><td>${fmtMoneda(pagadoAbonado)}</td><td>${fmtMoneda(r.s)}</td></tr>`; 
+                }); 
+                h += `</tbody></table>`;
+            }
+
+            if(window.liquidacionDataPagar.length > 0) {
+                h += `<h3>A PAGAR (Les Debemos - Pases Enviados)</h3><table class="print-table" style="margin-bottom:20px;"><thead><tr><th>FECHA</th><th>PASAJERO</th><th>TOUR</th><th>ESTADO</th><th>COSTO</th></tr></thead><tbody>`; 
+                window.liquidacionDataPagar.forEach(r => { 
+                    const estado = r.liq ? 'PAGADO' : 'PENDIENTE';
+                    h += `<tr><td>${r.fecha}</td><td>${r.nombre} (${r.pax})</td><td>${r.desc}</td><td>${estado}</td><td>${fmtMoneda(r.costo)}</td></tr>`; 
+                }); 
+                h += `</tbody></table>`;
+            }
+
+            h += `<div style="margin-top:20px; display:flex; justify-content:flex-end;"><table style="width:350px; border:2px solid #000; border-collapse:collapse;">
+                <tr><td style="padding:8px; border:1px solid #000;">Total A COBRAR:</td><td style="padding:8px; border:1px solid #000; text-align:right;">${tSC}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #000;">Total A PAGAR:</td><td style="padding:8px; border:1px solid #000; text-align:right; color:red;">${tSP}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #000; font-weight:bold; font-size:1.1rem;">SALDO NETO:</td><td style="padding:8px; border:1px solid #000; text-align:right; font-weight:bold; font-size:1.1rem;">${neto}</td></tr>
+            </table></div><div style="margin-top:50px; text-align:center;">__________________________<br>Firma Conforme</div>`; 
+            
+            document.getElementById('printableArea').innerHTML = h; 
+            window.print(); 
+            document.getElementById('printableArea').innerHTML = ''; 
+        }
+        
         function cargarSelectOps() { const s = document.getElementById('ops_tour'); s.innerHTML = '<option value="">Seleccione Tour</option>' + catalogo.tours.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join(''); }
         function nuevaOperacion() { document.getElementById('ops_id_actual').value = ''; document.getElementById('ops_firestore_id').value = ''; document.getElementById('ops_fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('ops_tour').value = ''; document.getElementById('ops_conductor').value = ''; document.getElementById('ops_guia').value = ''; document.getElementById('ops_capacidad').value = 16; window.opsTempAsignados = []; cargarPendientesOps(); }
         
-        function cargarPendientesOps() { 
+        window.abrirModalTercerizar = function(id, tipo, idx, paxCount) {
+            document.getElementById('terc_id').value = id;
+            document.getElementById('terc_tipo').value = tipo;
+            document.getElementById('terc_idx').value = idx;
+            const sa = document.getElementById('terc_agencia');
+            sa.innerHTML = '<option value="">Seleccione Agencia...</option>' + window.catalogo.agencias.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+            document.getElementById('terc_costo').value = '';
+            document.getElementById('modalTercerizar').classList.add('active');
+        };
+
+        const renderTercerizado = (id, tipo, idx, nombre, pax, agenciaOp, costo) => {
+            return `<div class="ops-item" style="background:#f5f3ff; border-left:4px solid var(--pase-color);">
+                <div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>
+                Pax: <b>${pax}</b> | S/ ${costo}<br>
+                <span style="color:var(--pase-color); font-size:0.75rem;">🏢 Env. a: ${agenciaOp}</span></div>
+                <button class="btn-icon btn-del" onclick="revertirTercerizado('${id}', '${tipo}', ${idx})" title="Deshacer Pase">↩</button>
+            </div>`;
+        };
+
+        window.cargarPendientesOps = function() { 
             const f = document.getElementById('ops_fecha').value; 
             const t = document.getElementById('ops_tour').value; 
             const idActual = document.getElementById('ops_id_actual').value; 
 
             const divPend = document.getElementById('lista_ops_pendientes'); 
             const divAsig = document.getElementById('lista_ops_asignados'); 
+            const divTerc = document.getElementById('lista_ops_tercerizados');
             divPend.innerHTML = ''; 
             divAsig.innerHTML = ''; 
+            divTerc.innerHTML = '';
             
             if (!f || !t) return; 
 
@@ -1363,68 +1524,211 @@
             window.dbOps.forEach(op => {
                 if (String(op.id) === String(idActual)) return;
                 if (op.fecha === f && op.tour === t) {
-                    op.pasajeros.forEach(p => {
-                        bloqueados.add(`${p.tipo}_${p.refId}`);
-                    });
+                    op.pasajeros.forEach(p => { bloqueados.add(`${p.tipo}_${p.refId}`); });
                 }
             });
 
-            let htmlPend = ''; 
-            let countPend = 0; 
+            let htmlPend = ''; let htmlTerc = '';
+            let countPend = 0; let countTerc = 0;
             
-            const renderItem = (id, nombre, pax, hotel, tipo, fullObs, celular, agencia) => { 
+            const renderItem = (id, nombre, pax, hotel, tipo, fullObs, celular, agencia, idx) => { 
                 const yaAsignadoAqui = window.opsTempAsignados.find(x => x.refId == id && x.tipo == tipo); 
                 if (yaAsignadoAqui) return; 
-
                 if (bloqueados.has(`${tipo}_${id}`)) return;
 
                 countPend += parseInt(pax); 
                 
                 const obsTag = fullObs ? `<span style="color:orange;font-size:0.7rem; display:block;">📝 ${fullObs.substring(0,30)}...</span>` : ''; 
-                
                 const safeNombre = nombre.replace(/'/g, "").replace(/"/g, "");
                 const safeHotel = hotel.replace(/'/g, "").replace(/"/g, "");
                 const safeObs = fullObs.replace(/'/g, "").replace(/"/g, "");
                 const safeAgencia = agencia.replace(/'/g, "").replace(/"/g, "");
 
-                return `<div class="ops-item"><div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div><button class="btn-add-ops" onclick="asignarPax(${id}, '${tipo}', ${pax}, '${safeNombre}', '${safeHotel}', '${celular || ""}', '${safeObs}', '${safeAgencia}')">></button></div>`; 
+                return `<div class="ops-item">
+                    <div><b>${nombre}</b> <small>(${tipo==='db'?'Huésped':'Pase'})</small><br>Pax: <b>${pax}</b> | ${hotel} ${obsTag}</div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-add-ops" onclick="asignarPax('${id}', '${tipo}', ${pax}, '${safeNombre}', '${safeHotel}', '${celular || ""}', '${safeObs}', '${safeAgencia}')" title="Asignar al Vehículo">></button>
+                        <button class="btn-icon" style="background:var(--pase-color); color:white; width:30px; height:30px; font-size:1.1rem; border-radius:50%;" onclick="abrirModalTercerizar('${id}', '${tipo}', ${idx}, ${pax})" title="Tercerizar / Enviar Pase">🏢</button>
+                    </div>
+                </div>`; 
             }; 
 
             // Candidatos DB
             window.db.forEach(c => {
                 if(Array.isArray(c.tours)) {
-                    const tr = c.tours.find(x => x.fecha === f && x.nombre === t);
-                    if(tr) {
-                        const notaDia = c.tours.find(x => x.fecha === f && !x.nombre);
+                    const trIdx = c.tours.findIndex(x => x.fecha === f && x.nombre === t);
+                    if(trIdx >= 0) {
+                        const tr = c.tours[trIdx];
+                        if(tr.tercerizado) {
+                            countTerc += parseInt(c.cantidad);
+                            htmlTerc += renderTercerizado(c.id, 'db', trIdx, c.nombre, c.cantidad, tr.agenciaOperadora, tr.costoPase);
+                        } else {
+                            const notaDia = c.tours.find(x => x.fecha === f && !x.nombre);
+                            let obsParts = [];
+                            if(c.observaciones) obsParts.push(`[Gen: ${c.observaciones}]`);
+                            if(tr.obsTour || tr.obs) obsParts.push(`[Tour: ${tr.obsTour || tr.obs}]`);
+                            if(notaDia && notaDia.obsDia) obsParts.push(`[Nota: ${notaDia.obsDia}]`);
+                            
+                            // --- LÓGICA DE HOTEL SEGÚN EL DÍA DEL TOUR ---
+                            let hotelDelDia = c.hotelName || "Sin Hotel";
+                            if (c.habitaciones && c.habitaciones.length > 0) {
+                                const hab = c.habitaciones.find(h => {
+                                    if (h.checkin && h.checkout) {
+                                        return f >= h.checkin && f <= h.checkout; 
+                                    }
+                                    return false;
+                                });
+                                if (hab) hotelDelDia = hab.hotel;
+                            }
+                            // ----------------------------------------------
+
+                            const h = renderItem(c.id, c.nombre, c.cantidad, hotelDelDia, 'db', obsParts.join(' '), c.celular, c.agencia, trIdx);
+                            if(h) htmlPend+=h;
+                        }
+                    }
+                }
+            });
+
+            // Candidatos Pases
+            window.dbPases.forEach(c => {
+                const tours = getToursFromPase(c);
+                const trIdx = tours.findIndex(x => x.fecha === f && x.nombre === t);
+                if(trIdx >= 0) {
+                    const tr = tours[trIdx];
+                    if(tr.tercerizado) {
+                        countTerc += parseInt(c.cantidad);
+                        htmlTerc += renderTercerizado(c.id, 'pase', trIdx, c.nombre, c.cantidad, tr.agenciaOperadora, tr.costoPase);
+                    } else {
                         let obsParts = [];
-                        if(c.observaciones) obsParts.push(`[Gen: ${c.observaciones}]`);
-                        if(tr.obsTour || tr.obs) obsParts.push(`[Tour: ${tr.obsTour || tr.obs}]`);
-                        if(notaDia && notaDia.obsDia) obsParts.push(`[Nota: ${notaDia.obsDia}]`);
-                        const fullObs = obsParts.join(' ');
-                        const h = renderItem(c.id, c.nombre, c.cantidad, c.hotelName, 'db', fullObs, c.celular, c.agencia);
+                        if(c.observacion) obsParts.push(`[Gen: ${c.observacion}]`);
+                        if(tr.obs) obsParts.push(`[Tour: ${tr.obs}]`);
+                        const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', obsParts.join(' '), c.celular, c.agencia, trIdx);
                         if(h) htmlPend+=h;
                     }
                 }
             });
 
-            // Candidatos Pases (Multi-tour logic)
-            window.dbPases.forEach(c => {
-                const tours = getToursFromPase(c);
-                const tr = tours.find(x => x.fecha === f && x.nombre === t);
-                if(tr) {
-                    let obsParts = [];
-                    if(c.observacion) obsParts.push(`[Gen: ${c.observacion}]`);
-                    if(tr.obs) obsParts.push(`[Tour: ${tr.obs}]`);
-                    const fullObs = obsParts.join(' ');
-                    const h = renderItem(c.id, c.nombre, c.cantidad, c.hotel, 'pase', fullObs, c.celular, c.agencia);
-                    if(h) htmlPend+=h;
-                }
-            });
-
             divPend.innerHTML = htmlPend || '<div style="padding:10px; color:gray;">No hay clientes pendientes.</div>'; 
+            divTerc.innerHTML = htmlTerc || '<div style="padding:10px; color:gray;">Ninguno.</div>'; 
             document.getElementById('count_pendientes').innerText = countPend; 
+            document.getElementById('count_tercerizados').innerText = countTerc; 
             renderizarAsignados(); 
         }
+
+        // --- NUEVA FUNCIÓN PARA EXPORTAR COMO IMAGEN ---
+        window.exportarManifiestoImagen = async function() {
+            const fecha = document.getElementById('ops_fecha').value;
+            const tour = document.getElementById('ops_tour').value;
+            const conductor = document.getElementById('ops_conductor').value || "---";
+            const guia = document.getElementById('ops_guia').value || "---";
+            const capacidad = document.getElementById('ops_capacidad').value;
+            const paxList = window.opsTempAsignados;
+
+            if (paxList.length === 0) {
+                return alert("No hay pasajeros asignados para exportar la imagen.");
+            }
+
+            // Crear contenedor temporal para el renderizado
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px'; // Lo escondemos fuera de la pantalla
+            tempDiv.style.top = '0';
+            tempDiv.style.width = '800px';
+            tempDiv.style.background = '#ffffff';
+            tempDiv.style.padding = '30px';
+            tempDiv.style.fontFamily = 'Arial, sans-serif';
+            tempDiv.style.color = '#000000';
+            tempDiv.style.boxSizing = 'border-box';
+            
+            let totalPax = paxList.reduce((sum, p) => sum + parseInt(p.pax), 0);
+
+            let h = `
+                <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+                    <h1 style="margin:0; font-size: 26px; color: #111827;">MANIFIESTO DE PASAJEROS</h1>
+                    <h2 style="margin:5px 0; font-size: 20px; color: #4f46e5;">${tour}</h2>
+                    <table style="width:100%; margin-top:15px; border:none; font-size:15px;">
+                        <tr>
+                            <td style="text-align:left;"><strong>Fecha:</strong> ${fecha}</td>
+                            <td style="text-align:right;"><strong>Vehículo Cap:</strong> ${capacidad}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;"><strong>Conductor:</strong> ${conductor}</td>
+                            <td style="text-align:right;"><strong>Guía:</strong> ${guia}</td>
+                        </tr>
+                    </table>
+                </div>
+                <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+                    <thead>
+                        <tr style="background:#f3f4f6;">
+                            <th style="border:1px solid #d1d5db; padding:10px;">AGENCIA</th>
+                            <th style="border:1px solid #d1d5db; padding:10px;">HOTEL / RECOJO</th>
+                            <th style="border:1px solid #d1d5db; padding:10px;">PASAJERO</th>
+                            <th style="border:1px solid #d1d5db; padding:10px;">CELULAR</th>
+                            <th style="border:1px solid #d1d5db; padding:10px; width:40px; text-align:center;">PAX</th>
+                            <th style="border:1px solid #d1d5db; padding:10px;">OBSERVACIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            paxList.forEach((p) => {
+                h += `
+                    <tr>
+                        <td style="border:1px solid #d1d5db; padding:8px;">${p.agencia || ''}</td>
+                        <td style="border:1px solid #d1d5db; padding:8px; font-weight:bold;">${p.hotel}</td>
+                        <td style="border:1px solid #d1d5db; padding:8px;">${p.nombre}</td>
+                        <td style="border:1px solid #d1d5db; padding:8px;">${p.celular || '---'}</td>
+                        <td style="border:1px solid #d1d5db; padding:8px; text-align:center; font-weight:bold;">${p.pax}</td>
+                        <td style="border:1px solid #d1d5db; padding:8px; font-size:12px; color:#b45309;">${p.obs || ''}</td> 
+                    </tr>
+                `;
+            });
+
+            h += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" style="text-align:right; font-weight:bold; padding:12px; border:1px solid #d1d5db;">TOTAL PASAJEROS:</td>
+                            <td style="text-align:center; font-weight:bold; font-size:16px; padding:12px; border:1px solid #d1d5db; background:#e0f2fe; color:#0369a1;">${totalPax}</td>
+                            <td style="border:1px solid #d1d5db;"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div style="margin-top:60px; display:flex; justify-content:space-around; font-size:14px;">
+                    <div style="text-align:center; border-top:1px solid #000; width:220px; padding-top:10px;">Firma Conductor</div>
+                    <div style="text-align:center; border-top:1px solid #000; width:220px; padding-top:10px;">Firma Guía</div>
+                </div>
+                <div style="margin-top: 30px; text-align: right; font-size: 11px; color: #9ca3af;">
+                    Generado el: ${new Date().toLocaleString()}
+                </div>
+            `;
+
+            tempDiv.innerHTML = h;
+            document.body.appendChild(tempDiv);
+
+            try {
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                document.getElementById('loadingOverlay').innerHTML = 'Generando Imagen... 📸';
+                
+                // Generar canvas con alta resolución
+                const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
+                const imgData = canvas.toDataURL("image/png");
+                
+                // Forzar descarga
+                const link = document.createElement('a');
+                const nombreArchivo = `Manifiesto_${tour.replace(/\s+/g, '_')}_${fecha}.png`;
+                link.download = nombreArchivo;
+                link.href = imgData;
+                link.click();
+            } catch (err) {
+                console.error(err);
+                alert("Hubo un error al generar la imagen.");
+            } finally {
+                // Limpiar
+                document.body.removeChild(tempDiv);
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        };
 
         window.imprimirManifiesto = function() {
             const originalTitle = document.title; 
@@ -1514,7 +1818,7 @@
 
         function renderizarAsignados() { const divAsig = document.getElementById('lista_ops_asignados'); let html = ''; let total = 0; window.opsTempAsignados.forEach((p, index) => { total+=parseInt(p.pax); html += `<div class="ops-item"><button class="btn-remove-ops" onclick="removerPax(${index})"><</button><div><b>${p.nombre}</b><br>Pax: ${p.pax}</div></div>`; }); divAsig.innerHTML = html || '<div style="padding:10px; color:gray;">Vacío.</div>'; document.getElementById('count_asignados').innerText = total; actualizarIndicadorCapacidad(total); }
         
-        function asignarPax(id, tipo, pax, nombre, hotel, celular, obs, agencia) { 
+        window.asignarPax = function(id, tipo, pax, nombre, hotel, celular, obs, agencia) { 
             const capMax = parseInt(document.getElementById('ops_capacidad').value); 
             const actual = window.opsTempAsignados.reduce((sum, p) => sum + parseInt(p.pax), 0); 
             if (actual + parseInt(pax) > capMax) return alert("Excede capacidad"); 
@@ -1522,11 +1826,11 @@
             cargarPendientesOps(); 
         }
         
-        function removerPax(i) { window.opsTempAsignados.splice(i, 1); cargarPendientesOps(); }
-        function actualizarIndicadorCapacidad(c=null) { if(c===null) c=window.opsTempAsignados.reduce((s,p)=>s+parseInt(p.pax),0); const m=document.getElementById('ops_capacidad').value; document.getElementById('indicadorCapacidad').innerText=`${c} / ${m}`; }
-        function guardarOperacion() { const data = { id: document.getElementById('ops_id_actual').value || Date.now(), fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados }; window.guardarOperacionEnNube(data); }
+        window.removerPax = function(i) { window.opsTempAsignados.splice(i, 1); cargarPendientesOps(); }
+        window.actualizarIndicadorCapacidad = function(c=null) { if(c===null) c=window.opsTempAsignados.reduce((s,p)=>s+parseInt(p.pax),0); const m=document.getElementById('ops_capacidad').value; document.getElementById('indicadorCapacidad').innerText=`${c} / ${m}`; }
+        window.guardarOperacion = function() { const data = { id: document.getElementById('ops_id_actual').value || Date.now(), fecha: document.getElementById('ops_fecha').value, tour: document.getElementById('ops_tour').value, conductor: document.getElementById('ops_conductor').value, guia: document.getElementById('ops_guia').value, capacidad: document.getElementById('ops_capacidad').value, pasajeros: window.opsTempAsignados }; window.guardarOperacionEnNube(data); }
         function renderListaOps() { const tbody = document.getElementById('tbodyOps'); tbody.innerHTML = window.dbOps.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(op => { const total = op.pasajeros.reduce((s,p)=>s+parseInt(p.pax),0); return `<tr><td>${op.fecha}</td><td>${op.tour}</td><td>${op.conductor}</td><td>${total}/${op.capacidad}</td><td>OK</td><td><button class="btn-icon btn-edit" onclick="cargarOp(${op.id})">✎</button><button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('operaciones', '${op.firestoreId}')">🗑</button></td></tr>`; }).join(''); }
-        function cargarOp(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
+        window.cargarOp = function(id) { const op = window.dbOps.find(x => x.id === id); if(!op) return; document.getElementById('ops_id_actual').value = op.id; document.getElementById('ops_firestore_id').value = op.firestoreId; document.getElementById('ops_fecha').value = op.fecha; document.getElementById('ops_tour').value = op.tour; document.getElementById('ops_conductor').value = op.conductor; document.getElementById('ops_guia').value = op.guia; document.getElementById('ops_capacidad').value = op.capacidad; window.opsTempAsignados = [...op.pasajeros]; cargarPendientesOps(); }
         
         function cargarSelects() { 
             const s = document.getElementById('selHotelAdd'); 
@@ -1564,21 +1868,27 @@
             const hName = document.getElementById('selHotelAdd').value;
             const rSelect = document.getElementById('selRoomAdd');
             const rName = rSelect.value;
-            const noches = document.getElementById('txtNochesAdd').value;
+            const checkin = document.getElementById('txtCheckinAdd').value;
+            const checkout = document.getElementById('txtCheckoutAdd').value;
             
             if(!hName || !rName) return alert("Seleccione Hotel y Habitación");
-            if(parseInt(noches) < 1) return alert("Ingrese al menos 1 noche");
+            if(!checkin || !checkout) return alert("Ingrese fechas de Check-In y Check-Out para este hotel");
+            if(checkin >= checkout) return alert("La fecha de Out debe ser mayor a la fecha de In");
 
             const selectedOption = rSelect.options[rSelect.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
             const cap = selectedOption.getAttribute('data-cap');
+
+            const noches = Math.ceil((new Date(checkout) - new Date(checkin)) / 86400000);
 
             window.tempHabitaciones.push({
                 hotel: hName,
                 habitacion: rName,
                 precio: price,
                 capacidad: cap,
-                noches: noches // Guardamos noches
+                noches: noches,
+                checkin: checkin,
+                checkout: checkout
             });
             
             renderTempHabitaciones();
@@ -1604,7 +1914,7 @@
                 div.innerHTML = `
                     <div class="added-room-info">
                         <span class="added-room-hotel">${item.hotel}</span>
-                        <span>Hab: <b>${item.habitacion}</b> | 🌙 ${item.noches} Noches | Cap: ${item.capacidad} | S/ ${item.precio}</span>
+                        <span>Hab: <b>${item.habitacion}</b> | 📅 ${item.checkin} al ${item.checkout} (${item.noches}N) | Cap: ${item.capacidad} | S/ ${item.precio}</span>
                     </div>
                     <button type="button" onclick="removerHabitacion(${index})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">✕</button>
                 `;
@@ -1614,7 +1924,6 @@
         
         function cargarSelectsPase() {
             const sa = document.getElementById('p_agencia'); sa.innerHTML = '<option value="">Seleccione Agencia...</option>'; if(window.catalogo.agencias) window.catalogo.agencias.forEach(a => sa.innerHTML += `<option value="${a.nombre}">${a.nombre}</option>`);
-            //const st = document.getElementById('p_tour'); st.innerHTML = '<option value="">Seleccione Tour...</option>'; if(window.catalogo.tours) window.catalogo.tours.forEach(t => st.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`);
             const sh = document.getElementById('p_hotel'); sh.innerHTML = '<option value="">Seleccione Hotel/Lugar...</option>'; if(window.catalogo.hoteles) window.catalogo.hoteles.forEach(h => sh.innerHTML += `<option value="${h.nombre}">${h.nombre}</option>`);
         }
         
@@ -1651,7 +1960,6 @@
             document.getElementById('listaToursInputs').appendChild(d); 
         }
 
-        // --- NUEVA FUNCION PARA AGREGAR FILA DE TOUR EN MODAL PASES ---
         window.agregarFilaTourPase = function(nombre='', fecha='', obs='') {
             const container = document.getElementById('listaToursPases');
             const div = document.createElement('div');
@@ -1662,7 +1970,6 @@
                 tourOpts += `<option value="${t.nombre}" ${t.nombre===nombre?'selected':''}>${t.nombre}</option>`;
             });
 
-            // MODIFICADO: APLICANDO CLASE input-date-short
             div.innerHTML = `
                 <input type="date" class="p-tour-fecha input-date-short" value="${fecha}" required>
                 <select class="p-tour-nombre" style="flex:1.5;" onchange="calcPaseAuto()" required>${tourOpts}</select>
@@ -1670,39 +1977,37 @@
                 <button type="button" onclick="this.parentElement.remove(); calcPaseAuto();" style="color:red;border:none;cursor:pointer;font-weight:bold;margin-left:5px;">🗑</button>
             `;
             container.appendChild(div);
+            calcPaseAuto();
         }
 
-        // --- CALCULO AUTOMATICO DE PASE ---
         window.calcPaseAuto = function() {
             const qty = parseFloat(document.getElementById('p_cantidad').value) || 0;
             let total = 0;
 
-            // Iterate rows
             document.querySelectorAll('#listaToursPases .tour-row-input').forEach(row => {
                 const select = row.querySelector('.p-tour-nombre');
                 const tourName = select.value;
-                // Find price in catalog
                 const tourData = window.catalogo.tours.find(t => t.nombre === tourName);
                 if(tourData) {
                     total += (parseFloat(tourData.precio) || 0);
                 }
             });
 
-            // Multiply by pax
             total = total * qty;
 
-            // Update UI
             document.getElementById('p_precio').value = total.toFixed(2);
             syncPasePago();
         }
 
-        function abrirModalRegistro() { 
+        window.abrirModalRegistro = function() { 
             window.editId = null; 
             document.getElementById('reg_firestore_id').value = ''; 
             document.getElementById('modalRegTitulo').innerText="📝 Nuevo Registro"; 
             document.getElementById('formTour').reset(); 
             document.getElementById('listaToursInputs').innerHTML=''; 
-            document.getElementById('txtNochesAdd').value = 1; // Reset noches
+            
+            document.getElementById('txtCheckinAdd').value = ''; 
+            document.getElementById('txtCheckoutAdd').value = ''; 
             
             window.tempHabitaciones = []; 
             renderTempHabitaciones();
@@ -1712,7 +2017,7 @@
             document.getElementById('modalRegistro').classList.add('active'); 
         }
         
-        function cargarEdicion(id) { 
+        window.cargarEdicion = function(id) { 
             const r = window.db.find(x => x.id === id); if(!r) return; 
             abrirModalRegistro(); 
             document.getElementById('listaToursInputs').innerHTML = ''; 
@@ -1729,32 +2034,27 @@
             document.getElementById('retorno').value = r.retorno; 
             document.getElementById('observaciones').value = r.observaciones || ''; 
             
-            // CARGA DE HABITACIONES
             window.tempHabitaciones = [];
             if(Array.isArray(r.habitaciones)) {
                 r.habitaciones.forEach(h => {
                     if(typeof h === 'object') {
-                        // Nuevo formato
-                        window.tempHabitaciones.push(h);
-                    } else {
-                        // Viejo formato
                         window.tempHabitaciones.push({
-                            hotel: r.hotelName,
-                            habitacion: h,
-                            precio: 0,
-                            capacidad: 0,
-                            noches: 1
+                            ...h,
+                            checkin: h.checkin || r.llegada, 
+                            checkout: h.checkout || r.retorno
+                        });
+                    } else {
+                        window.tempHabitaciones.push({
+                            hotel: r.hotelName, habitacion: h, precio: 0, capacidad: 0, noches: 1,
+                            checkin: r.llegada, checkout: r.retorno
                         });
                     }
                 });
             } else {
                  if(r.habitaciones) {
                      window.tempHabitaciones.push({
-                         hotel: r.hotelName,
-                         habitacion: r.habitaciones,
-                         precio: 0,
-                         capacidad: 0,
-                         noches: 1
+                         hotel: r.hotelName, habitacion: r.habitaciones, precio: 0, capacidad: 0, noches: 1,
+                         checkin: r.llegada, checkout: r.retorno
                      });
                  }
             }
@@ -1774,47 +2074,21 @@
             } 
         }
 
-        function abrirModalPases() { 
+        window.abrirModalPases = function() { 
             window.editId = null; 
             document.getElementById('pase_firestore_id').value = ''; 
             document.getElementById('formPase').reset(); 
-            document.getElementById('listaToursPases').innerHTML = ''; // Limpiar lista
+            document.getElementById('listaToursPases').innerHTML = ''; 
             setPasePagoMode('adelanto'); 
             cargarSelectsPase(); 
-            // Agregar una linea vacia por defecto
+            
             const hoy = new Date().toISOString().split('T')[0];
             agregarFilaTourPase('', hoy, '');
             document.getElementById('modalPases').classList.add('active'); 
         }
         
-        function setPasePagoMode(mode) { document.getElementById('p_modo_pago').value = mode; if (mode === 'pagado') { document.getElementById('opt_pagado').classList.add('active-green'); document.getElementById('opt_adelanto').classList.remove('active'); syncPasePago(); } else { document.getElementById('opt_adelanto').classList.add('active'); document.getElementById('opt_pagado').classList.remove('active-green'); document.getElementById('p_adelanto').readOnly = false; } }
-        function syncPasePago() { if (document.getElementById('p_modo_pago').value === 'pagado') { document.getElementById('p_adelanto').value = document.getElementById('p_precio').value; document.getElementById('p_adelanto').readOnly = true; } }
-        
-        // Esta función ahora suma los precios de tours del catálogo si se quisiera automatico, 
-        // pero como los pases son negociables, dejamos que el usuario ponga el total manual o sume mentalmente.
-        // Se deja como trigger manual si se quisiera implementar logica extra.
-        function calcPaseAuto() {
-            const qty = parseFloat(document.getElementById('p_cantidad').value) || 0;
-            let total = 0;
-
-            // Iterate rows
-            document.querySelectorAll('#listaToursPases .tour-row-input').forEach(row => {
-                const select = row.querySelector('.p-tour-nombre');
-                const tourName = select.value;
-                // Find price in catalog
-                const tourData = window.catalogo.tours.find(t => t.nombre === tourName);
-                if(tourData) {
-                    total += (parseFloat(tourData.precio) || 0);
-                }
-            });
-
-            // Multiply by pax
-            total = total * qty;
-
-            // Update UI
-            document.getElementById('p_precio').value = total.toFixed(2);
-            syncPasePago();
-        }
+        window.setPasePagoMode = function(mode) { document.getElementById('p_modo_pago').value = mode; if (mode === 'pagado') { document.getElementById('opt_pagado').classList.add('active-green'); document.getElementById('opt_adelanto').classList.remove('active'); syncPasePago(); } else { document.getElementById('opt_adelanto').classList.add('active'); document.getElementById('opt_pagado').classList.remove('active-green'); document.getElementById('p_adelanto').readOnly = false; } }
+        window.syncPasePago = function() { if (document.getElementById('p_modo_pago').value === 'pagado') { document.getElementById('p_adelanto').value = document.getElementById('p_precio').value; document.getElementById('p_adelanto').readOnly = true; } }
 
         document.getElementById('formPase').addEventListener('submit', e => { 
             e.preventDefault(); 
@@ -1842,11 +2116,9 @@
                 hotel: document.getElementById('p_hotel').value, 
                 observacion: document.getElementById('p_obs').value, 
                 
-                // Campos Legacy para compatibilidad, tomamos el primero
                 fecha: tours[0].fecha, 
                 tour: tours[0].nombre, 
 
-                // Campo Nuevo
                 tours: tours,
 
                 precio: precio, 
@@ -1856,11 +2128,11 @@
             window.guardarPaseEnNube(data); 
         });
 
-        function editarPase(id) { 
+        window.editarPase = function(id) { 
             const p = window.dbPases.find(x => x.id === id); 
             if(!p) return; 
             abrirModalPases(); 
-            document.getElementById('listaToursPases').innerHTML = ''; // Limpiar vacio default
+            document.getElementById('listaToursPases').innerHTML = ''; 
 
             window.editId = id; 
             document.getElementById('pase_firestore_id').value = p.firestoreId; 
@@ -1873,7 +2145,6 @@
             document.getElementById('p_precio').value = p.precio; 
             document.getElementById('p_adelanto').value = p.adelanto; 
             
-            // Cargar Tours
             const tours = getToursFromPase(p);
             tours.forEach(t => {
                 agregarFilaTourPase(t.nombre, t.fecha, t.obs || '');
@@ -1882,7 +2153,7 @@
             if (p.liquidado || (p.precio > 0 && p.adelanto >= p.precio)) setPasePagoMode('pagado'); else setPasePagoMode('adelanto'); 
         }
         
-        function editarCat(tipo, idOrName) { 
+        window.editarCat = function(tipo, idOrName) { 
             window.isEditingCat = true;
             document.getElementById('modalCatalogo').classList.add('active'); 
             cambiarTipoCat(tipo);
@@ -1906,7 +2177,7 @@
             } 
         }
 
-        function eliminarCat(t,i){
+        window.eliminarCat = function(t,i){
             if(!confirm("Borrar?"))return;
             if(t==='hotel') window.catalogo.hoteles=window.catalogo.hoteles.filter(x=>x.nombre!==i);
             else if(t==='tour') window.catalogo.tours=window.catalogo.tours.filter(x=>x.id!=i);
@@ -1970,9 +2241,23 @@
                 tours: tours,
                 liquidado: false 
             };
+            
             if(window.editId) {
                 const old = window.db.find(x => x.id === window.editId);
-                if(old) data.liquidado = old.liquidado;
+                if(old) {
+                    data.liquidado = old.liquidado;
+                    if(old.tours) {
+                        data.tours.forEach(nt => {
+                            const foundOld = old.tours.find(ot => ot.nombre === nt.nombre && ot.fecha === nt.fecha);
+                            if(foundOld && foundOld.tercerizado) {
+                                nt.tercerizado = foundOld.tercerizado;
+                                nt.agenciaOperadora = foundOld.agenciaOperadora;
+                                nt.costoPase = foundOld.costoPase;
+                                nt.pasePagado = foundOld.pasePagado;
+                            }
+                        });
+                    }
+                }
             }
             await window.guardarRegistroEnNube(data);
         });
