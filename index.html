@@ -134,6 +134,7 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 0; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; transition: 0.2s; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        input:disabled { background: #f3f4f6; cursor: not-allowed; }
         
         .btn-icon { width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; margin-left: 5px; transition: 0.1s; }
         .btn-icon:hover { opacity: 0.8; transform: scale(1.05); }
@@ -325,17 +326,41 @@
         <div id="vistaGastos" class="view-section">
             <div class="card" style="padding:20px; border-top: 4px solid var(--expense-color);">
                 <h3 style="margin:0; margin-bottom:15px; color:var(--expense-color);">Registro de Gastos Operativos</h3>
+                
                 <form id="formGasto" style="display:flex; gap:10px; align-items:flex-end; background:#fff1f2; padding:15px; border-radius:10px; margin-bottom:20px; flex-wrap:wrap;">
                     <input type="hidden" id="g_firestore_id">
                     <div><label class="input-label">Fecha</label><input type="date" id="g_fecha" required></div>
-                    <div style="flex:2;"><label class="input-label">Descripción</label><input type="text" id="g_desc" placeholder="Ej. Gasolina..." required></div>
-                    <div><label class="input-label">Monto (S/)</label><input type="number" id="g_monto" placeholder="0.00" step="0.01" required></div>
+                    <div style="flex:2;"><label class="input-label">Descripción</label><input type="text" id="g_desc" placeholder="Ej. Gasolina / Mantenimiento..." required></div>
+                    <div style="flex:1;"><label class="input-label">Total a Pagar (S/)</label><input type="number" id="g_monto" placeholder="0.00" step="0.01" required></div>
+                    <div style="flex:1;"><label class="input-label">Adelanto (S/)</label><input type="number" id="g_adelanto" placeholder="0.00" step="0.01"></div>
                     <div style="flex:1;"><label class="input-label">Responsable</label><input type="text" id="g_resp" placeholder="Quién gastó"></div>
                     <button type="submit" id="btnGuardarGasto" class="btn-main" style="background:var(--expense-color);">+ Agregar</button>
                     <button type="button" id="btnCancelGasto" onclick="limpiarGastoForm()" style="display:none; background:#ccc; color:#333; padding:10px; border:none; border-radius:6px; cursor:pointer;">Cancelar</button>
                 </form>
+                
                 <h4 style="margin-bottom:10px;">Gastos del Mes</h4>
-                <table style="width:100%"><thead><tr><th>Fecha</th><th>Descripción</th><th>Responsable</th><th>Monto</th><th>Acción</th></tr></thead><tbody id="tbodyGastos"></tbody><tfoot><tr style="background:#f9fafb; font-weight:bold;"><td colspan="3" style="text-align:right;">TOTAL GASTOS:</td><td id="totalGastosDisplay" style="color:var(--expense-color);">S/ 0.00</td><td></td></tr></tfoot></table>
+                <table style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Responsable</th>
+                            <th>Total Gasto</th>
+                            <th>Abonado</th>
+                            <th>Saldo</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyGastos"></tbody>
+                    <tfoot>
+                        <tr style="background:#f9fafb; font-weight:bold;">
+                            <td colspan="3" style="text-align:right;">TOTAL GASTOS REGISTRADOS:</td>
+                            <td id="totalGastosDisplay" style="color:var(--expense-color);">S/ 0.00</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
 
@@ -401,7 +426,44 @@
         </div>
     </div>
 
-    <div class="modal" id="modalRegistro"><div class="modal-content"><div class="modal-header"><h2 id="modalRegTitulo" style="margin:0;color:var(--primary);">📝 Registro</h2><button onclick="cerrarModal('modalRegistro')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div><div class="modal-body"><form id="formTour"><input type="hidden" id="reg_firestore_id"><div class="pro-section"><div class="pro-section-title">👤 Datos del Cliente</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;"><div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div></div><div style="margin-top:10px;"><label class="input-label">Fechas de Estadía</label><div class="date-range-container"><div style="flex:1;"><label style="font-size:0.7rem;">LLEGADA</label><input type="date" id="llegada" required onchange="validarFechas()" style="border:none; background:transparent;"></div><div class="date-separator">➝</div><div style="flex:1; text-align:right;"><label style="font-size:0.7rem;">SALIDA</label><input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right; background:transparent;"></div></div></div></div><div class="pro-section"><div class="pro-section-title">🏨 Alojamiento (Habitaciones)</div><div style="background: #f0f9ff; padding: 10px; border-radius: 8px; border: 1px dashed #bae6fd; margin-bottom: 10px;"><div style="display:flex; gap:10px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1.5; min-width: 200px;"><label class="input-label">1. Seleccionar Hotel</label><select id="selHotelAdd" onchange="actualizarSelectRoom()"></select></div><div style="flex:1; min-width: 150px;"><label class="input-label">2. Habitación</label><select id="selRoomAdd"></select></div><div style="width: 110px;"><label class="input-label">3. Check-In</label><input type="date" id="txtCheckinAdd" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:0.8rem; width:100%; box-sizing:border-box;"></div><div style="width: 110px;"><label class="input-label">4. Check-Out</label><input type="date" id="txtCheckoutAdd" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:0.8rem; width:100%; box-sizing:border-box;"></div><button type="button" class="btn-main" onclick="agregarHabitacion()" style="padding: 10px 15px;">+ Agregar</button></div></div><div id="listaHabitacionesAgregadas"></div></div><div class="pro-section"><div class="pro-section-title">💰 Detalles</div><div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;"><div class="input-group"><label class="input-label">Precio Total</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="precioPaquete" required class="with-icon" style="font-weight:bold;"></div></div><div class="input-group"><label class="input-label">Adelanto</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="adelanto" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Observaciones</label><input type="text" id="observaciones" style="width:100%;"></div></div></div><div class="pro-section" style="background:#f8fafc;"><div class="pro-section-title" style="justify-content:space-between;"><span>🗺️ Itinerario</span><div style="display:flex; gap:5px;"><button type="button" onclick="agregarLineaItinerario('tour')" class="btn-main" style="padding:4px 10px; height:auto; background:var(--primary);">+ Tour</button><button type="button" onclick="agregarLineaItinerario('nota')" class="btn-main" style="padding:4px 10px; height:auto; background:#f59e0b;">+ Nota</button></div></div><div id="listaToursInputs"></div></div><button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:15px; margin-top:10px;">💾 Guardar Registro</button></form></div></div></div>
+    <div class="modal" id="modalRegistro"><div class="modal-content"><div class="modal-header"><h2 id="modalRegTitulo" style="margin:0;color:var(--primary);">📝 Registro</h2><button onclick="cerrarModal('modalRegistro')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div><div class="modal-body"><form id="formTour"><input type="hidden" id="reg_firestore_id"><div class="pro-section"><div class="pro-section-title">👤 Datos del Cliente</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr 0.5fr;"><div class="input-group"><label class="input-label">Nombres</label><div class="input-wrapper"><span class="input-icon-left">👤</span><input type="text" id="nombre" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Celular</label><div class="input-wrapper"><span class="input-icon-left">📱</span><input type="tel" id="celular" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Agencia</label><select id="selAgencia" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="cantidad" min="1" required style="text-align:center;"></div></div><div style="margin-top:10px;"><label class="input-label">Fechas de Estadía</label><div class="date-range-container"><div style="flex:1;"><label style="font-size:0.7rem;">LLEGADA</label><input type="date" id="llegada" required onchange="validarFechas()" style="border:none; background:transparent;"></div><div class="date-separator">➝</div><div style="flex:1; text-align:right;"><label style="font-size:0.7rem;">SALIDA</label><input type="date" id="retorno" required onchange="validarFechas()" style="border:none; text-align:right; background:transparent;"></div></div></div></div><div class="pro-section"><div class="pro-section-title">🏨 Alojamiento (Habitaciones)</div><div style="background: #f0f9ff; padding: 10px; border-radius: 8px; border: 1px dashed #bae6fd; margin-bottom: 10px;"><div style="display:flex; gap:10px; align-items:flex-end; flex-wrap: wrap;"><div style="flex:1.5; min-width: 200px;"><label class="input-label">1. Seleccionar Hotel</label><select id="selHotelAdd" onchange="actualizarSelectRoom()"></select></div><div style="flex:1; min-width: 150px;"><label class="input-label">2. Habitación</label><select id="selRoomAdd"></select></div><div style="width: 110px;"><label class="input-label">3. Check-In</label><input type="date" id="txtCheckinAdd" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:0.8rem; width:100%; box-sizing:border-box;"></div><div style="width: 110px;"><label class="input-label">4. Check-Out</label><input type="date" id="txtCheckoutAdd" style="padding:8px; border:1px solid var(--border); border-radius:8px; font-size:0.8rem; width:100%; box-sizing:border-box;"></div><button type="button" class="btn-main" onclick="agregarHabitacion()" style="padding: 10px 15px;">+ Agregar</button></div></div><div id="listaHabitacionesAgregadas"></div></div><div class="pro-section"><div class="pro-section-title">💰 Detalles</div><div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;"><div class="input-group"><label class="input-label">Precio Total</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="precioPaquete" required class="with-icon" style="font-weight:bold;"></div></div><div class="input-group"><label class="input-label">Adelanto</label><div class="input-wrapper"><span class="input-icon-left">S/</span><input type="number" id="adelanto" required class="with-icon"></div></div><div class="input-group"><label class="input-label">Observaciones</label><input type="text" id="observaciones" style="width:100%;"></div></div></div>
+
+    <div class="pro-section">
+        <div class="pro-section-title">🚐 Traslados (Costos Operativos)</div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="input-group">
+                <label class="input-label" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="chk_traslado_1" style="width:auto; cursor:pointer;" onchange="document.getElementById('costo_traslado_1').disabled = !this.checked; if(this.checked) document.getElementById('costo_traslado_1').focus();"> 
+                    Recojo y Traslado
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon-left">S/</span>
+                    <input type="number" id="costo_traslado_1" class="with-icon" step="0.01" placeholder="0.00" disabled>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="chk_traslado_2" style="width:auto; cursor:pointer;" onchange="document.getElementById('costo_traslado_2').disabled = !this.checked; if(this.checked) document.getElementById('costo_traslado_2').focus();"> 
+                    Traslado Sauce a Tarapoto
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon-left">S/</span>
+                    <input type="number" id="costo_traslado_2" class="with-icon" step="0.01" placeholder="0.00" disabled>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="chk_traslado_3" style="width:auto; cursor:pointer;" onchange="document.getElementById('costo_traslado_3').disabled = !this.checked; if(this.checked) document.getElementById('costo_traslado_3').focus();"> 
+                    Traslado Terminal Sauce a Hotel
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon-left">S/</span>
+                    <input type="number" id="costo_traslado_3" class="with-icon" step="0.01" placeholder="0.00" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pro-section" style="background:#f8fafc;"><div class="pro-section-title" style="justify-content:space-between;"><span>🗺️ Itinerario</span><div style="display:flex; gap:5px;"><button type="button" onclick="agregarLineaItinerario('tour')" class="btn-main" style="padding:4px 10px; height:auto; background:var(--primary);">+ Tour</button><button type="button" onclick="agregarLineaItinerario('nota')" class="btn-main" style="padding:4px 10px; height:auto; background:#f59e0b;">+ Nota</button></div></div><div id="listaToursInputs"></div></div><button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:15px; margin-top:10px;">💾 Guardar Registro</button></form></div></div></div>
 
     <div class="modal" id="modalPases"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h2 id="modalPasesTitulo" style="margin:0;color:var(--pase-color);">🎫 Nuevo Pase (Multi-Tours)</h2><button onclick="cerrarModal('modalPases')" style="border:none;background:none;font-size:1.8rem;cursor:pointer;">&times;</button></div><div class="modal-body"><form id="formPase"><input type="hidden" id="pase_firestore_id"><div class="pro-section"><div class="pro-section-title">Datos del Pasajero</div><div class="form-grid" style="grid-template-columns: 2fr 1fr 1.5fr;"><div class="input-group"><label class="input-label">Nombres</label><input type="text" id="p_nombre" required></div><div class="input-group"><label class="input-label">Celular</label><input type="tel" id="p_celular" required></div><div class="input-group"><label class="input-label">Agencia</label><select id="p_agencia" required></select></div></div><div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:10px;"><div class="input-group"><label class="input-label">Recojo/Hotel</label><select id="p_hotel" required></select></div><div class="input-group"><label class="input-label">Pax</label><input type="number" id="p_cantidad" min="1" required oninput="calcPaseAuto()"></div></div><div class="input-group" style="margin-top:10px;"><label class="input-label">Observaciones Generales</label><input type="text" id="p_obs"></div></div><div class="pro-section" style="background:#f5f3ff; border:1px solid #ddd6fe;"><div class="pro-section-title" style="color:var(--pase-color); justify-content:space-between;"><span>🗺️ Tours del Pase</span><button type="button" onclick="agregarFilaTourPase()" class="btn-main" style="padding:4px 10px; height:auto; background:var(--pase-color); font-size:0.8rem;">+ Agregar Tour</button></div><div id="listaToursPases"></div></div><div class="pro-section"><div class="pro-section-title">Pago</div><div class="pay-toggle-container"><div class="pay-toggle-opt active" id="opt_adelanto" onclick="setPasePagoMode('adelanto')">A Cuenta</div><div class="pay-toggle-opt" id="opt_pagado" onclick="setPasePagoMode('pagado')">Pagado</div></div><input type="hidden" id="p_modo_pago" value="adelanto"><div class="form-grid" style="grid-template-columns: 1fr 1fr;"><div class="input-group"><label class="input-label">Total</label><input type="number" id="p_precio" required step="0.01" onchange="syncPasePago()"></div><div class="input-group"><label class="input-label">Abonado</label><input type="number" id="p_adelanto" required step="0.01"></div></div></div><button type="submit" class="btn-main" style="width:100%; justify-content:center; padding:12px;">💾 Guardar Pase</button></form></div></div></div>
 
@@ -467,7 +529,28 @@
         window.guardarRegistroEnNube = async (data) => { const fid = document.getElementById('reg_firestore_id').value; try { if (fid) await updateDoc(doc(dbFirestore, "registros", fid), data); else await addDoc(collection(dbFirestore, "registros"), data); window.cerrarModal('modalRegistro'); } catch (e) { alert("Error: " + e.message); } };
         window.guardarPaseEnNube = async (data) => { const fid = document.getElementById('pase_firestore_id').value; try { if (fid) await updateDoc(doc(dbFirestore, "pases", fid), data); else await addDoc(collection(dbFirestore, "pases"), data); window.cerrarModal('modalPases'); } catch (e) { alert("Error: " + e.message); } };
         window.guardarOperacionEnNube = async (data) => { const fid = document.getElementById('ops_firestore_id').value; try { if (fid) await updateDoc(doc(dbFirestore, "operaciones", fid), data); else await addDoc(collection(dbFirestore, "operaciones"), data); window.nuevaOperacion(); window.cambiarVista('ops'); } catch (e) { alert("Error: " + e.message); } };
-        window.guardarGastoEnNube = async (data) => { const fid = document.getElementById('g_firestore_id').value; try { if(fid) { await updateDoc(doc(dbFirestore, "gastos", fid), data); } else { await addDoc(collection(dbFirestore, "gastos"), data); } window.limpiarGastoForm(); } catch(e){ alert(e); } };
+        
+        window.guardarGastoEnNube = async (data) => { 
+            const fid = document.getElementById('g_firestore_id').value; 
+            try { 
+                if(fid) { 
+                    await updateDoc(doc(dbFirestore, "gastos", fid), data); 
+                } else { 
+                    await addDoc(collection(dbFirestore, "gastos"), data); 
+                } 
+                window.limpiarGastoForm(); 
+            } catch(e){ alert(e); } 
+        };
+
+        window.marcarGastoPagado = async function(fid, montoTotal) {
+            if(!confirm("¿Marcar este gasto como PAGADO en su totalidad?")) return;
+            try {
+                await updateDoc(doc(dbFirestore, "gastos", fid), { pagado: true, adelanto: montoTotal });
+            } catch(e) {
+                alert("Error: " + e.message);
+            }
+        };
+
         window.eliminarDocEnNube = async (coll, fid) => { if(confirm("¿Borrar?")) try { await deleteDoc(doc(dbFirestore, coll, fid)); } catch(e){ alert(e); } };
         window.guardarCatalogoEnNube = async () => { try { await setDoc(doc(dbFirestore, "config", "catalogo"), window.catalogo); } catch(e){ alert(e); } };
         
@@ -1057,7 +1140,22 @@
                     });
                 }
 
-                const costoOp = costoHosp + costoTours;
+                // Cálculo costo de traslados operativos SOLO si el checkbox está marcado
+                let costoTraslados = 0;
+                if(type === 'db' && r.traslados) {
+                    const getCosto = (t) => {
+                        if (typeof t === 'object' && t !== null) {
+                            return t.checked ? (parseFloat(t.costo) || 0) : 0;
+                        }
+                        return parseFloat(t) || 0; // Por si hay registros de pruebas antiguas guardados como número simple
+                    };
+                    
+                    costoTraslados += getCosto(r.traslados.recojo);
+                    costoTraslados += getCosto(r.traslados.sauceTarapoto);
+                    costoTraslados += getCosto(r.traslados.terminalHotel);
+                }
+
+                const costoOp = costoHosp + costoTours + costoTraslados;
                 const venta = type === 'db' ? parseFloat(r.precioPaquete)||0 : parseFloat(r.precio)||0;
                 const adelanto = parseFloat(r.adelanto)||0;
                 const saldo = venta - adelanto;
@@ -1083,7 +1181,7 @@
                     <td class="money-cell">${fmtMoneda(venta)}</td>
                     <td class="money-cell">${moneyAdelantoHtml}</td>
                     <td class="money-cell" style="color:${!isPaid && saldo>0?'var(--danger)':'var(--success)'}">${moneySaldoHtml}</td>
-                    <td class="money-cell">${fmtMoneda(costoOp)}</td>
+                    <td class="money-cell" title="Incluye Hospedaje, Tours y Traslados marcados">${fmtMoneda(costoOp)}</td>
                     <td class="money-cell" style="font-weight:bold; color:${ganancia>=0?'var(--money)':'red'}">${fmtMoneda(ganancia)}</td>
                     <td>${badge}</td>
                     <td>
@@ -1103,12 +1201,17 @@
 
         document.getElementById('formGasto').addEventListener('submit', e => { 
             e.preventDefault(); 
+            const monto = parseFloat(document.getElementById('g_monto').value) || 0;
+            const adelanto = parseFloat(document.getElementById('g_adelanto').value) || 0;
+
             const g = { 
                 id: window.editGastoId || Date.now(), 
                 fecha: document.getElementById('g_fecha').value, 
                 desc: document.getElementById('g_desc').value, 
-                monto: parseFloat(document.getElementById('g_monto').value), 
-                resp: document.getElementById('g_resp').value 
+                monto: monto, 
+                adelanto: adelanto,
+                resp: document.getElementById('g_resp').value,
+                pagado: adelanto >= monto
             }; 
             window.guardarGastoEnNube(g); 
         });
@@ -1120,6 +1223,7 @@
             document.getElementById('g_fecha').value = g.fecha;
             document.getElementById('g_desc').value = g.desc;
             document.getElementById('g_monto').value = g.monto;
+            document.getElementById('g_adelanto').value = g.adelanto || 0;
             document.getElementById('g_resp').value = g.resp;
             
             window.editGastoId = g.id;
@@ -1133,6 +1237,7 @@
             document.getElementById('g_firestore_id').value = '';
             document.getElementById('g_desc').value = ''; 
             document.getElementById('g_monto').value = ''; 
+            document.getElementById('g_adelanto').value = ''; 
             document.getElementById('g_resp').value = '';
             
             window.editGastoId = null;
@@ -1148,22 +1253,40 @@
             const displayTotal = document.getElementById('totalGastosDisplay'); 
             const gastosMes = window.dbGastos.filter(g => g.fecha.startsWith(mes)); 
             gastosMes.sort((a,b) => a.fecha.localeCompare(b.fecha)); 
+            
             let total = 0; 
             let html = ''; 
+            
             gastosMes.forEach(g => { 
-                total += g.monto; 
-                html += `<tr>
+                const monto = parseFloat(g.monto) || 0;
+                const adelanto = parseFloat(g.adelanto) || 0;
+                const saldo = monto - adelanto;
+                
+                const isPaid = g.pagado || (monto > 0 && saldo <= 0);
+
+                total += monto; 
+
+                const badge = isPaid ? '<span class="badge-paid">PAGADO</span>' : `<span class="badge-debt">Debe S/ ${fmtMoneda(saldo).replace('S/','')}</span>`;
+                const checkBtn = isPaid ? '' : `<button class="btn-icon" style="background:#10b981; color:white;" onclick="marcarGastoPagado('${g.firestoreId}', ${monto})" title="Liquidar y Marcar Pagado">✔</button>`;
+                
+                const rowBg = isPaid ? '' : 'background-color:#fff5f5';
+
+                html += `<tr style="${rowBg}">
                     <td>${g.fecha}</td>
                     <td>${g.desc}</td>
                     <td>${g.resp}</td>
-                    <td style="font-weight:bold;">${fmtMoneda(g.monto)}</td>
+                    <td style="font-weight:bold;">${fmtMoneda(monto)}</td>
+                    <td>${fmtMoneda(adelanto)}</td>
+                    <td style="color:${isPaid?'var(--success)':'var(--danger)'}; font-weight:bold;">${fmtMoneda(isPaid ? 0 : saldo)}</td>
+                    <td>${badge}</td>
                     <td>
-                        <button class="btn-icon btn-edit" onclick="cargarEdicionGasto('${g.id}')">✎</button>
-                        <button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('gastos', '${g.firestoreId}')">🗑</button>
+                        ${checkBtn}
+                        <button class="btn-icon btn-edit" onclick="cargarEdicionGasto('${g.id}')" title="Editar Gasto">✎</button>
+                        <button class="btn-icon btn-del" onclick="window.eliminarDocEnNube('gastos', '${g.firestoreId}')" title="Borrar">🗑</button>
                     </td>
                 </tr>`; 
             }); 
-            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:gray;padding:20px;">Sin gastos registrados.</td></tr>'; 
+            tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;color:gray;padding:20px;">Sin gastos registrados.</td></tr>'; 
             displayTotal.innerText = fmtMoneda(total); 
         }
 
@@ -1615,7 +1738,6 @@
             renderizarAsignados(); 
         }
 
-        // --- NUEVA FUNCIÓN PARA EXPORTAR COMO IMAGEN ---
         window.exportarManifiestoImagen = async function() {
             const fecha = document.getElementById('ops_fecha').value;
             const tour = document.getElementById('ops_tour').value;
@@ -2009,6 +2131,13 @@
             document.getElementById('txtCheckinAdd').value = ''; 
             document.getElementById('txtCheckoutAdd').value = ''; 
             
+            // Reset checks de traslados y deshabilitar inputs
+            for(let i=1; i<=3; i++) {
+                document.getElementById(`chk_traslado_${i}`).checked = false;
+                document.getElementById(`costo_traslado_${i}`).value = '';
+                document.getElementById(`costo_traslado_${i}`).disabled = true;
+            }
+
             window.tempHabitaciones = []; 
             renderTempHabitaciones();
 
@@ -2017,6 +2146,13 @@
             document.getElementById('modalRegistro').classList.add('active'); 
         }
         
+        // Helper para leer estructura antigua o nueva de los costos de traslado
+        const parseTraslado = (data) => {
+            if (typeof data === 'object' && data !== null) return { checked: !!data.checked, costo: data.costo || '' };
+            if (data) return { checked: true, costo: data }; // Dato legacy (versión anterior que era un número simple)
+            return { checked: false, costo: '' };
+        };
+
         window.cargarEdicion = function(id) { 
             const r = window.db.find(x => x.id === id); if(!r) return; 
             abrirModalRegistro(); 
@@ -2034,6 +2170,24 @@
             document.getElementById('retorno').value = r.retorno; 
             document.getElementById('observaciones').value = r.observaciones || ''; 
             
+            // Cargar datos de Traslados guardados (Con soporte de checks)
+            const tCostos = r.traslados || {};
+            
+            const t1 = parseTraslado(tCostos.recojo);
+            document.getElementById('chk_traslado_1').checked = t1.checked;
+            document.getElementById('costo_traslado_1').value = t1.costo;
+            document.getElementById('costo_traslado_1').disabled = !t1.checked;
+
+            const t2 = parseTraslado(tCostos.sauceTarapoto);
+            document.getElementById('chk_traslado_2').checked = t2.checked;
+            document.getElementById('costo_traslado_2').value = t2.costo;
+            document.getElementById('costo_traslado_2').disabled = !t2.checked;
+
+            const t3 = parseTraslado(tCostos.terminalHotel);
+            document.getElementById('chk_traslado_3').checked = t3.checked;
+            document.getElementById('costo_traslado_3').value = t3.costo;
+            document.getElementById('costo_traslado_3').disabled = !t3.checked;
+
             window.tempHabitaciones = [];
             if(Array.isArray(r.habitaciones)) {
                 r.habitaciones.forEach(h => {
@@ -2225,6 +2379,22 @@
                 }
             });
 
+            // Extraemos los datos de traslados operativos guardando si está "checked" y su "costo"
+            const trasladosCostos = {
+                recojo: { 
+                    checked: document.getElementById('chk_traslado_1').checked,
+                    costo: parseFloat(document.getElementById('costo_traslado_1').value) || 0
+                },
+                sauceTarapoto: { 
+                    checked: document.getElementById('chk_traslado_2').checked,
+                    costo: parseFloat(document.getElementById('costo_traslado_2').value) || 0
+                },
+                terminalHotel: { 
+                    checked: document.getElementById('chk_traslado_3').checked,
+                    costo: parseFloat(document.getElementById('costo_traslado_3').value) || 0
+                }
+            };
+
             const data = {
                 id: window.editId || Date.now(),
                 nombre: document.getElementById('nombre').value,
@@ -2238,6 +2408,7 @@
                 precioPaquete: parseFloat(document.getElementById('precioPaquete').value) || 0,
                 adelanto: parseFloat(document.getElementById('adelanto').value) || 0,
                 observaciones: document.getElementById('observaciones').value,
+                traslados: trasladosCostos, 
                 tours: tours,
                 liquidado: false 
             };
