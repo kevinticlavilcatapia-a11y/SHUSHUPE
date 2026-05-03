@@ -394,7 +394,7 @@
 
             <div class="card">
                 <table style="width:100%">
-                    <thead><tr><th>Pasajero</th><th>Detalle</th><th>Venta</th><th>Abonado</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Pasajero</th><th>Fechas</th><th>Detalle</th><th>Venta</th><th>Abonado</th><th>Saldo</th><th>Costo Op.</th><th>Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody id="tbodyControl"></tbody>
                 </table>
             </div>
@@ -1175,8 +1175,26 @@
                 const editFunc = type === 'db' ? `cargarEdicion(${r.id})` : `editarPase(${r.id})`;
                 const toggleFunc = `window.toggleLiquidadoEnNube('${r.firestoreId}', '${type==='db'?'registros':'pases'}', ${r.liquidado || false})`;
 
+                let fLlegada = '---';
+                let fSalida = '---';
+                if (type === 'db') {
+                    fLlegada = r.llegada || '---';
+                    fSalida = r.retorno || '---';
+                } else {
+                    const t = getToursFromPase(r);
+                    fLlegada = t.length > 0 ? t[0].fecha : (r.fecha || '---');
+                    fSalida = t.length > 0 ? t[t.length - 1].fecha : (r.fecha || '---');
+                }
+                
+                const fmtDate = (dStr) => {
+                    if(!dStr || dStr === '---') return '---';
+                    const p = dStr.split('-');
+                    return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : dStr;
+                };
+
                 html += `<tr>
                     <td><b>${r.nombre}</b><br><small>${r.cantidad} pax</small></td>
+                    <td style="font-size:0.8rem; white-space:nowrap;"><span style="color:#059669;font-weight:bold;">IN:</span> <b>${fmtDate(fLlegada)}</b><br><span style="color:#dc2626;font-weight:bold;">OUT:</span> <b>${fmtDate(fSalida)}</b></td>
                     <td>${hotelDisplayName}<br>${r.agencia}</td>
                     <td class="money-cell">${fmtMoneda(venta)}</td>
                     <td class="money-cell">${moneyAdelantoHtml}</td>
